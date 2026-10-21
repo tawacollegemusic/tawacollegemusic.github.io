@@ -7278,9 +7278,14 @@ function recTime(tick){
 // to the piano at the recording's time for them (from the bar times), so the piano follows the recording's own speed,
 // and stops with it when it pauses, stalls to load or jumps. A note that started up to 0.15 s ago (the note it starts
 // on) plays straight away; one further back is left out.
+// The recording's reported time is what's being heard, but the piano's notes still have to get through the speakers or
+// headphones (Isaac, 21 October: "about a quarter of a second late", on Bluetooth that delay is 0.2 s or more), so each
+// note starts that much earlier: the delay the browser reports for its sound output (recOwnLatency).
 const REC_OWN_AHEAD = 0.3, REC_OWN_LATE = 0.15;
+function recOwnLatency(){ const c = AUDIO.ctx; return clamp((c.outputLatency || 0) + (c.baseLatency || 0), 0, 0.6); }
 function recOwnStep(run, rec){
   const notes = SG.timeline.parts[SG.part.id], now = AUDIO.ctx.currentTime, rt = rec.time();
+  const heard = rt + recOwnLatency();                     // the recording's time when a note started now is heard
   if (!rec.playing()) { run.ownAt = null; return; }
   if (run.ownAt == null || rt < run.ownAt - 0.4 || rt > run.ownAt + 1) {           // starting, or the recording jumped (small corrections from YouTube's reports aren't jumps)
     run.ownI = notes.findIndex(x => recTime(x.t) >= rt - REC_OWN_LATE); if (run.ownI < 0) run.ownI = notes.length;
@@ -7288,10 +7293,10 @@ function recOwnStep(run, rec){
   run.ownAt = rt;
   while (run.ownI < notes.length) {
     const x = notes[run.ownI], st = recTime(x.t);
-    if (st > rt + REC_OWN_AHEAD) break;
+    if (st > heard + REC_OWN_AHEAD) break;
     run.ownI++;
     if (st < rt - REC_OWN_LATE) continue;                                            // already gone by
-    tone(x.m, now + Math.max(0, st - rt), Math.max(0.1, (recTime(x.t + x.d) - st) * 0.95), { vol: SONG_VOL.own, noIgnore: true });
+    tone(x.m, now + Math.max(0, st - heard), Math.max(0.1, (recTime(x.t + x.d) - st) * 0.95), { vol: SONG_VOL.own, noIgnore: true });
   }
 }
 // ================= The recording =================
