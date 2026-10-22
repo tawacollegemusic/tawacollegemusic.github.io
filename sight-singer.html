@@ -318,6 +318,20 @@ body.counting #act-song #livePanel { position: relative; z-index: 41; background
 svg.score .ev.dim { color: var(--miss); opacity: 0.55; }
 .syncwrap { margin-top: 10px; }
 /* the teacher page (teacher.html) */
+.partedit { margin-top: 10px; }
+.partedit [hidden], .partedit .row[hidden] { display: none !important; }
+.partedit .row { gap: 8px; }
+.partedit input[type=text], .partedit select { font: inherit; font-size: 0.95rem; padding: 7px 10px; border-radius: 8px; border: 1.5px solid var(--line); background: var(--card); color: var(--ink); min-width: 0; max-width: 100%; }
+.partedit #pe-name { flex: 1 1 180px; }
+.partedit .small { font-size: 0.85rem; margin: 6px 0 0; }
+.partedit .small:empty { display: none; }
+#act-song.editing #pe { position: sticky; top: 0; z-index: 5; background: var(--card); padding: 8px 0; border-bottom: 1px solid var(--line); margin-inline: -4px; padding-inline: 4px; }
+.pe-say { margin: 0 0 8px; font-family: var(--display); font-weight: 600; max-width: 70ch; }
+/* while a part is being edited, the song card shows only what editing needs */
+#act-song.editing :is(.songtools, #song-yt, .secrow, #song-tempo, #song-prompt, #song-acts, #song-hp, .helpers, .songplay, #livePanel, #results, #song-msg) { display: none !important; }
+body.editing-parts #teach { display: none !important; }
+#act-song.editing #song-box svg.score { cursor: pointer; }
+svg.score .ev.picked { color: var(--brand); }
 .tbadge { font-family: var(--body); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.02em; border: 1.5px solid #fff; border-radius: 999px; padding: 1px 9px; margin-left: 10px; vertical-align: 3px; }
 .teach h3 { margin: 18px 0 0; font-family: var(--display); font-size: 1.05rem; }
 .teach select, .teach input[type=text], .teach input[type=password] { font: inherit; font-size: 0.95rem; padding: 7px 10px; border-radius: 8px; border: 1.5px solid var(--line); background: var(--card); color: var(--ink); min-width: 0; max-width: 100%; }
@@ -455,6 +469,7 @@ body.mode-start #status { font-size: 1.35rem; }
     <h2 id="song-title"></h2>
     <p class="muted" id="song-by"></p>
     <div class="songrow"><span class="lab">Your part</span><div class="seg" id="song-parts"></div></div>
+
     <div class="songtools">
       <div class="seg" id="song-recrow" hidden><button type="button" data-r="rec">Recording</button><button type="button" data-r="piano">Piano</button></div>
       <div class="row showrow"><span class="lab">Show</span><button type="button" class="toggle" id="song-show-others" aria-pressed="false">Other parts</button><button type="button" class="toggle" id="song-show-accomp" aria-pressed="false">Accompaniment</button></div>
@@ -6887,6 +6902,7 @@ function partSpan(pt){
 // staves as everywhere else in the app, written an octave above where they sound.
 function songVoice(s, pt){
   const t8 = pt.clef === "treble8", ms = pt.bars.flat().filter(e => e.p).map(e => midiOfP(e.p) + (t8 ? 12 : 0));
+  if (!ms.length) ms.push(...(pt.clef === "bass" ? [45, 59] : [60, 74]));         // a new part with no notes yet (teacher page)
   const lo = Math.min(...ms), hi = Math.max(...ms), id = "song:" + s.id + ":" + pt.id;
   if (t8) return { id, name: pt.name, clef: "treble8", alt: "bass", altShift: -12, lo, hi, tr: -12 };
   return { id, name: pt.name, clef: pt.clef === "bass" ? "bass" : "treble", lo, hi, tr: 0 };
@@ -6954,9 +6970,13 @@ function secWords(pt, sc){
 // bars from a to z: one per bar, except that a run of bars where none of the staves shown has a note is one multi-bar rest
 function songPlan(a, z){
   const s = SG.song, staves = [];
-  s.parts.forEach(pt => { if (pt === SG.part) staves.push({ kind: "own", pt, name: pt.name }); else if (APP.settings.songShowOthers) staves.push({ kind: "part", pt, name: pt.name }); });
-  if (APP.settings.songShowAccomp) s.accomp.forEach(ac => { for (let n = 1; n <= ac.staves; n++) staves.push({ kind: "acc", ac, staff: String(n), name: n === 1 ? (ac.name || "Accompaniment") : "" }); });
-  const has = (st, bi) => st.kind === "acc" ? st.ac.voices.some(v => v.staff === st.staff && v.bars[bi].some(e => e.p)) : st.pt.bars[bi].some(e => e.p);
+  if (TEACH && TEACH.editing()) staves.push(...TEACH.staves());     // the teacher page's part editor: the part, then every part as it was
+  else {
+    s.parts.forEach(pt => { if (pt === SG.part) staves.push({ kind: "own", pt, name: pt.name }); else if (APP.settings.songShowOthers) staves.push({ kind: "part", pt, name: pt.name }); });
+    if (APP.settings.songShowAccomp) s.accomp.forEach(ac => { for (let n = 1; n <= ac.staves; n++) staves.push({ kind: "acc", ac, staff: String(n), name: n === 1 ? (ac.name || "Accompaniment") : "" }); });
+  }
+  const has = (st, bi) => st.kind === "acc" ? st.ac.voices.some(v => v.staff === st.staff && v.bars[bi].some(e => e.p))
+    : st.pt.bars[bi].some(e => e.p) || !!(st.src && st.pt.more && st.pt.more[bi] && st.pt.more[bi].some(e => e.p));
   const plan = [];
   let g = 0;
   for (let bi = a; bi <= z; bi++) {
@@ -6978,13 +6998,15 @@ function vocalBar(pt, item, ctx, own, sec){
   if (!sung(pt, bi)) { ctx.prev = null; ctx.ext = false; return [{ ticks: item.ticks, rest: true, wholeBar: true }]; }
   const out = [], start = SG.timeline.starts[bi];
   const outside = t => sec && (t < sec.s - 1e-6 || t >= sec.e - 1e-6);
-  pt.bars[bi].forEach(e => {
+  const split = ctx.split && pt.more && pt.more[bi] && pt.more[bi].length > 0;      // the teacher page shows a split's other notes, stems down
+  pt.bars[bi].forEach((e, k) => {
     const t = start + e.t;
     if (!e.p) { const r = { ticks: e.d, rest: true, songT: t }; if (outside(t)) r.state = r.base = "dim"; out.push(r); ctx.prev = null; ctx.ext = false; return; }
     const note = noteOfP(e.p, t8 ? 1 : 0);
     const tiedIn = (e.tie === "stop" || e.tie === "both") && ctx.prev && ctx.prev.tieNext && ctx.prev.note.midi === note.midi;
     const v = e.verses && e.verses["1"];
-    const ev = { ticks: e.d, note, tieNext: e.tie === "start" || e.tie === "both", tiedIn: !!tiedIn, forceAcc: !!e.acc, songT: t };
+    const ev = { ticks: e.d, note, tieNext: e.tie === "start" || e.tie === "both", tiedIn: !!tiedIn, forceAcc: !!e.acc, songT: t, src: { pt: pt.id, bi, k } };
+    if (split) ev.stem = "up";
     if (v && v.text) { ev.lyric = v.text + ((v.syl === "begin" || v.syl === "middle") && !v.text.endsWith("-") ? "-" : ""); ctx.ext = !!v.ext; }
     else if (ctx.ext) ev.ext = true;
     if (labels && !tiedIn) { ev.label = noteLabel(key, note); ev.hand = noteHand(key, note); }
@@ -6996,6 +7018,22 @@ function vocalBar(pt, item, ctx, own, sec){
     if (outside(tiedIn && ctx.ownLast ? ctx.ownLast.t : t)) ev.state = ev.base = "dim";
     out.push(ev); ctx.prev = ev;
   });
+  return out;
+}
+// A part's split notes (chord notes and second voices kept by songs/import.py as "more") for one drawn bar, as a second
+// voice with its stems down; the teacher page's part editor shows them so a split can become its own part
+function moreBar(pt, item){
+  const list = !item.multi && pt.more && pt.more[item.a];
+  if (!list || !list.length) return [{ ticks: item.ticks, rest: true, hidden: true }];
+  const out = [], t8 = pt.clef === "treble8", start = SG.timeline.starts[item.a];
+  let at = 0;
+  list.forEach((e, k) => {
+    if (e.t < at - 1e-6) return;                              // two split notes at once: the first is shown
+    if (e.t > at + 1e-6) out.push({ ticks: e.t - at, rest: true, hidden: true });
+    out.push({ ticks: e.d, note: noteOfP(e.p, t8 ? 1 : 0), forceAcc: !!e.acc, stem: "down", songT: start + e.t, src: { pt: pt.id, bi: item.a, k, more: true } });
+    at = e.t + e.d;
+  });
+  if (at < item.ticks - 1e-6) out.push({ ticks: item.ticks - at, rest: true, hidden: true });
   return out;
 }
 // The clef in force on an accompaniment stave at a place in the song (a change at the very end of a bar counts from the next)
@@ -7114,10 +7152,11 @@ function songDraw(){
       st.passes = accompPasses(st, plan);
       st.passes.forEach((bars, k) => passes.push({ bars, main: k === 0, clef0: st.clef }));
     } else {
-      const ctx = {};
+      const ctx = { split: !!st.src };
       st.bars = plan.map(item => vocalBar(st.pt, item, ctx, st.kind === "own", sec));
       st.clef = st.kind === "own" ? V.clef : st.pt.clef;
       passes.push({ bars: st.bars, main: true, clef0: st.clef });
+      if (st.src && st.pt.more) { st.more = plan.map(item => moreBar(st.pt, item)); passes.push({ bars: st.more, main: false, clef0: st.clef }); }
     }
   });
   const cols = songColumns(passes, plan, beats);
@@ -7129,24 +7168,27 @@ function songDraw(){
     if (st.name && staves.length > 1 || (st.kind === "own" && V.alt)) {
       const cap = document.createElement("div");
       cap.className = "partlabel" + (st.kind === "own" ? " mine" : "");
-      cap.textContent = st.kind === "own" ? `${st.name} (your part)` : st.name;
+      cap.textContent = st.label || (st.kind === "own" ? `${st.name} (your part)` : st.name);
       box.appendChild(cap);
     }
     const svg = sel("svg", { class: "score", role: "img", "aria-label": st.kind === "own" ? "Your part" : st.name || "Accompaniment" }, box);
+    svg.__st = st;
     const common = { ...cols, printedAcc, barNums: first ? barNums : null, final: true };
     if (st.kind === "acc") {
       const L = renderScore(svg, { clef: st.clef, key, ts: s.ts, bars: st.passes[0] }, { ...common, tight: true, tr: 0 });
       st.passes.slice(1).forEach(bars => renderScore(svg, { clef: st.clef, key, ts: s.ts, bars }, { ...cols, printedAcc, overlay: L }));
       Ls.push(L);
     } else if (st.kind === "part") {
-      Ls.push(renderScore(svg, { clef: st.clef, key, ts: s.ts, bars: st.bars }, { ...common, tight: true, tr: 0 }));
+      const L = renderScore(svg, { clef: st.clef, key, ts: s.ts, bars: st.bars }, { ...common, tight: true, tr: 0 });
+      if (st.more) L.overlays = [renderScore(svg, { clef: st.clef, key, ts: s.ts, bars: st.more }, { ...cols, printedAcc, overlay: L })];
+      Ls.push(L);
     } else {
       // the singer's part: labels, beat numbers and marks (a tenor's go on the bass clef copy beneath)
       const lab = !!(APP.settings.names || APP.settings.solf);
       const plain = V.alt ? st.bars.map(b => b.map(e => ({ ...e, label: "", hand: null }))) : st.bars;
       SG.L = renderScore(svg, { clef: V.clef, key, ts: s.ts, bars: plain }, { ...common, labels: lab && !V.alt, beats });
       Ls.push(SG.L);
-      if (V.alt) {
+      if (V.alt && !(TEACH && TEACH.editing())) {         // (not while the teacher page edits the part)
         const c2 = document.createElement("div"); c2.className = "partlabel"; c2.textContent = "Same notes in bass clef"; box.appendChild(c2);
         const svg2 = sel("svg", { class: "score", role: "img", "aria-label": "The same notes in bass clef" }, box);
         SG.L2 = renderScore(svg2, { clef: V.alt, key, ts: s.ts, bars: shiftBars(st.bars, V.altShift) }, { ...cols, printedAcc, labels: lab, tr: V.tr - V.altShift, lyrics: false, final: true });
@@ -7162,6 +7204,7 @@ function songDraw(){
   SG.drawnFor = SG.phrase + "|" + a + "|" + z;
   box.scrollLeft = keepScroll;
   songMarksDraw(); songHead(SG.pos); songPlaceBox(false);
+  if (TEACH) TEACH.drawn();
 }
 
 // ================= Marks =================
@@ -7346,15 +7389,98 @@ function songApplySections(s, sx){
   s.parts.forEach(pt => { const v = sx.parts[pt.id]; if (v && okSecs(v.learn) && okSecs(v.practice)) { pt.sections = { learn: v.learn, practice: v.practice }; any = true; } });
   return any;
 }
+// Parts changed or added on the teacher page (Isaac, 22 October: a split bar, or the tenors singing with the basses):
+// songs/<id>-parts.json is {song, parts: [{id, name, voice, clef, bars}, ...]} in the order students see them, or
+// {song, parts: null} for the score's own parts. A part whose notes are the score's keeps the score's phrases (and any
+// split notes, for the teacher page); a changed or new one gets phrases found the importer's way (songPartSections).
+// SONG_SCORE keeps each song's parts as built in, to go back to.
+const SONG_SCORE = {};
+SONGS.forEach(s => { SONG_SCORE[s.id] = JSON.parse(JSON.stringify(s.parts)); });
+const PART_CLEFS = { S: "treble", A: "treble", T: "treble8", B: "bass" };
+function okPart(q, n){
+  const okEv = e => e && Number.isFinite(e.t) && Number.isFinite(e.d) && e.d > 0 && (e.p === undefined || (Array.isArray(e.p) && /^[A-G]$/.test(e.p[0]) && Number.isInteger(e.p[1]) && Number.isInteger(e.p[2])));
+  return q && typeof q.id === "string" && q.id && typeof q.name === "string" && q.name.trim() && PART_CLEFS[q.voice] && ["treble", "treble8", "bass"].includes(q.clef)
+    && Array.isArray(q.bars) && q.bars.length === n && q.bars.every(b => Array.isArray(b) && b.every(okEv)) && q.bars.some(b => b.some(e => e.p));
+}
+function songApplyParts(s, px){
+  if (!px || px.song !== s.id || !("parts" in px)) return false;
+  const score = SONG_SCORE[s.id], n = s.barTicks.length, now = JSON.stringify(s.parts.map(songPartCore));
+  let list;
+  if (px.parts === null) list = JSON.parse(JSON.stringify(score));
+  else {
+    if (!Array.isArray(px.parts) || !px.parts.length || px.parts.length > 16 || !px.parts.every(q => okPart(q, n)) || new Set(px.parts.map(q => q.id)).size !== px.parts.length) return false;
+    const starts = songBarStarts(s);
+    list = px.parts.map(q => {
+      const sc = score.find(p => p.id === q.id), same = sc && JSON.stringify(sc.bars) === JSON.stringify(q.bars);
+      const pt = { id: q.id, name: q.name.trim(), voice: q.voice, clef: q.clef, bars: q.bars, sections: same ? JSON.parse(JSON.stringify(sc.sections)) : songPartSections(q, starts) };
+      if (sc && sc.more) pt.more = sc.more;
+      return pt;
+    });
+  }
+  if (JSON.stringify(list.map(songPartCore)) === now) return false;
+  s.parts = list;
+  return true;
+}
+// What a part is, without its phrases or split notes: what the parts file holds
+const songPartCore = pt => ({ id: pt.id, name: pt.name, voice: pt.voice, clef: pt.clef, bars: pt.bars });
+// A part's phrases, found as songs/import.py's part_sections finds them (break strengths at rests and the ends of
+// sentences and clauses in the words; learn: up to 5 bars, practice: up to 10, never across a bar or more of rest)
+function songPartSections(pt, starts){
+  const notes = []; let open = null;
+  pt.bars.forEach((bar, bi) => bar.forEach(e => {
+    if (!e.p) { open = null; return; }
+    if ((e.tie === "stop" || e.tie === "both") && open) { open.d += e.d; if (e.tie === "stop") open = null; return; }
+    const v = e.verses && e.verses["1"];
+    const n = { t: starts[bi] + e.t, d: e.d, bar: bi, ly: v ? v.text : null, syl: v ? v.syl : null };
+    notes.push(n); open = e.tie === "start" || e.tie === "both" ? n : null;
+  }));
+  if (!notes.length) return { learn: [], practice: [] };
+  const strength = []; let lastLy = null;
+  notes.forEach((n, i) => {
+    if (n.ly) lastLy = n;
+    if (i === notes.length - 1) { strength.push(5); return; }
+    const nx = notes[i + 1], gap = nx.t - (n.t + n.d);
+    const p = nx.ly && lastLy && (lastLy.syl === "single" || lastLy.syl === "end") ? lastLy.ly.trimEnd().slice(-1) : "";
+    strength.push(gap >= starts[n.bar + 1] - starts[n.bar] - 1e-6 ? 5 : p && ".!?".includes(p) ? 4
+      : gap > 1e-6 ? (p && ",;:".includes(p) ? 3 : 2) : (p && ",;:".includes(p) ? 1 : 0));
+  });
+  const bars = (a, b) => notes[b].bar - notes[a].bar + 1, r6 = x => Math.round(x * 1e6) / 1e6;
+  const less = (x, y) => { for (let i = 0; i < x.length; i++) if (x[i] !== y[i]) return x[i] < y[i]; return false; };
+  const build = (level, most, shortMost) => {
+    const pieces = []; let a = 0;
+    notes.forEach((_, i) => { if (strength[i] >= level) { pieces.push([a, i]); a = i + 1; } });
+    for (;;) {
+      let best = null;
+      for (let k = 0; k < pieces.length - 1; k++) {
+        const st = strength[pieces[k][1]]; if (st >= 5) continue;
+        const n = bars(pieces[k][0], pieces[k + 1][1]), small = bars(...pieces[k]) < 2 || bars(...pieces[k + 1]) < 2;
+        if (n <= most || (small && n <= shortMost)) { const key = [small ? 0 : 1, st, n, -k]; if (!best || less(key, best[0])) best = [key, k]; }
+      }
+      if (!best) break;
+      const k = best[1]; pieces.splice(k, 2, [pieces[k][0], pieces[k + 1][1]]);
+    }
+    return pieces.map(([a, b]) => ({ a: notes[a].bar, z: notes[b].bar, s: r6(notes[a].t), e: r6(notes[b].t + notes[b].d) }));
+  };
+  return { learn: build(1, 5, 6), practice: build(3, 10, 10) };
+}
 async function songLoadEdits(){
+  // parts changed on the teacher page and built in (build.py keeps songs/<id>-parts.json as partsEdit)
+  // and the phrases saved with them (songs/<id>-sections.json, as sectionsEdit)
+  SONGS.forEach(s => {
+    if (s.partsEdit) { songApplyParts(s, s.partsEdit); delete s.partsEdit; }
+    if (s.sectionsEdit) { songApplySections(s, s.sectionsEdit); delete s.sectionsEdit; }
+  });
   if (typeof fetch !== "function") return;
   const web = /^https?:$/.test(location.protocol);
   const site = async f => { if (!web) return null; try { const r = await fetch(`songs/${f}?t=${Date.now()}`, { cache: "no-store" }); return r.ok ? await r.json() : null; } catch (e) { return null; } };
   const get = async f => { const v = TEACH ? await TEACH.get(f) : undefined; return v === undefined ? site(f) : v; };
   await Promise.all(SONGS.map(async s => {
-    const [tm, sx] = await Promise.all([get(`${s.id}-timings.json`), get(`${s.id}-sections.json`)]);
-    const changed = songApplyTimings(s, tm) | songApplySections(s, sx);
-    if (changed && SG.song === s && SG.view === "song" && SG.state === "idle" && MODE === "songs" && !SG.tapping) {
+    const [px, tm, sx] = await Promise.all([get(`${s.id}-parts.json`), get(`${s.id}-timings.json`), get(`${s.id}-sections.json`)]);
+    const parts = songApplyParts(s, px);
+    if (TEACH) TEACH.hadParts(s, !!px);
+    const changed = parts | songApplyTimings(s, tm) | songApplySections(s, sx);
+    if (changed && SG.song === s && SG.view === "song" && SG.state === "idle" && MODE === "songs" && !SG.tapping && !(TEACH && TEACH.editing())) {
+      if (parts) { SG.timeline = songTimeline(s); SG.part = s.parts.find(p => p.id === SG.part.id) || songDefaultPart(s); songPartButtons(s); }
       SG.rec = songRecording(s); SG.useRec = !!SG.rec; recSelect(); songSet();
     }
   }));
@@ -7912,12 +8038,7 @@ function songOpen(s, fresh){
   if (TEACH) TEACH.view();
   $("song-title").textContent = s.title;
   $("song-by").textContent = [s.composer, s.words ? "words: " + s.words : ""].filter(Boolean).join(" · ");
-  $("song-parts").innerHTML = s.parts.map(p => `<button type="button" data-p="${p.id}">${escHTML(p.name)}</button>`).join("");
-  $("song-parts").querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
-    if (SG.state === "listening") return;
-    SG.part = s.parts.find(p => p.id === b.dataset.p); SG.marks = null; SG.phrase = -1; SG.pos = 0;
-    ensureCtx(); songSet();
-  }));
+  songPartButtons(s);
   $("song-show-others").hidden = s.parts.length < 2; $("song-show-accomp").hidden = !s.accomp.length;
   syncOptions();
   songSet();
@@ -7926,6 +8047,16 @@ function songOpen(s, fresh){
     SG.useRec = false; songShowMode(); songMsg(ytWhy(SG.yt.failed) + " The piano plays instead.");
   }
   window.scrollTo(0, 0);
+}
+// The part buttons (the teacher page can add, rename and take away parts)
+function songPartButtons(s){
+  $("song-parts").innerHTML = s.parts.map(p => `<button type="button" data-p="${p.id}">${escHTML(p.name)}</button>`).join("");
+  $("song-parts").querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+    if (SG.state === "listening" || (TEACH && TEACH.editing())) return;
+    SG.part = s.parts.find(p => p.id === b.dataset.p); SG.marks = null; SG.phrase = -1; SG.pos = 0;
+    ensureCtx(); songSet();
+  }));
+  $("song-parts").querySelectorAll("button").forEach(b => b.classList.toggle("sel", SG.part && b.dataset.p === SG.part.id));
 }
 // Draws the song for the chosen part and phrase
 function songSet(){
