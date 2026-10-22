@@ -107,9 +107,8 @@ svg.score .oct8 { font-family: var(--body); font-size: 10px; fill: currentColor;
 svg.score .res { font-family: var(--body); font-size: 11px; font-weight: 600; text-anchor: middle; fill: var(--muted); font-variant-numeric: tabular-nums; }
 svg.score .xmark { font-size: 15px; font-weight: 700; }
 svg.score .res.ok { fill: var(--ok); } svg.score .res.near { fill: var(--warn); } svg.score .res.wrong { fill: var(--bad); } svg.score .res.missed { fill: var(--miss); }
-svg.score .you { fill: none; stroke: var(--brand); stroke-width: 2.2; transition: cx 120ms linear; }
-svg.score .you.ok { stroke: var(--ok); } svg.score .you.near { stroke: var(--warn); } svg.score .you.off { stroke: var(--bad); }
-svg.score .trace { fill: none; stroke: var(--brand); stroke-width: 1.6; stroke-linecap: round; opacity: 0.45; }
+svg.score .you { fill: var(--brand); fill-opacity: 0.55; stroke: none; pointer-events: none; transition: y 90ms linear; }
+svg.score .you.ok { fill: var(--ok); } svg.score .you.near { fill: var(--warn); } svg.score .you.off { fill: var(--bad); }
 
 .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
 .options { display: flex; flex-wrap: wrap; gap: 10px 22px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); align-items: center; }
@@ -294,7 +293,23 @@ button.toggle[aria-pressed="true"] { background: var(--brand-tint); border-color
 .sync input[type=url] { flex: 1 1 220px; min-width: 0; font: inherit; font-size: 0.95rem; padding: 8px 10px; border-radius: 8px; border: 1.5px solid var(--line); background: var(--card); color: var(--ink); }
 .songmodes { margin-top: 14px; }
 @media (max-width: 480px) { .songmodes button { padding: 10px 9px; } .songmodes .n { display: none; } }
-.secrow { display: flex; gap: 8px; align-items: center; margin-top: 10px; }
+.secrow { display: flex; gap: 8px; align-items: center; margin-top: 14px; }
+.secrow .lab { margin-right: 2px; }
+/* Practice songs' three steps (Isaac, 22 October): numbered like the tabs, the one in use outlined */
+.songacts { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 8px; }
+.songacts .step { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px 10px 12px; font-weight: 600; }
+.songacts .step .n { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--banner); color: #FFFFFF; font-size: 0.78rem; flex: none; }
+.songacts .step.sel { background: var(--brand-tint); border-color: var(--brand); color: var(--brand-ink); }
+.songacts .step.on { background: var(--card); border-color: var(--red); color: var(--red); }
+.songacts .step.on .n { background: var(--red); }
+.songacts .step:disabled .n { opacity: 0.45; }
+#act-song .prompt { margin-top: 16px; }
+/* the tuning keyboard above the score, and the marks' key under the steps, inside the song card */
+#livePanel.insong, #results.insong { border: 0; padding: 0; background: transparent; border-radius: 0; }
+#livePanel.insong { margin: 12px 0 6px; }
+#results.insong { margin-top: 12px; }
+body.counting #act-song .songacts .step.on { position: relative; z-index: 43; }
+body.counting #act-song #livePanel { position: relative; z-index: 41; background: var(--card); }
 .secrow select { flex: 1; min-width: 0; }
 .secrow .tbtn svg { fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 .songtools { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; margin-top: 12px; }
@@ -440,45 +455,39 @@ body.mode-start #status { font-size: 1.35rem; }
     <h2 id="song-title"></h2>
     <p class="muted" id="song-by"></p>
     <div class="songrow"><span class="lab">Your part</span><div class="seg" id="song-parts"></div></div>
-    <div class="tabs songmodes" role="tablist" id="song-modes">
-      <button type="button" role="tab" data-m="listen"><span class="n">1</span>Listen</button>
-      <button type="button" role="tab" data-m="learn"><span class="n">2</span>Learn</button>
-      <button type="button" role="tab" data-m="refine"><span class="n">3</span>Refine</button>
-      <button type="button" role="tab" data-m="practice"><span class="n">4</span>Practice</button>
-    </div>
-    <p class="prompt" id="song-prompt"></p>
-    <div class="secrow" data-modes="learn refine practice">
-      <button type="button" class="tbtn" id="song-prev" aria-label="Previous section" title="Previous section"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 5 8.5 12l7 7"/></svg></button>
-      <select id="song-sec" aria-label="Section"></select>
-      <button type="button" class="tbtn" id="song-next" aria-label="Next section" title="Next section"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 5l7 7-7 7"/></svg></button>
-    </div>
-    <div class="hp" data-modes="learn practice">Use headphones.</div>
     <div class="songtools">
+      <div class="seg" id="song-recrow" hidden><button type="button" data-r="rec">Recording</button><button type="button" data-r="piano">Piano</button></div>
       <div class="row showrow"><span class="lab">Show</span><button type="button" class="toggle" id="song-show-others" aria-pressed="false">Other parts</button><button type="button" class="toggle" id="song-show-accomp" aria-pressed="false">Accompaniment</button></div>
-      <div class="seg" id="song-recrow" hidden><button type="button" data-r="piano">Piano</button><button type="button" data-r="rec">Recording</button></div>
     </div>
     <div class="ytbox" id="song-yt" hidden></div>
+    <div class="secrow">
+      <span class="lab">Phrase</span>
+      <button type="button" class="tbtn" id="song-prev" aria-label="Previous phrase" title="Previous phrase"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 5 8.5 12l7 7"/></svg></button>
+      <select id="song-sec" aria-label="Phrase"></select>
+      <button type="button" class="tbtn" id="song-next" aria-label="Next phrase" title="Next phrase"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 5l7 7-7 7"/></svg></button>
+    </div>
     <div class="tempomark" id="song-tempo"><span class="tterm" data-term="songTempo"></span><svg class="tnote" viewBox="0 0 14 22" aria-hidden="true"><ellipse cx="4.2" cy="18.2" rx="4" ry="2.9" transform="rotate(-22 4.2 18.2)"/><rect x="7.1" y="1.5" width="1.3" height="16.6"/><path class="tflag" d="M8.4 1.5C8.7 5.2 13.4 6.6 12.2 12.2C11.8 9 10.2 7.6 8.4 7.2Z"/></svg><span class="teq">=</span><span data-songtempo-val></span><input type="range" data-opt="songTempo" min="40" max="140" step="2" aria-label="Tempo"></div>
     <div class="staff-scroll songbox" id="song-box"></div>
-    <div class="transport" role="group" aria-label="Playback" data-modes="listen">
+    <div class="transport" role="group" aria-label="Playback">
       <button type="button" class="tbtn" id="song-restart" aria-label="Back to the start" title="Back to the start"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="5" width="2.6" height="14" rx="1"/><path d="M19 5.5v13L9 12z"/></svg></button>
       <button type="button" class="tbtn play" id="song-play" aria-label="Play" title="Play"><svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15L19.5 12z"/></svg><svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg></button>
       <button type="button" class="tbtn" id="song-stop" aria-label="Stop" title="Stop"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="1.5"/></svg></button>
       <input type="range" id="song-scrub" class="scrub" min="0" max="1" step="any" value="0" aria-label="Where in the music">
       <span class="where" id="song-where"></span>
     </div>
-    <div class="actions" data-modes="learn refine practice">
-      <button type="button" id="song-ref" data-modes="refine">Key chord</button>
-      <button type="button" class="primary" id="song-go">I'm ready</button>
-      <button type="button" id="song-hear" data-modes="refine practice">Hear it</button>
+    <p class="prompt" id="song-prompt"></p>
+    <div class="songacts" id="song-acts">
+      <button type="button" class="step" id="song-learn"><span class="n">1</span><span class="t">Learn it</span></button>
+      <button type="button" class="step" id="song-nbn" aria-pressed="false"><span class="n">2</span><span class="t">Note by note</span></button>
+      <button type="button" class="step" id="song-sing"><span class="n">3</span><span class="t">Sing it</span></button>
       <button type="button" class="helpbtn" aria-expanded="false">Helpers</button>
     </div>
-    <div class="actions" data-modes="listen"><button type="button" class="helpbtn" aria-expanded="false">Helpers</button></div>
+    <div class="hp" id="song-hp">Use headphones.</div>
     <div class="helpers" data-act="song" hidden></div>
-    <div class="songplay" data-modes="listen learn practice"><span class="lab" data-modes="listen practice">The piano plays</span><span class="lab" data-modes="learn">With the accompaniment, the piano also plays</span>
+    <div class="songplay"><span class="lab">The piano plays</span>
       <label class="switch"><input type="checkbox" data-opt="songOthers"> Other parts</label>
-      <label class="switch" data-modes="listen practice"><input type="checkbox" data-opt="songAccomp"> Accompaniment</label>
-      <label class="switch" data-modes="listen practice"><input type="checkbox" data-opt="songOwn"> My part</label>
+      <label class="switch"><input type="checkbox" data-opt="songAccomp"> Accompaniment</label>
+      <label class="switch"><input type="checkbox" data-opt="songOwn"> My part</label>
       <label class="switch" id="song-recown" hidden><input type="checkbox" data-opt="songRecOwn"> My part</label>
     </div>
     <p class="hpmsg" id="song-msg" aria-live="polite"></p>
@@ -4795,19 +4804,18 @@ function noteLabel(key, n){
 function labelGap(){ return APP.settings.solf ? 58 : APP.settings.names ? 42 : 34; }   // hand signs need room
 
 // ---------- Pitch ring on the stave ----------
+// Where the singer is on the stave: a pill (a bar with rounded ends) one stave space tall, centred on the note and
+// coloured as the marks are (Isaac, 22 October: the thin line and small ring were hard to see). It sits at the pitch
+// sung, between the lines and spaces when they're between notes.
+const PILL_W = 34;
 function makeRing(L){
-  const trace = sel("polyline", { class: "trace", points: "" }, L.svg);
-  const c = sel("circle", { class: "you", r: 7.5, cx: -50, cy: -50 }, L.svg);
-  let pts = [], lastX = null;
+  const c = sel("rect", { class: "you", x: -100, y: -100, width: PILL_W, height: SP, rx: SP / 2, ry: SP / 2 }, L.svg);
   return {
     show(x, y, cls){
-      y = clamp(y, 6, L.height - 6);
-      if (x !== lastX) { pts = []; lastX = x; }
-      c.setAttribute("cx", x); c.setAttribute("cy", y); c.setAttribute("class", "you " + (cls || ""));
-      pts.push(y); if (pts.length > 45) pts.shift();
-      trace.setAttribute("points", pts.map((py, k) => `${(x + 12 + k * 0.8).toFixed(1)},${py.toFixed(1)}`).join(" "));
+      y = clamp(y, SP / 2 + 2, L.height - SP / 2 - 2);
+      c.setAttribute("x", (x - PILL_W / 2).toFixed(1)); c.setAttribute("y", (y - SP / 2).toFixed(1)); c.setAttribute("class", "you " + (cls || ""));
     },
-    hide(){ c.setAttribute("cx", -50); trace.setAttribute("points", ""); pts = []; lastX = null; }
+    hide(){ c.setAttribute("x", -100); c.setAttribute("y", -100); }
   };
 }
 function ringY(L, key, target, writtenMidi){
@@ -5426,7 +5434,7 @@ const HELPERS = {
   read: ["tuning", "counts", "names", "solf", "clickHear", "guitar", "playChords", "playRhythm"],
   // Practice songs: Sight sing's, apart from Play chords, Play the rhythm and Click notes to hear (the playback bar plays
   // the music, and clicking the score chooses bars)
-  song: ["tuning", "counts", "names", "solf", "guitar"]
+  song: ["counts", "names", "solf", "guitar"]      // Practice songs always shows the tuning keyboard while they sing (22 October)
 };
 function helperOn(key, act = APP.settings.activity){
   if (MODE === "songs") act = "song"; else if (MODE !== "skills") return false;      // no helpers in the practice audition
@@ -6841,28 +6849,26 @@ const CH = makeAuralActivity({ id: "chords", type: "chord", p: "ch" });
 const AURALS = [IV, CH];
 
 // ==== FILE: 09-songs.js ====
-// ================= Practice songs: sing your part in one of the choir's songs (Isaac, 20 and 21 October) =================
+// ================= Practice songs: sing your part in one of the choir's songs (Isaac, 20 to 22 October) =================
 // The songs come from Isaac's scores (MusicXML), turned into SONGS by songs/import.py and build.py, note for note as
 // written: nothing here changes a pitch, rhythm, accidental or word.
-// Four ways in (Isaac, 21 October), each modelled on something the app already does:
-// - Listen: the whole song with a playback bar (play and pause, stop, back to the start, scrubbing), on the piano or, when
-//   the song has one, a recording (a file built in, or a YouTube video) whose bar times were tapped along by Isaac (Sync
-//   a recording), with the score following.
-// - Learn (as Hold your part): a short section (about 4 bars); the piano plays their part, then a count-in and they sing
-//   it on their own, then a count-in and they sing it with the accompaniment (and the other parts, on a switch). Tuning
-//   keyboard while they sing; the marks show the go with the accompaniment.
-// - Refine (as Solfège): the box sits on a note and the tuning keyboard shows where they are; click a note to hear it and
-//   move the box; then I'm ready and the app waits for each note.
-// - Practice (as Sight sing): a longer section to the click, after a count-in and the bar before on the piano, with the
-//   piano playing what's switched on.
-// Sections come with the song (songs/import.py finds them at the phrase ends, Isaac checks them): Learn and Refine use
-// the short ones, Practice the long ones. In Learn, Refine and Practice the score shows the section's bars, with notes of
-// the bars that belong to the section before or after in grey. Marks are on the music; nothing is scored or kept.
+// One screen (Isaac, 22 October: Listen with the YouTube recording "works really well... let's collapse everything on to
+// that tab"). The student picks their part and a phrase (or the whole song), and:
+// - plays it (the play bar): the recording (a YouTube video or a file, with bar times Isaac tapped) or the piano, the
+//   score following; a phrase plays from the bar before it.
+// - 1 Learn it (a phrase): the recording with the piano doubling their part; then on their own to a click at the
+//   recording's speed; then with the recording. The marks show the go with the recording.
+// - 2 Note by note: the box on a note, the tuning keyboard, arrows and Previous and Next; click a note to hear it.
+// - 3 Sing it: the phrase or the whole song with the recording, from the bar before (counted in over it), then marks.
+// The tuning keyboard sits above the score while they sing. With no recording (or it can't play here) the piano does the
+// recording's job: Learn it plays their part, then the click, then the accompaniment; Sing it counts in on the click.
+// Phrases are the part's long sections (songs/import.py finds them at the phrase ends, Isaac checks them on the teacher
+// page). A phrase's score shows the bar before it too, with notes outside the phrase in grey. Marks are on the music;
+// nothing is scored or kept.
 const SONG_VOL = { own: 0.3, other: 0.1, accomp: 0.075 };
 // The teacher page's tools (09-teacher.js, in teacher.html only): null in the students' app
 let TEACH = null;
-const SONG_MODES = [["listen", "Listen"], ["learn", "Learn"], ["refine", "Refine"], ["practice", "Practice"]];
-const SG = { view: "list", song: null, part: null, mode: "listen", secIdx: { learn: 0, practice: 0 }, sc: null, notes: [],
+const SG = { view: "list", song: null, part: null, phrase: -1, nbn: false, sc: null, notes: [],
   state: "idle", pos: 0, play: null, run: null, marks: null, pi: 0, timeline: null, stream: null, rec: null, useRec: false, tapping: null,
   yt: null, syncSrc: null, recWait: null };
 
@@ -6907,18 +6913,30 @@ const songTempo = () => APP.settings.songTempo;
 const songTotal = () => SG.timeline.starts[SG.timeline.starts.length - 1];
 const sound = n => n.note.midi + voiceInfo().tr;
 
-// ================= Sections =================
-// Learn and Refine use the part's short sections, Practice its long ones; Listen is the whole song
-const secList = () => SG.part ? (SG.mode === "practice" ? SG.part.sections.practice : SG.part.sections.learn) : [];
+// ================= Phrases =================
+// A phrase is one of the part's long sections ({a, z, s, e}: first and last bar, start and end tick); SG.phrase -1 is the
+// whole song. The short sections (sections.learn) stay in the song data but aren't used (Isaac, 22 October: one length,
+// the longer ones).
+const phrases = () => SG.part ? SG.part.sections.practice : [];
 function songSec(){
-  if (SG.mode === "listen") return null;
-  const list = secList(), k = SG.mode === "practice" ? "practice" : "learn";
-  SG.secIdx[k] = clamp(SG.secIdx[k] || 0, 0, Math.max(0, list.length - 1));
-  return list[SG.secIdx[k]] || null;
+  const list = phrases();
+  if (SG.phrase < 0 || !list.length) { SG.phrase = -1; return null; }
+  SG.phrase = clamp(SG.phrase, 0, list.length - 1);
+  return list[SG.phrase];
 }
-// The bars drawn: the section's, or the whole song
-function songBars(){ const sc = songSec(); return sc ? [sc.a, sc.z] : [0, SG.song.barTicks.length - 1]; }
-// The singer's notes to sing: those in the section (all of them in Listen)
+// The whole of the part, as a section: from the bar of its first note to the end of its last
+function wholeSec(){
+  const ns = SG.timeline.parts[SG.part.id], [a, z] = partSpan(SG.part), last = ns[ns.length - 1];
+  return { a, z, s: ns[0].t, e: last.t + last.d, whole: true };
+}
+// What Learn it and Sing it sing: the phrase, or the whole part
+const singSec = () => songSec() || wholeSec();
+// The bars drawn: a phrase's, with the bar before it (the lead-in), or the whole song
+function songBars(){ const sc = songSec(); return sc ? [Math.max(0, sc.a - 1), sc.z] : [0, SG.song.barTicks.length - 1]; }
+// Where playing starts and stops: a phrase from the bar before it to the end of its last bar; or the whole song
+function songFrom(){ const sc = songSec(); return sc ? SG.timeline.starts[Math.max(0, sc.a - 1)] : 0; }
+function songTo(){ const sc = songSec(); return sc ? SG.timeline.starts[sc.z + 1] : songTotal(); }
+// The singer's notes to sing: those in the phrase (all of them for the whole song)
 function songTargets(){ const sc = songSec(); return sc ? SG.notes.filter(n => n.t >= sc.s - 1e-6 && n.t < sc.e - 1e-6) : SG.notes.slice(); }
 // A section's words, for its name in the list
 function secWords(pt, sc){
@@ -7086,7 +7104,7 @@ function songColumns(passes, plan, beats){
 // Draws the score: every stave in the scroll box, all lined up, with the bar numbers on the top one
 function songDraw(){
   const s = SG.song, key = songKey(s), V = voiceInfo(), box = $("song-box"), sec = songSec(), [a, z] = songBars();
-  const keepScroll = SG.drawnFor === SG.mode + "|" + a + "|" + z ? box.scrollLeft : 0;
+  const keepScroll = SG.drawnFor === SG.phrase + "|" + a + "|" + z ? box.scrollLeft : 0;
   const { staves, plan } = songPlan(a, z);
   SG.notes = [];
   const passes = [], beats = helperOn("counts", "song");
@@ -7141,7 +7159,7 @@ function songDraw(){
   SG.L.evs.forEach((e, i) => { if (e.ev.noteIdx !== undefined && !e.ev.tiedIn) SG.notes[e.ev.noteIdx].ev = i; });
   SG.ring = makeRing(SG.L); SG.ring2 = SG.L2 ? makeRing(SG.L2) : null;
   [SG.L, SG.L2].forEach(L => { if (L) L.pbox = sel("rect", { x: -100, y: 4, width: 44, height: L.height - 8, rx: 10, class: "pbox" }, L.svg); });
-  SG.drawnFor = SG.mode + "|" + a + "|" + z;
+  SG.drawnFor = SG.phrase + "|" + a + "|" + z;
   box.scrollLeft = keepScroll;
   songMarksDraw(); songHead(SG.pos); songPlaceBox(false);
 }
@@ -7196,10 +7214,10 @@ function songStream(evs, start, from, tick, opt){
   };
   pump();
 }
-// Plays from `from` to `to`: the piano (evs), or in Listen the recording, with the playhead following. o.noSeek: the
+// Plays from `from` to `to`: the piano (evs), or the recording when it's chosen, with the playhead following. o.noSeek: the
 // recording is already playing from where it is (they pressed play in the YouTube player itself).
 function songPlay(from, to, evs, o = {}){
-  const rec = SG.useRec && SG.mode === "listen" && SG.rec ? recPlayer(SG.rec) : null;
+  const rec = SG.useRec && SG.rec ? recPlayer(SG.rec) : null;
   ensureCtx(); if (!rec && waitForPiano(() => songPlay(from, to, evs, o))) return;
   songHalt();
   if (rec && rec.failed !== null) {   // a YouTube video that can't play here: say why, and the piano plays
@@ -7219,11 +7237,11 @@ function songPlay(from, to, evs, o = {}){
   songButtons();
   const loop = () => {
     if (SG.play !== run || SG.state !== "playing") return;
-    if (rec && APP.settings.songRecOwn) recOwnStep(run, rec);
+    if (rec && APP.settings.songRecOwn) recOwnStep(run, rec, run.to);
     const cur = rec ? recTick(rec.time()) : run.from + Math.max(0, AUDIO.ctx.currentTime - run.t0) / run.tick;
     // a recording plays on to its end after the last bar (the last chord and the room)
     const done = rec ? rec.ended() || (run.to < songTotal() - 1e-6 && cur >= run.to - 1e-6) : cur >= run.to - 1e-6;
-    if (done) { songHalt(); SG.pos = SG.mode === "listen" ? 0 : SG.pos; songHead(SG.pos); songScrub(); return; }
+    if (done) { songHalt(); SG.pos = songFrom(); songHead(SG.pos); songScrub(); return; }
     SG.pos = cur; songHead(cur); songScrub();
     requestAnimationFrame(loop);
   };
@@ -7237,23 +7255,20 @@ function songHalt(){
 }
 function songHead(pos){
   if (!SG.Ls || !SG.sc) return;
-  const g = pos - SG.timeline.starts[SG.sc.a], show = SG.state !== "idle" || (SG.mode === "listen" && pos > 1e-6);
+  const g = pos - SG.timeline.starts[SG.sc.a], show = SG.state !== "idle" || pos > songFrom() + 1e-6;
   SG.Ls.forEach(L => { const x = show ? L.tickX(g) : -20; L.head.setAttribute("x1", x); L.head.setAttribute("x2", x); });
   if (show) scrollIntoViewX(SG.L, SG.L.tickX(g));
   const st = SG.timeline.starts, bi = clamp(st.findIndex(t => t > pos + 1e-6) - 1, 0, SG.song.barLabels.length - 1);
   $("song-where").textContent = `Bar ${SG.song.barLabels[bi < 0 ? SG.song.barLabels.length - 1 : bi]}`;
   if (TEACH) TEACH.at(bi < 0 ? SG.song.barLabels.length - 1 : bi);
 }
-function songScrub(){ const sc = $("song-scrub"); sc.max = songTotal(); sc.value = clamp(SG.pos, 0, songTotal()); }
-// Listen: from where the playhead is, the piano's switches (or the recording)
-function songListenPlay(){ if (SG.state === "playing") return songHalt(); if (SG.recWait) { SG.recWait = null; songMsg(""); return; } songPlay(SG.pos >= songTotal() - 1e-6 ? 0 : SG.pos, songTotal(), songEvents(SG.pos, songTotal())); }
-// Hear it (Refine, Practice): the section, from the start of its first bar; their own part only in Refine
-function songHear(){
+function songScrub(){ const sc = $("song-scrub"); sc.min = songFrom(); sc.max = songTo(); sc.value = clamp(SG.pos, songFrom(), songTo()); }
+// The play bar: from where the playhead is (or the start of the phrase or song) to the end, on the recording or the piano
+function songListenPlay(){
   if (SG.state === "playing") return songHalt();
-  const sc = songSec(), st = SG.timeline.starts, from = st[sc.a], to = sc.e;
-  const evs = SG.mode === "refine" ? songEvents(from, to, { songOwn: true, songOthers: false, songAccomp: false, ownFrom: sc.s, ownTo: sc.e })
-    : songEvents(from, to, { ownFrom: sc.s, ownTo: sc.e });
-  SG.pos = from; songPlay(from, to, evs);
+  if (SG.recWait) { SG.recWait = null; songMsg(""); return; }
+  const from = SG.pos >= songTo() - 1e-6 || SG.pos < songFrom() - 1e-6 ? songFrom() : SG.pos;
+  songPlay(from, songTo(), songEvents(from, songTo()));
 }
 
 // ================= A recording, with the score following (Listen) =================
@@ -7283,7 +7298,7 @@ function recTime(tick){
 // note starts that much earlier: the delay the browser reports for its sound output (recOwnLatency).
 const REC_OWN_AHEAD = 0.3, REC_OWN_LATE = 0.15;
 function recOwnLatency(){ const c = AUDIO.ctx; return clamp((c.outputLatency || 0) + (c.baseLatency || 0), 0, 0.6); }
-function recOwnStep(run, rec){
+function recOwnStep(run, rec, to = Infinity){
   const notes = SG.timeline.parts[SG.part.id], now = AUDIO.ctx.currentTime, rt = rec.time();
   const heard = rt + recOwnLatency();                     // the recording's time when a note started now is heard
   if (!rec.playing()) { run.ownAt = null; return; }
@@ -7293,7 +7308,7 @@ function recOwnStep(run, rec){
   run.ownAt = rt;
   while (run.ownI < notes.length) {
     const x = notes[run.ownI], st = recTime(x.t);
-    if (st > heard + REC_OWN_AHEAD) break;
+    if (st > heard + REC_OWN_AHEAD || x.t >= to - 1e-6) break;
     run.ownI++;
     if (st < rt - REC_OWN_LATE) continue;                                            // already gone by
     tone(x.m, now + Math.max(0, st - heard), Math.max(0.1, (recTime(x.t + x.d) - st) * 0.95), { vol: SONG_VOL.own, noIgnore: true });
@@ -7411,9 +7426,9 @@ function ytState(P, st){
   P.state = st; P.at = performance.now();
   const run = SG.play;
   if (st === 1 && run && run.rec === P) run.started = true;
-  if (SG.tapping || SG.view !== "song" || SG.mode !== "listen" || !SG.useRec || !SG.rec || SG.rec.kind !== "yt") return;
+  if (SG.tapping || SG.view !== "song" || !SG.useRec || !SG.rec || SG.rec.kind !== "yt") return;
   if (st === 2 && SG.state === "playing" && run && run.rec === P && run.started) songHalt();
-  else if (st === 1 && SG.state === "idle" && !SG.recWait) songPlay(recTick(P.time()), songTotal(), null, { noSeek: true });
+  else if (st === 1 && SG.state === "idle" && !SG.recWait) songPlay(recTick(P.time()), Math.max(songTo(), recTick(P.time()) + 1), null, { noSeek: true });
 }
 function ytFail(P, why){
   if (P.failed !== null || P.gone) return;
@@ -7424,7 +7439,7 @@ function ytFail(P, why){
   if (SG.rec && SG.rec.kind === "yt" && SG.rec.id === P.id && SG.useRec) {
     const was = SG.state === "playing" || (waiting && SG.recWait);
     songHalt(); SG.useRec = false;
-    if (SG.view === "song") { songShowMode(); songMsg(msg + " The piano plays instead."); if (was && SG.mode === "listen") songListenPlay(); }
+    if (SG.view === "song") { songShowMode(); songMsg(msg + " The piano plays instead."); if (was) songListenPlay(); }
   }
 }
 function ytWhy(c){
@@ -7470,35 +7485,158 @@ function songLive(run, show){
 }
 // The count-in labels: a bar, then the beats before the first note when the section starts part-way through its bar
 function upbeatCount(tg, S0){ const c = clickTicksOf(SG.song.ts); return Array.from({ length: Math.round((tg[0].t - S0) / c) }, (_, k) => String(k + 1)); }
-// Every event of the singer's part in the section (rests too), for finding extra notes, from a pass starting at `start`
-function songPass(tg, S0, start, tick, from){
-  const sc = songSec(), evs = [];
+// Every event of the singer's part in the phrase (rests too), for finding extra notes. at(t): when song tick t is heard,
+// in audio time (the click's time, or the recording's); from: when the listening for this go began
+function songPass(tg, at, from){
+  const sc = singSec(), evs = [];
   SG.L.evs.forEach((e, j) => {
     const t = e.ev.songT; if (t === undefined || t < sc.s - 1e-6 || t >= sc.e - 1e-6) return;
     const local = e.ev.noteIdx !== undefined ? tg.findIndex(n => n.i === e.ev.noteIdx) : -1;
-    evs.push({ start: start + (t - S0) * tick, end: start + (t - S0 + e.ev.ticks) * tick, rest: !!e.ev.rest, n: e.ev.rest ? -1 : local, j });
+    evs.push({ start: at(t), end: at(t + e.ev.ticks), rest: !!e.ev.rest, n: e.ev.rest ? -1 : local, j });
   });
-  const ms = start + (tg[0].t - S0) * tick, me = start + (sc.e - S0) * tick;
-  return { events: evs, musicStart: ms, musicEnd: me, from, to: me + 1.0, beat: clickTicksOf(SG.song.ts) * tick };
+  const ms = at(tg[0].t), me = at(sc.e);
+  return { events: evs, musicStart: ms, musicEnd: me, from, to: me + 1.0, beat: (at(tg[0].t + clickTicksOf(SG.song.ts)) - ms) };
 }
-async function songGo(){
+// 1 Learn it and 3 Sing it. With the recording (when it's chosen and can play) the recording leads; otherwise the piano.
+async function songGo(kind){
   if (SG.state === "listening") return songFinish();
+  if (kind === "learn" && !songSec()) return;
   const tg = songTargets();
   if (!tg.length) return;
   songHalt();
   if (!(await startMic())) return;
+  let rec = SG.useRec && SG.rec ? recPlayer(SG.rec) : null;
+  if (rec && rec.failed !== null) { SG.useRec = false; songShowMode(); songMsg(ytWhy(rec.failed) + " The piano plays instead."); rec = null; }
+  if (rec && !rec.ready) {            // a YouTube video still loading: start once it's ready (pressing again cancels)
+    const w = SG.recWait = {};
+    songMsg("Loading the YouTube recording…");
+    rec.whenReady(() => { if (SG.recWait !== w) return; SG.recWait = null; songMsg(""); songGo(kind); });
+    return;
+  }
   if (PRACTISING === SONGM) { PRACTISING = null; AUDIO.onFrame = null; }
   stopAllSound(); songClearMarks(); songMsg("");
   SG.ring.hide(); if (SG.ring2) SG.ring2.hide();
   SG.state = "listening"; BUSY = SONGM;
-  SG.run = { kind: SG.mode, tg, frames: [] };
-  songButtons();
-  if (SG.mode === "refine") songSteady(); else if (SG.mode === "learn") songLearn(); else songTimed();
+  SG.run = { kind, tg, frames: [], rec, windows: [], targets: [] };
+  songShowMode();
+  if (rec) songRecRun(); else if (kind === "learn") songLearnPiano(); else songSingPiano();
+  songShowLive();
 }
-// Learn (as Hold your part): the piano plays their part; a count-in; they sing it on their own; a count-in; they sing it
-// with the accompaniment (and the other parts if that switch is on). The click runs all the way through.
-function songLearn(){
-  const s = SG.song, run = SG.run, tg = run.tg, sc = songSec(), st = SG.timeline.starts;
+// The live display while singing to the click or the recording: holds still between notes until the singer gets there
+// (makeSettle). Each go's windows are in run.windows, in audio time.
+function songLiveFrame(run, f, smoother, settle, lat){
+  run.frames.push({ t: f.t, raw: f.raw, rms: f.rms });
+  const n = run.tg.length, lt = f.t - lat, w = run.windows.findIndex(x => lt >= x.start && lt < x.end);
+  const p = smoother.push(f), nn = w >= 0 ? run.tg[w % n] : null;
+  const h = settle.step(w, nn ? nn.note.midi : null, f.t, f.raw, w >= 0 ? run.targets[w] : null);
+  if (h === "release") smoother.reset();
+  else if (h) LIVE.target(nn.note.midi);
+  else if (p !== null && nn) { let d = p - run.targets[w]; if (APP.settings.anyOct) d -= 12 * Math.round(d / 12); songShowPitch(nn, p, d * 100); }
+  else songShowPitch(nn, null);
+}
+// ---- With the recording ----
+// A go is a list of stages, one after another, driven by the microphone's frames:
+// - "rec": the recording from the bar before the phrase to its end (own: the piano doubles their part; sing: they sing,
+//   counted in over the bar before). The windows come from the bar times: when a note is heard is the recording's time
+//   for it, mapped to audio time when the recording starts playing (and again if it stalls or slips).
+// - "solo": on their own, to a click at the recording's speed through the phrase, after a bar's count-in.
+function songRecRun(){
+  const run = SG.run, sc = singSec(), st = SG.timeline.starts;
+  run.sc = sc; run.S0 = st[sc.a]; run.lead = st[Math.max(0, sc.a - 1)]; run.tail = sc.whole ? 2 : 0.3;
+  const learn = run.kind === "learn", stages = [];
+  if (learn) stages.push({ kind: "rec", own: true, say: "Listen. The piano plays your part with the choir." });
+  if (learn) stages.push({ kind: "solo", sing: true, count: "Get ready to sing on your own.", say: "Your turn. Sing it on your own." });
+  stages.push({ kind: "rec", sing: true, own: !!APP.settings.songRecOwn, count: "Listen to the bar before, then come in.",
+    say: learn ? "Now sing it with the choir." : "Sing!", marked: true });
+  if (learn) stages[1].marked = false;
+  run.stages = stages; run.si = -1;
+  LIVE.open(true, "");
+  LIVE.target(run.tg[0].note.midi);
+  songStageNext(run, AUDIO.ctx.currentTime);
+  const smoother = makeSmoother(), settle = makeSettle(), lat = latencyGuess();
+  AUDIO.onFrame = f => {
+    if (SG.state !== "listening" || SG.run !== run) return;
+    const g = run.stages[run.si]; if (!g) return;
+    if (g.kind === "rec" ? songRecStage(run, g, f.t) : songSoloStage(run, g, f.t)) return;    // true: moved on (or finished)
+    if (!f.ignored) songLiveFrame(run, f, smoother, settle, lat);
+  };
+}
+function songStageNext(run, now){
+  run.si++;
+  const g = run.stages[run.si];
+  if (!g) { songFinish(); return true; }
+  g.t0 = now;
+  LIVE.status(g.count || g.say);
+  if (g.kind === "rec") { g.started = false; g.paused = false; g.giveUp = now + 15; run.rec.seek(recTime(run.lead)); run.rec.play(); }
+  else songSoloStart(run, g, now);
+  return false;
+}
+// The recording's stage, each frame. Returns true when it has moved on to the next stage.
+function songRecStage(run, g, now){
+  const r = run.rec, tg = run.tg, n = tg.length;
+  if (!g.started) {
+    if (!r.playing()) {
+      if (now > g.giveUp) { songMsg("The recording didn't start. Check the internet connection and try again."); songFinish(true); return true; }
+      return false;
+    }
+    g.started = true; g.anchor = now - r.time();
+    const at = t => g.anchor + recTime(t);
+    if (g.sing) {
+      g.w0 = run.windows.length;
+      tg.forEach(x => { run.windows.push({ start: at(x.t), end: at(x.t + x.d) }); run.targets.push(sound(x)); });
+      window.__timed = { musicStart: at(tg[0].t), windows: run.windows.slice(g.w0), notes: run.targets.slice(g.w0) };
+      // the count-in over the bar before (and any beats before the first note)
+      const c = clickTicksOf(SG.song.ts), barBeats = Math.round(barTicksOf(SG.song.ts) / c), nb = Math.round((tg[0].t - run.lead) / c);
+      if (nb > 0) {
+        const beat = (recTime(tg[0].t) - recTime(run.lead)) / nb;
+        showCountIn($("song-box"), at(run.lead), beat, [], Array.from({ length: nb }, (_, k) => String(k % barBeats + 1)));
+      }
+    }
+    g.goAt = at(tg[0].t);
+  }
+  const rt = r.time();
+  if (r.playing() && !g.paused) {
+    // the recording stalled or slipped: move the windows still to come
+    const est = now - rt;
+    if (Math.abs(est - g.anchor) > 0.15) {
+      const d = est - g.anchor; g.anchor = est; g.goAt += d;
+      if (g.sing) for (let k = g.w0; k < g.w0 + n; k++) if (run.windows[k].start > now) { run.windows[k].start += d; run.windows[k].end += d; }
+    }
+    if (g.own) recOwnStep(g, r, run.sc.e);
+  }
+  if (g.count && now >= g.goAt - 0.05 && !g.went) { g.went = true; LIVE.status(g.say); }
+  if (!g.paused) { SG.pos = clamp(recTick(rt), run.lead, songTotal()); songHead(SG.pos); }
+  if (!g.paused && (rt >= recTime(run.sc.e) + run.tail || r.ended())) { r.pause(); g.paused = true; g.pausedAt = now; }
+  const lastEnd = g.sing ? run.windows[g.w0 + n - 1].end + 1.0 : 0;
+  if (g.paused && now >= Math.max(g.pausedAt, lastEnd)) return songStageNext(run, now);
+  return false;
+}
+// On their own: a bar's count-in, then the click through the phrase at the recording's speed
+function songSoloStart(run, g, now){
+  const tg = run.tg, sc = run.sc, ts = SG.song.ts, S0 = run.S0, c = clickTicksOf(ts);
+  let tick = (recTime(sc.e) - recTime(S0)) / (sc.e - S0);
+  if (!(tick > 0.02 && tick < 1)) tick = tickSecOf(ts, songTempo());
+  const beat = c * tick, cl = countLabels(ts), c1 = now + 0.3, s2 = c1 + cl.length * beat;
+  countInClicks(c1, beat, ts);
+  musicClicks(s2, tick, Math.ceil((sc.e - S0) / c) * c, ts);
+  g.w0 = run.windows.length;
+  tg.forEach(x => { run.windows.push({ start: s2 + (x.t - S0) * tick, end: s2 + (x.t - S0 + x.d) * tick }); run.targets.push(sound(x)); });
+  g.start = s2; g.tick = tick; g.end = s2 + (sc.e - S0) * tick + 1.0; g.goAt = s2 + (tg[0].t - S0) * tick;
+  showCountIn($("song-box"), c1, beat, [], cl.concat(upbeatCount(tg, S0)));
+  window.__timed = { musicStart: g.goAt, windows: run.windows.slice(g.w0), notes: run.targets.slice(g.w0) };
+  run.rec.pause(); run.rec.seek(recTime(run.lead));       // ready for the go with the recording
+}
+function songSoloStage(run, g, now){
+  if (now >= g.goAt - 0.05 && !g.went) { g.went = true; LIVE.status(g.say); }
+  if (now >= g.start && now < g.end - 1.0) { SG.pos = run.S0 + (now - g.start) / g.tick; songHead(SG.pos); }
+  if (now >= g.end) return songStageNext(run, now);
+  return false;
+}
+// ---- With the piano ----
+// Learn it (as Hold your part): the piano plays their part; a count-in; they sing it on their own; a count-in; they sing
+// it with the accompaniment (and the other parts if that switch is on). The click runs all the way through.
+function songLearnPiano(){
+  const s = SG.song, run = SG.run, tg = run.tg, sc = singSec(), st = SG.timeline.starts;
   const S0 = st[sc.a], L = st[sc.z + 1] - S0, ts = s.ts, tick = tickSecOf(ts, songTempo()), cT = clickTicksOf(ts), beat = cT * tick;
   const cl = countLabels(ts), bar = cl.length * beat, labels = cl.concat(upbeatCount(tg, S0)), ctx = AUDIO.ctx;
   LIVE.open(true, "Listen.");
@@ -7515,20 +7653,21 @@ function songLearn(){
   const wins = start => tg.map(n => ({ start: start + (n.t - S0) * tick, end: start + (n.t - S0 + n.d) * tick }));
   run.windows = wins(s2).concat(wins(s3)); run.targets = tg.map(sound).concat(tg.map(sound));
   run.S0 = S0; run.len = sec; run.tick = tick;
-  run.sections = [{ t: s1, say: "Listen.", from: s1 }, { t: c1, say: "Get ready to sing on your own." }, { t: s2, say: "Your turn. Sing on your own.", from: s2 },
-    { t: c2, say: "Get ready to sing with the accompaniment." }, { t: s3, say: "Now sing with the accompaniment.", from: s3 }];
-  run.pass = songPass(tg, S0, s3, tick, c2);
+  run.sections = [{ t: s1, say: "Listen.", from: s1 }, { t: c1, say: "Get ready to sing on your own." }, { t: s2, say: "Your turn. Sing it on your own.", from: s2 },
+    { t: c2, say: "Get ready to sing with the accompaniment." }, { t: s3, say: "Now sing it with the accompaniment.", from: s3 }];
+  run.pass = songPass(tg, t => s3 + (t - S0) * tick, c2);
   run.end = s3 + (sc.e - S0) * tick + 1.0;
   showCountIn($("song-box"), c1, beat, [{ t: s1, text: "Listen" }].concat(countCues(c2, beat, labels)), labels);
   window.__timed = { musicStart: s2, windows: run.windows, notes: run.targets };
   AUDIO.onFrame = songLive(run, true);
 }
-// Practice (as Sight sing): a count-in, the bar before on the piano, then the section to the click with what's switched on
-function songTimed(){
-  const s = SG.song, run = SG.run, tg = run.tg, sc = songSec(), st = SG.timeline.starts;
+// Sing it (as Sight sing): a count-in, the bar before on the piano, then the phrase (or the whole part) to the click with
+// what's switched on
+function songSingPiano(){
+  const s = SG.song, run = SG.run, tg = run.tg, sc = singSec(), st = SG.timeline.starts;
   const S0 = st[sc.a], ts = s.ts, tick = tickSecOf(ts, songTempo()), beat = clickTicksOf(ts) * tick, cl = countLabels(ts), ctx = AUDIO.ctx;
-  const show = helperOn("tuning", "song");
-  LIVE.open(show, "Listen for the count-in.");
+  LIVE.open(true, "Listen for the count-in.");
+  LIVE.target(tg[0].note.midi);
   const t0 = ctx.currentTime + 0.3;
   let start = countInClicks(t0, beat, ts), lead = [];
   SG.stream = {};
@@ -7546,84 +7685,56 @@ function songTimed(){
   run.targets = tg.map(sound);
   run.S0 = S0; run.len = len; run.tick = tick;
   run.sections = [{ t: t0, say: "Listen for the count-in." }, { t: start, say: "Sing!", from: start }];
-  run.pass = songPass(tg, S0, start, tick, t0);
+  run.pass = songPass(tg, t => start + (t - S0) * tick, t0);
   run.end = start + len + 1.0;
   showCountIn($("song-box"), t0, beat, [], cl.concat(lead, upbeatCount(tg, S0)));
   window.__timed = { musicStart: start, windows: run.windows, notes: run.targets };
-  AUDIO.onFrame = songLive(run, show);
+  AUDIO.onFrame = songLive(run, true);
 }
-// Refine (as Solfège): the key chord and the first note, then the app waits for each note
-function songSteady(){
-  const run = SG.run, tg = run.tg, key = songKey(SG.song);
-  playKeyChordAndDo(key, tonicNote(key, 4), true, tg[0].note);
-  LIVE.open(true, "Find the first note and hold it. Take your time.");
-  LIVE.needle(null, null, tg[0].note.midi);
-  const hl = k => { setHighlight(SG.L, k >= 0 && tg[k] ? tg[k].ev : -1); if (SG.L2) setHighlight(SG.L2, k >= 0 && tg[k] ? tg[k].ev : -1); };
-  hl(0);
-  const settle = makeSettle(), targets = tg.map(sound), res = new Map();
-  SG.marks = { steady: true, res, key: SG.drawnFor };
-  run.S = steadyListen(targets, {
-    onLive(idx, cents, p, f){
-      if (!tg[idx]) return;
-      const h = settle.step(idx, tg[idx].note.midi, f.t, f.raw, targets[idx]);
-      if (h === "release") run.S.smoother.reset();
-      else if (h) LIVE.target(tg[idx].note.midi);
-      else songShowPitch(tg[idx], p, cents);
-    },
-    onNote(idx, r){ res.set(tg[idx].i, r); songMarksDraw(); },
-    onNext(idx){ hl(idx); LIVE.status(`Note ${idx + 1} of ${tg.length}`); },
-    onDone(){ songFinish(); }
-  });
-}
-function songFinish(){
+// Marks the go: Learn it marks the second go (with the recording or the accompaniment); Sing it marks its one go.
+// Pressed before that go's singing starts, it cancels and nothing is marked. quiet: no results line.
+function songFinish(quiet){
   const run = SG.run;
   if (SG.state !== "listening" || !run) return;
   AUDIO.onFrame = null; SG.state = "idle"; BUSY = null; SG.stream = null;
+  if (run.rec) run.rec.pause();
   stopAllSound(); hideCountIn();
-  setHighlight(SG.L, -1); if (SG.L2) setHighlight(SG.L2, -1);
   SG.ring.hide(); if (SG.ring2) SG.ring2.hide();
   LIVE.close();
-  const tg = run.tg;
-  let firstBad = -1;
-  if (run.kind === "refine") {
-    const res = SG.marks.res;
-    tg.forEach(n => { if (!res.has(n.i)) res.set(n.i, { state: "missed", took: null, sung: null }); });
-    songMarksDraw();
-    RESULTS.show("", "", [], STEADY_LEGEND);
-    firstBad = tg.findIndex(n => res.get(n.i).state !== "ok");
-    window.__last = { notes: tg.map(n => res.get(n.i)) };
-  } else {
-    // I'm finished before the singing starts cancels: nothing is marked
-    if (AUDIO.ctx.currentTime < run.windows[0].start - run.tick * 0.5) { SG.run = null; songAfter(); return; }
-    const timed = analyseTimed(run.frames, run.windows, run.targets, APP.settings.anyOct, TOL), n = tg.length;
-    const tgt = run.targets.slice(0, n);
-    let alone = run.kind === "learn" ? markOctaveLeaps(timed.notes.slice(0, n), tgt) : null;
-    let notes = markOctaveLeaps(run.kind === "learn" ? timed.notes.slice(n) : timed.notes, tgt);
-    const ps = run.pass, sh = x => x + timed.offset;
-    const X = findExtras(run.frames, { ...ps, events: ps.events.map(e => ({ ...e, start: sh(e.start), end: sh(e.end) })), musicStart: sh(ps.musicStart), musicEnd: sh(ps.musicEnd), from: sh(ps.from), to: sh(ps.to) }, tgt, APP.settings.anyOct);
-    X.split.forEach(i => { notes[i] = { ...notes[i], state: "wrong", extra: true }; });
-    const res = new Map(); tg.forEach((t, k) => res.set(t.i, notes[k]));
-    const own = ps.events;
-    SG.marks = { res, key: SG.drawnFor, rests: X.rests.map(k => own[k] && own[k].rest ? own[k].j : -1).filter(j => j >= 0), before: !!X.before, after: !!X.after,
-      first: tg[0].ev, last: tg[n - 1].ev };
-    songMarksDraw();
-    RESULTS.show("", "", run.kind === "learn" ? ["The marks show your second go, with the accompaniment."] : []);
-    firstBad = notes.findIndex(r => r.state !== "ok");
-    window.__last = { notes, alone, offset: timed.offset, extras: X };
-  }
+  const tg = run.tg, n = tg.length, m0 = run.kind === "learn" ? n : 0;
+  const w0 = run.windows[m0];
+  if (quiet === true || !w0 || AUDIO.ctx.currentTime < w0.start - 0.3) { SG.run = null; songAfter(); return; }
+  const timed = analyseTimed(run.frames, run.windows, run.targets, APP.settings.anyOct, TOL);
+  const tgt = run.targets.slice(0, n);
+  const alone = run.kind === "learn" ? markOctaveLeaps(timed.notes.slice(0, n), tgt) : null;
+  const notes = markOctaveLeaps(timed.notes.slice(m0, m0 + n), tgt);
+  // the marked go's events, for extra notes: with the recording, where each part of the phrase was heard
+  let ps = run.pass;
+  if (!ps) { const g = run.stages.find(x => x.marked); ps = songPass(tg, t => g.anchor + recTime(t), g.t0); }
+  const sh = x => x + timed.offset;
+  const X = findExtras(run.frames, { ...ps, events: ps.events.map(e => ({ ...e, start: sh(e.start), end: sh(e.end) })), musicStart: sh(ps.musicStart), musicEnd: sh(ps.musicEnd), from: sh(ps.from), to: sh(ps.to) }, tgt, APP.settings.anyOct);
+  X.split.forEach(i => { notes[i] = { ...notes[i], state: "wrong", extra: true }; });
+  const res = new Map(); tg.forEach((t, k) => res.set(t.i, notes[k]));
+  SG.marks = { res, key: SG.drawnFor, rests: X.rests.map(k => ps.events[k] && ps.events[k].rest ? ps.events[k].j : -1).filter(j => j >= 0), before: !!X.before, after: !!X.after,
+    first: tg[0].ev, last: tg[n - 1].ev };
+  songMarksDraw();
+  RESULTS.show("", "", run.kind === "learn" ? [run.rec ? "The marks show your go with the choir." : "The marks show your go with the accompaniment."] : []);
+  const firstBad = notes.findIndex(r => r.state !== "ok");
+  window.__last = { notes, alone, offset: timed.offset, extras: X };
   SG.run = null;
   SG.pi = tg[firstBad >= 0 ? firstBad : 0].i;
   songAfter();
 }
 function songAfter(){
-  SG.pos = SG.mode === "listen" ? SG.pos : 0;
-  songHead(SG.pos); songButtons(); songSync();
+  SG.pos = songFrom();
+  songHead(SG.pos); songScrub(); songButtons(); songShowMode(); songSync();
   if (SG.L) scrollIntoViewX(SG.L, 0);
 }
 
-// ================= The practice box =================
-// Refine: always, on the note being practised; click a note to hear it and put the box on it. Learn and Practice: with
-// Show keyboard and tuning, as Sight sing. The arrow keys and Previous note / Next note move it.
+// ================= 2 Note by note: the practice box =================
+// The box sits on a note and the tuning keyboard (above the score) shows where they are. The arrow keys and Previous
+// note / Next note move it; click or tap a note to hear it and put the box there. It stays on until the button is pressed
+// again, and comes back after Learn it or Sing it, on the first note that wasn't in tune.
 const SONGM = {
   ex: null,
   redraw(){ if (SG.song && SG.view === "song" && SG.state !== "listening") { songDraw(); songSync(); } },
@@ -7649,37 +7760,54 @@ function songPlaceBox(scroll){
     if (e && scroll) scrollIntoViewX(L, e.cx);
   });
 }
+function songNbn(on, gesture){
+  if (SG.state === "listening") return;
+  SG.nbn = !!on;
+  songButtons(); songShowMode();
+  const p = songSync(gesture);
+  if (on) songShowLive();
+  return p;
+}
+// While they sing or go note by note, the tuning keyboard and the score need to be on screen: scroll the page so the
+// keyboard is near the top, unless it's already in view with the score under it
+function songShowLive(){
+  const lp = $("livePanel"), box = $("song-box");
+  if (lp.hidden) return;
+  const top = lp.getBoundingClientRect().top, bottom = box.getBoundingClientRect().bottom;
+  if (top >= 0 && bottom <= window.innerHeight) return;
+  window.scrollTo({ top: Math.max(0, window.scrollY + top - 12), behavior: "smooth" });
+}
 async function songSync(gesture){
-  const tg = SG.song && SG.view === "song" && SG.mode !== "listen" ? songTargets() : [];
-  const want = MODE === "songs" && SG.view === "song" && SG.state !== "listening" && tg.length && (SG.mode === "refine" || helperOn("tuning", "song"));
+  const tg = SG.song && SG.view === "song" && SG.nbn ? songTargets() : [];
+  const want = MODE === "songs" && SG.view === "song" && SG.state !== "listening" && tg.length;
   if (!want) { if (PRACTISING === SONGM) { PRACTISING = null; AUDIO.onFrame = null; LIVE.close(); songPlaceBox(); } return; }
   if (!AUDIO.listening && gesture) await startMic();
-  if (SG.state === "listening") return;
+  if (SG.state === "listening" || !SG.nbn) return;
   if (!tg.some(n => n.i === SG.pi)) SG.pi = tg[0].i;
   PRACTISING = SONGM;
   LIVE.open(true, ""); LIVE.practice(AUDIO.listening);
   songPlaceBox(true);
   LIVE.target(songNoteNow().note.midi);
+  const k = tg.findIndex(n => n.i === SG.pi); LIVE.sung(`Note ${k + 1} of ${tg.length}`);
   if (!AUDIO.listening) { LIVE.status("Press Start practising to use your microphone, then sing the note in the box."); return; }
   const coarse = window.matchMedia && matchMedia("(pointer: coarse)").matches;
-  LIVE.status(SG.mode === "refine" ? `Sing the note in the box. ${coarse ? "Tap" : "Click"} a note to hear it and move the box.`
-    : `Sing the note in the box. To move on, use ${coarse ? "the buttons below" : "the arrow keys or the buttons below"}.`);
+  LIVE.status(`Sing the note in the box. ${coarse ? "Tap a note to hear it. Use the buttons to move on." : "Click a note to hear it. Use the arrow keys or the buttons to move on."}`);
   const sm = makeSmoother(), settle = makeSettle();
   AUDIO.onFrame = f => {
     if (PRACTISING !== SONGM) return;
     const n = songNoteNow(); if (!n) return;
-    if (SG.state !== "idle" || f.ignored) { songShowPitch(n, null); LIVE.sung(""); return; }     // the app is playing
+    if (SG.state !== "idle" || f.ignored) { songShowPitch(n, null); return; }     // the app is playing
     const tgt = sound(n), p = sm.push(f);
     const h = settle.step(SG.pi, n.note.midi, f.t, f.raw, tgt);
     if (h === "release") sm.reset();
     else if (h) LIVE.target(n.note.midi);
     else if (p !== null) { let d = p - tgt; if (APP.settings.anyOct) d -= 12 * Math.round(d / 12); songShowPitch(n, p, d * 100); }
-    else { songShowPitch(n, null); LIVE.sung(""); }
+    else songShowPitch(n, null);
   };
 }
-// Refine: click or tap a note of their part to hear it, and the box moves there
+// Click or tap a note of their part to hear it; with Note by note on, the box moves there
 document.addEventListener("click", e => {
-  if (MODE !== "songs" || SG.view !== "song" || SG.mode !== "refine" || SG.state !== "idle") return;
+  if (MODE !== "songs" || SG.view !== "song" || SG.state === "listening") return;
   const svg = e.target.closest && e.target.closest("#song-box svg.score");
   if (!svg || !(svg === (SG.L && SG.L.svg) || svg === (SG.L2 && SG.L2.svg))) return;
   const L = svg.__L, r = svg.getBoundingClientRect(), x = (e.clientX - r.left) * (L.width / r.width);
@@ -7692,60 +7820,74 @@ document.addEventListener("click", e => {
   if (PRACTISING === SONGM && songTargets().some(n => n.i === best.i)) songBoxTo(best.i, false);
 });
 
-// ================= Screens =================
+// ================= The screen =================
 function songButtons(){
-  const busy = SG.state === "listening", playing = SG.state === "playing", m = SG.mode;
+  const busy = SG.state === "listening", playing = SG.state === "playing", run = SG.run, phrase = !!songSec();
   const pb = $("song-play"); pb.classList.toggle("on", playing); pb.setAttribute("aria-label", playing ? "Pause" : "Play"); pb.title = playing ? "Pause" : "Play";
-  const go = $("song-go"); go.firstChild.textContent = busy ? "I'm finished" : "I'm ready"; go.classList.toggle("on", busy);
-  $("song-hear").textContent = playing && m !== "listen" ? "Stop" : "Hear it";
-  ["song-hear", "song-ref", "song-prev", "song-next", "song-sec", "song-show-others", "song-show-accomp"].forEach(id => $(id).disabled = busy);
-  document.querySelectorAll("#song-parts button, #song-modes button").forEach(b => b.disabled = busy);
-  const sc = songSec(), list = secList(), k = SG.secIdx[m === "practice" ? "practice" : "learn"];
-  if (sc) { $("song-prev").disabled = busy || k <= 0; $("song-next").disabled = busy || k >= list.length - 1; }
+  [["song-learn", "learn", "Learn it"], ["song-sing", "sing", "Sing it"]].forEach(([id, k, label]) => {
+    const b = $(id), mine = busy && run && run.kind === k;
+    b.querySelector(".t").textContent = mine ? "I'm finished" : label;
+    b.classList.toggle("on", mine);
+    b.disabled = (busy && !mine) || (k === "learn" && !phrase);
+  });
+  $("song-learn").title = phrase ? "" : "Choose a phrase to learn it";
+  const nb = $("song-nbn"); nb.disabled = busy; nb.setAttribute("aria-pressed", SG.nbn); nb.classList.toggle("sel", SG.nbn);
+  ["song-prev", "song-next", "song-sec", "song-show-others", "song-show-accomp", "song-play", "song-stop", "song-restart", "song-scrub"].forEach(id => $(id).disabled = busy);
+  document.querySelectorAll("#song-parts button, #song-recrow button").forEach(b => b.disabled = busy);
+  const list = phrases();
+  $("song-prev").disabled = busy || SG.phrase < 0; $("song-next").disabled = busy || SG.phrase >= list.length - 1;
 }
-// What each mode shows (Isaac, 21 October: only what that way of practising needs)
+// The words above the buttons, the phrase list, the recording or piano, and the switches for what the piano plays
 function songShowMode(){
-  const m = SG.mode, card = $("act-song");
-  card.dataset.mode = m;
-  card.querySelectorAll("[data-modes]").forEach(el => el.hidden = !el.dataset.modes.split(" ").includes(m));
-  document.querySelectorAll("#song-modes button").forEach(b => { const on = b.dataset.m === m; b.classList.toggle("sel", on); b.setAttribute("aria-selected", on); });
-  const coarse = window.matchMedia && matchMedia("(pointer: coarse)").matches;
-  $("song-prompt").textContent = { listen: "Press play to hear the whole song.", learn: "Listen, sing it on your own, then sing it with the accompaniment.",
-    refine: `${coarse ? "Tap" : "Click"} a note to hear it, then press I'm ready and sing the notes one at a time.`, practice: "Sing the section to the click." }[m];
-  const list = secList(), k = SG.secIdx[m === "practice" ? "practice" : "learn"];
-  $("song-sec").innerHTML = list.map((sc, i) => `<option value="${i}">${i + 1}. Bars ${SG.song.barLabels[sc.a]}–${SG.song.barLabels[sc.z]}: ${escHTML(secWords(SG.part, sc))}</option>`).join("");
-  $("song-sec").value = String(k || 0);
-  $("song-recrow").hidden = !(m === "listen" && SG.rec);
+  const card = $("act-song"), sc = songSec(), busy = SG.state === "listening";
+  card.dataset.phrase = sc ? "phrase" : "whole";
+  $("song-prompt").textContent = busy || SG.nbn ? "" : sc ? "Press play to listen, then work through 1, 2 and 3."
+    : "Press play to listen. Choose a phrase to learn it, or sing the whole song.";
+  const list = phrases();
+  $("song-sec").innerHTML = `<option value="-1">Whole song</option>` + list.map((p, i) => `<option value="${i}">${i + 1}. Bars ${SG.song.barLabels[p.a]}–${SG.song.barLabels[p.z]}: ${escHTML(secWords(SG.part, p))}</option>`).join("");
+  $("song-sec").value = String(SG.phrase);
+  $("song-recrow").hidden = !SG.rec;
   document.querySelectorAll("#song-recrow button").forEach(b => b.classList.toggle("sel", (b.dataset.r === "rec") === !!SG.useRec));
-  $("song-tempo").hidden = m === "refine" || (m === "listen" && SG.useRec);
-  // with the recording playing, the piano can only add the singer's own part (its own switch, off at first)
-  const recOn = m === "listen" && SG.useRec && !!SG.rec;
-  card.querySelectorAll('.songplay [data-opt="songOthers"], .songplay [data-opt="songAccomp"], .songplay [data-opt="songOwn"]').forEach(i => { if (recOn || !i.parentElement.dataset.modes) i.parentElement.hidden = recOn; });
-  $("song-recown").hidden = !recOn;
-  if (TEACH) TEACH.mode(m);
   document.querySelector('#song-recrow button[data-r="rec"]').textContent = SG.rec && SG.rec.kind === "yt" ? "YouTube" : "Recording";
-  const tSrc = TEACH && m === "listen" ? TEACH.ytSrc() : null;
-  const ytSrc = m !== "listen" ? null : tSrc && tSrc.kind === "yt" ? tSrc : SG.useRec && SG.rec && SG.rec.kind === "yt" ? SG.rec : null;
+  $("song-tempo").hidden = !!SG.useRec;
+  // with the recording, the piano can only add the singer's own part (its own switch, off at first)
+  const recOn = !!(SG.useRec && SG.rec);
+  card.querySelectorAll('.songplay [data-opt="songOthers"], .songplay [data-opt="songAccomp"], .songplay [data-opt="songOwn"]').forEach(i => { i.parentElement.hidden = recOn; });
+  $("song-recown").hidden = !recOn;
+  if (TEACH) TEACH.mode();
+  const tSrc = TEACH ? TEACH.ytSrc() : null;
+  const ytSrc = tSrc && tSrc.kind === "yt" ? tSrc : SG.useRec && SG.rec && SG.rec.kind === "yt" ? SG.rec : null;
   if (ytSrc) ytPlayer(ytSrc.id);
   $("song-yt").hidden = !ytSrc || !SG.yt || SG.yt.failed !== null;
-  const tg = m === "listen" ? [] : songTargets();
-  $("song-ref").innerHTML = tg.length ? `Key chord and <span class="sol">${solfege(songKey(SG.song), tg[0].note)}</span>` : "Key chord";
+  $("song-hp").hidden = SG.nbn && !busy;
   songButtons();
 }
 function songStop(){
-  if (SG.state === "listening") { AUDIO.onFrame = null; SG.run = null; BUSY = null; }
+  if (SG.state === "listening") { AUDIO.onFrame = null; if (SG.run && SG.run.rec) SG.run.rec.pause(); SG.run = null; BUSY = null; }
   if (SG.state === "playing") recPause();
   SG.state = "idle"; SG.stream = null; SG.play = null; SG.recWait = null;
   if (SG.tapping) { SG.tapping = null; recPause(); }
   if (PRACTISING === SONGM) { PRACTISING = null; AUDIO.onFrame = null; }
   VOICE_OVR = null;
 }
+// The tuning keyboard goes above the score, and the marks' key under the buttons, while a song is open (Isaac,
+// 22 October: below the score, students couldn't see it while they sang). Elsewhere they go back where they were.
+const PANEL_SPOT = {};
+function songPanels(on){
+  ["livePanel", "results"].forEach(id => {
+    const el = $(id);
+    if (!PANEL_SPOT[id]) { PANEL_SPOT[id] = document.createComment(id); el.before(PANEL_SPOT[id]); }
+    if (on) (id === "livePanel" ? $("song-box") : $("song-hp")).before(el);
+    else PANEL_SPOT[id].after(el);
+    el.classList.toggle("insong", !!on);
+  });
+}
 function songsShow(){
   songStop();
   RESULTS.hide(); LIVE.close();
   $("songs-list").hidden = SG.view !== "list"; $("act-song").hidden = SG.view !== "song";
   if (TEACH) TEACH.view();
-  if (SG.view === "list") return songList();
+  if (SG.view === "list") { songPanels(false); return songList(); }
   songOpen(SG.song, false);
 }
 function songList(){
@@ -7757,13 +7899,13 @@ function songList(){
 function songDefaultPart(s){ const v = APP.settings.voice || "S"; return s.parts.find(p => p.voice === v) || s.parts[0]; }
 function songOpen(s, fresh){
   songStop(); stopAllSound(); RESULTS.hide(); LIVE.close();
+  songPanels(true);
   if (fresh || SG.song !== s) {
-    SG.song = s; SG.timeline = songTimeline(s); SG.part = songDefaultPart(s); SG.marks = null; SG.secIdx = { learn: 0, practice: 0 };
+    SG.song = s; SG.timeline = songTimeline(s); SG.part = songDefaultPart(s); SG.marks = null; SG.phrase = -1; SG.nbn = false;
     APP.settings.songTempo = Math.round(s.tempo); SG.pos = 0; SG.pi = 0;
     SG.rec = songRecording(s); SG.useRec = !!SG.rec;
     recSelect();
     if (TEACH) TEACH.open(s);
-    SG.mode = ["listen", "learn", "refine", "practice"].includes(APP.settings.songMode) ? APP.settings.songMode : "listen";
   }
   SG.view = "song"; SONGM.ex = { timeSig: s.ts };
   $("songs-list").hidden = true; $("act-song").hidden = false;
@@ -7773,20 +7915,25 @@ function songOpen(s, fresh){
   $("song-parts").innerHTML = s.parts.map(p => `<button type="button" data-p="${p.id}">${escHTML(p.name)}</button>`).join("");
   $("song-parts").querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
     if (SG.state === "listening") return;
-    SG.part = s.parts.find(p => p.id === b.dataset.p); SG.marks = null; SG.secIdx = { learn: 0, practice: 0 };
+    SG.part = s.parts.find(p => p.id === b.dataset.p); SG.marks = null; SG.phrase = -1; SG.pos = 0;
     ensureCtx(); songSet();
   }));
   $("song-show-others").hidden = s.parts.length < 2; $("song-show-accomp").hidden = !s.accomp.length;
   syncOptions();
   songSet();
+  // a YouTube recording already found not to play here (opening the song again): the piano, and say why
+  if (SG.useRec && SG.rec && SG.rec.kind === "yt" && SG.yt && SG.yt.id === SG.rec.id && SG.yt.failed !== null) {
+    SG.useRec = false; songShowMode(); songMsg(ytWhy(SG.yt.failed) + " The piano plays instead.");
+  }
   window.scrollTo(0, 0);
 }
-// Draws the song for the chosen part, mode and section
+// Draws the song for the chosen part and phrase
 function songSet(){
   const s = SG.song, pt = SG.part;
   songHalt(); RESULTS.hide(); songMsg("");
-  if (SG.mode !== "listen") SG.pos = 0;
   VOICE_OVR = songVoice(s, pt);
+  songSec();
+  if (SG.pos < songFrom() - 1e-6 || SG.pos > songTo() + 1e-6) SG.pos = songFrom();
   $("song-parts").querySelectorAll("button").forEach(b => b.classList.toggle("sel", b.dataset.p === pt.id));
   ["songShowOthers", "songShowAccomp"].forEach((k, i) => { const b = $(i ? "song-show-accomp" : "song-show-others"); b.setAttribute("aria-pressed", !!APP.settings[k]); });
   songShowMode();
@@ -7794,18 +7941,11 @@ function songSet(){
   songScrub(); songButtons();
   songSync();
 }
-function songMode(m){
-  if (SG.state === "listening" || m === SG.mode) return;
-  if (PRACTISING === SONGM) { PRACTISING = null; AUDIO.onFrame = null; LIVE.close(); }
-  SG.mode = m; APP.settings.songMode = m; save();
-  SG.marks = null; SG.pos = 0;
-  ensureCtx(); songSet();
-}
+// Choose a phrase (-1: the whole song)
 function songSecTo(k){
   if (SG.state === "listening") return;
-  const key = SG.mode === "practice" ? "practice" : "learn", list = secList();
-  SG.secIdx[key] = clamp(k, 0, list.length - 1);
-  SG.marks = null; SG.pi = 0;
+  SG.phrase = clamp(k, -1, phrases().length - 1);
+  SG.marks = null; SG.pi = 0; SG.pos = songFrom();
   songSet();
 }
 
@@ -7813,43 +7953,43 @@ function songSecTo(k){
 (function(){
   SG.audio = new Audio();
   $("song-back").addEventListener("click", () => { if (SG.state === "listening") return; songStop(); stopAllSound(); RESULTS.hide(); LIVE.close(); SG.view = "list"; songsShow(); window.scrollTo(0, 0); });
-  document.querySelectorAll("#song-modes button").forEach(b => b.addEventListener("click", () => songMode(b.dataset.m)));
   $("song-sec").addEventListener("change", () => songSecTo(+$("song-sec").value));
-  $("song-prev").addEventListener("click", () => songSecTo(SG.secIdx[SG.mode === "practice" ? "practice" : "learn"] - 1));
-  $("song-next").addEventListener("click", () => songSecTo(SG.secIdx[SG.mode === "practice" ? "practice" : "learn"] + 1));
+  $("song-prev").addEventListener("click", () => songSecTo(SG.phrase - 1));
+  $("song-next").addEventListener("click", () => songSecTo(SG.phrase + 1));
   [["song-show-others", "songShowOthers"], ["song-show-accomp", "songShowAccomp"]].forEach(([id, k]) => $(id).addEventListener("click", () => {
     if (SG.state === "listening") return;
     APP.settings[k] = !APP.settings[k]; save();
     $(id).setAttribute("aria-pressed", APP.settings[k]);
-    const was = SG.state === "playing" && SG.mode === "listen";
+    const was = SG.state === "playing";
     songDraw(); if (was) songListenPlay();
     songSync();
   }));
   $("song-play").addEventListener("click", () => songListenPlay());
-  $("song-stop").addEventListener("click", () => { songHalt(); SG.pos = 0; songHead(0); songScrub(); if (SG.L) scrollIntoViewX(SG.L, 0); });
-  $("song-restart").addEventListener("click", () => { const was = SG.state === "playing"; songHalt(); SG.pos = 0; songHead(0); songScrub(); if (was) songListenPlay(); else if (SG.L) scrollIntoViewX(SG.L, 0); });
+  $("song-stop").addEventListener("click", () => { songHalt(); SG.pos = songFrom(); songHead(SG.pos); songScrub(); if (SG.L) scrollIntoViewX(SG.L, 0); });
+  $("song-restart").addEventListener("click", () => { const was = SG.state === "playing"; songHalt(); SG.pos = songFrom(); songHead(SG.pos); songScrub(); if (was) songListenPlay(); else if (SG.L) scrollIntoViewX(SG.L, 0); });
   // scrubbing: the music follows the slider; if it was playing it carries on from where the slider is let go
   const sc = $("song-scrub");
   sc.addEventListener("input", () => { if (SG.state === "playing") { SG.resume = true; songHalt(); } SG.pos = +sc.value; songHead(SG.pos); });
   sc.addEventListener("change", () => { if (SG.resume) { SG.resume = false; songListenPlay(); } });
   document.querySelectorAll("#song-recrow button").forEach(b => b.addEventListener("click", () => {
+    if (SG.state === "listening") return;
     const was = SG.state === "playing"; songHalt();
     const yt = SG.rec && SG.rec.kind === "yt" && b.dataset.r === "rec" ? ytPlayer(SG.rec.id) : null;
     if (yt && yt.failed !== null) { songMsg(ytWhy(yt.failed)); if (was) songListenPlay(); return; }   // stays on the piano
     SG.useRec = b.dataset.r === "rec" && !!SG.rec; recSelect(); songMsg("");
     songShowMode(); if (was) songListenPlay();
   }));
-  $("song-go").addEventListener("click", () => songGo());
-  $("song-hear").addEventListener("click", () => songHear());
-  $("song-ref").addEventListener("click", () => { const tg = songTargets(); if (!tg.length || SG.state !== "idle") return; ensureCtx(); const key = songKey(SG.song); playKeyChordAndDo(key, tonicNote(key, 4), true, tg[0].note); });
+  $("song-learn").addEventListener("click", () => songGo("learn"));
+  $("song-sing").addEventListener("click", () => songGo("sing"));
+  $("song-nbn").addEventListener("click", () => { ensureCtx(); songHalt(); songNbn(!SG.nbn, true); });
   window.addEventListener("message", ytMessage);
   ["songOthers", "songAccomp", "songOwn"].forEach(k => { if (APP.settings[k] === undefined) APP.settings[k] = true; });
 })();
-// A playback switch or the tempo changed: music playing in Listen carries on with it from where it is
-function songPlaybackChanged(){ if (SG.state === "playing" && SG.mode === "listen" && !SG.useRec) { songHalt(); songListenPlay(); } }
-function songTempoChanged(){ if (SG.state === "playing" && SG.mode === "listen" && !SG.useRec) { songHalt(); songListenPlay(); } }
+// A playback switch or the tempo changed: music playing on the piano carries on with it from where it is
+function songPlaybackChanged(){ if (SG.state === "playing" && !SG.useRec) { songHalt(); songListenPlay(); } }
+function songTempoChanged(){ if (SG.state === "playing" && !SG.useRec) { songHalt(); songListenPlay(); } }
 // The voice part changed in Settings: the matching part of the song
-function songVoiceChanged(){ if (SG.song && SG.view === "song") { SG.part = songDefaultPart(SG.song); SG.marks = null; SG.secIdx = { learn: 0, practice: 0 }; songSet(); } }
+function songVoiceChanged(){ if (SG.song && SG.view === "song") { SG.part = songDefaultPart(SG.song); SG.marks = null; SG.phrase = -1; SG.pos = 0; songSet(); } }
 
 // ==== FILE: 09-start.js ====
 // ================= Getting started: Matching pitch (Isaac, 20 October) =================
@@ -8123,6 +8263,7 @@ function setMode(m){
   audStop(); mpStop(); songStop();
   stopAllSound(); RESULTS.hide(); LIVE.close();
   if (PRACTISING) { PRACTISING = null; AUDIO.onFrame = null; }
+  songPanels(false);                     // the tuning keyboard and marks go back where they were (Practice songs moves them)
   MODE = m;
   document.body.classList.remove("mode-home", "mode-skills", "mode-aud", "mode-start", "mode-songs"); document.body.classList.add("mode-" + m);
   INSTR.hold = []; INSTR.refresh(); markHelpers();
