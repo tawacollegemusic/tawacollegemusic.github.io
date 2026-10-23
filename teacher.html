@@ -8428,8 +8428,10 @@ function scoreImport(xml, meta){
           const verses = {};
           for (const ly of kids(el, "lyric")) {
             const txt = kids(ly, "text").map(x => x.textContent || "").join("");
-            const num = ly.getAttribute("number") || "1";
+            let num = ly.getAttribute("number") || "1";
+            const vm = /verse(\d+)$/.exec(num); if (vm) num = vm[1];         // Sibelius 26 numbers them "part2verse1" (Isaac, 23 October)
             if (!kid(ly, "text") && !kid(ly, "extend")) continue;
+            if (num in verses) continue;                                    // two words on one note in the same line: the first is kept
             verses[num] = { text: txt, syl: text(ly, "syllabic") || "single", ext: !!kid(ly, "extend") };
           }
           if (Object.keys(verses).length) { hasLyrics = true; e.verses = verses; }
