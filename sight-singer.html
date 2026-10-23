@@ -47,7 +47,6 @@ header.bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; bac
 header.bar h1 { font-family: var(--display); font-weight: 700; font-size: 1.5rem; margin: 0; color: #FFFFFF; }
 header.bar .ex { font-family: var(--display); color: var(--muted); font-size: 1rem; }
 header.bar .sp { flex: 1; }
-.chip { font-family: var(--display); font-size: 0.8rem; font-weight: 600; padding: 5px 11px; border-radius: 999px; background: var(--brand-tint); color: var(--brand); border: 0; cursor: pointer; }
 .mic { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: var(--muted); }
 body.mic-on #micOn { display: none; }
 .setrow { display: flex; flex-direction: column; gap: 6px; }
@@ -73,17 +72,11 @@ button:disabled { opacity: 0.4; cursor: default; }
 select { font: inherit; font-size: 0.95rem; padding: 8px 10px; border-radius: 8px; border: 1.5px solid var(--line); background: var(--card); color: var(--ink); max-width: 100%; }
 .lab { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
 
-/* settings strip */
-.strip { display: flex; gap: 14px; flex-wrap: wrap; align-items: flex-end; }
-.strip .field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-.strip .grow { flex: 1; }
+/* segmented buttons */
 .seg { display: inline-flex; border: 1.5px solid var(--line); border-radius: 10px; overflow: hidden; }
 .seg button { border: 0; border-radius: 0; padding: 8px 14px; background: transparent; font-weight: 500; }
 .seg button + button { border-left: 1.5px solid var(--line); }
 .seg button.sel { background: var(--brand-tint); color: var(--brand-ink); font-weight: 600; }
-@media (max-width: 560px) { .strip .grow { flex-basis: 100%; } }
-.levelinfo { margin-top: 12px; color: var(--muted); font-size: 0.95rem; }
-.levelinfo b { color: var(--ink); font-family: var(--display); font-weight: 600; }
 
 /* stave */
 .staff-scroll { overflow-x: auto; overflow-y: hidden; margin-top: 6px; }
@@ -183,8 +176,6 @@ svg.score .tup { font-family: var(--display); font-size: 12px; font-style: itali
 .levels { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .levels button { padding: 8px 14px; border-radius: 999px; font-size: 0.9rem; }
 .levels button.sel { background: var(--banner); border-color: var(--banner); color: #FFFFFF; }
-.levels button.soon { color: var(--muted); border-style: dashed; }
-.levelsum { color: var(--muted); font-size: 0.95rem; max-width: 70ch; }
 .tabs { display: flex; gap: 4px; border-bottom: 1.5px solid var(--line); overflow-x: auto; }
 .tabs button { border: 0; border-radius: 10px 10px 0 0; background: transparent; padding: 10px 14px; color: var(--muted); border-bottom: 3px solid transparent; margin-bottom: -1.5px; white-space: nowrap; }
 .tabs button.sel { color: var(--brand-ink); border-bottom-color: var(--brand); }
@@ -221,7 +212,7 @@ body.click-hear svg.score:not(#rh-staff) { cursor: pointer; }
 .kbd .kw { fill: #fbfdfd; stroke: #9fb3b4; }
 .kbd .kb { fill: #1f2d2f; }
 .kbd .kw.on, .kbd .kb.on { fill: var(--brand); }
-.kbd .kw.on.soft, .kbd .kb.on.soft { fill: var(--brand-tint); }        /* Train your ears: the other notes of the chord */
+.kbd .kw.on.soft, .kbd .kb.on.soft { fill: var(--brand-tint); }        /* Chord notes: the other notes of the chord */
 .kbd .klbl { font-family: var(--body); font-size: 9px; fill: #6d8284; text-anchor: middle; }
 .fbd .fboard { fill: var(--paper); }
 .fbd .fret { stroke: var(--muted); stroke-width: 1.5; }
@@ -285,14 +276,12 @@ button.toggle[aria-pressed="true"] { background: var(--brand-tint); border-color
 .tbtn.play.on .i-pause { display: block; }
 .scrub { flex: 1; min-width: 60px; accent-color: var(--brand); }
 .where { font-family: var(--display); font-weight: 600; font-variant-numeric: tabular-nums; min-width: 4.6em; text-align: right; }
-#act-song [data-modes][hidden], #song-recrow[hidden], #song-yt[hidden] { display: none !important; }
+#song-recrow[hidden], #song-yt[hidden] { display: none !important; }
 #act-song .songplay .switch[hidden] { display: none !important; }
 /* a song's YouTube recording: YouTube's own player, never covered or smaller than 200px high */
 .ytbox { margin: 10px 0 4px; width: min(100%, 356px); aspect-ratio: 16 / 9; min-height: 200px; }
 .ytbox iframe { display: block; width: 100%; height: 100%; border: 0; border-radius: 8px; }
 .sync input[type=url] { flex: 1 1 220px; min-width: 0; font: inherit; font-size: 0.95rem; padding: 8px 10px; border-radius: 8px; border: 1.5px solid var(--line); background: var(--card); color: var(--ink); }
-.songmodes { margin-top: 14px; }
-@media (max-width: 480px) { .songmodes button { padding: 10px 9px; } .songmodes .n { display: none; } }
 .secrow { display: flex; gap: 8px; align-items: center; margin-top: 14px; }
 .secrow .lab { margin-right: 2px; }
 /* Practice songs' three steps (Isaac, 22 October): numbered like the tabs, the one in use outlined */
@@ -314,9 +303,7 @@ body.counting #act-song #livePanel { position: relative; z-index: 41; background
 .secrow .tbtn svg { fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 .songtools { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; margin-top: 12px; }
 .showrow { gap: 8px; }
-#act-song[data-mode="refine"] #song-box svg.score { cursor: pointer; }
 svg.score .ev.dim { color: var(--miss); opacity: 0.55; }
-.syncwrap { margin-top: 10px; }
 /* the teacher page (teacher.html) */
 .partedit { margin-top: 10px; }
 .partedit [hidden], .partedit .row[hidden] { display: none !important; }
@@ -340,6 +327,12 @@ svg.score .ev.picked { color: var(--brand); }
 .teach .small { font-size: 0.85rem; }
 .teach .warn { color: var(--red); }
 .teach .seg button[aria-pressed] { white-space: nowrap; }
+.teach #sync-mode { flex-wrap: wrap; }
+#addsong { margin-top: 18px; }
+#addsong .row .fld input, #addsong .row .fld select { width: 100%; box-sizing: border-box; }
+.asreport { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px; }
+.asreport .bad { color: var(--red); font-weight: 600; }
+.home button .asnote { font-size: 0.85rem; color: var(--brand-ink); }                  /* compound time has three choices */
 .sync { margin-top: 8px; padding: 12px 14px; border-radius: 10px; background: var(--paper); display: flex; flex-direction: column; gap: 10px; }
 .sync[hidden] { display: none; }
 .sync input[type=file] { max-width: 100%; font: inherit; font-size: 0.9rem; }
@@ -463,6 +456,7 @@ body.mode-start #status { font-size: 1.35rem; }
   <section class="card songs-only" id="songs-list">
     <h2>Practice songs</h2>
     <div class="home songlist" id="songs-items"></div>
+
   </section>
   <section class="card act songs-only" id="act-song" hidden>
     <div class="songhead"><button type="button" class="quietbtn" id="song-back">◀ All songs</button></div>
@@ -715,9 +709,6 @@ function noteName(n, withOct=true){
   const acc = n.alter === 1 ? "♯" : n.alter === -1 ? "♭" : n.alter === 2 ? "𝄪" : n.alter === -2 ? "𝄫" : "";
   return LETTERS[n.li] + acc + (withOct ? n.oct : "");
 }
-function transposeNote(n, semis){ // keep spelling family simple: use midi and nearest letter in key-agnostic way
-  return spellMidi(n.midi + semis, n.alter < 0 ? -1 : 1);
-}
 function spellMidi(m, pref=1){
   const pc = ((m % 12) + 12) % 12, oct = Math.floor(m / 12) - 1;
   const sharps = [[0,0],[0,1],[1,0],[1,1],[2,0],[3,0],[3,1],[4,0],[4,1],[5,0],[5,1],[6,0]];
@@ -725,12 +716,6 @@ function spellMidi(m, pref=1){
   const [li, al] = (pref < 0 ? flats : sharps)[pc];
   return makeNote(li, al, oct);
 }
-function midiName(m, key){
-  const pref = key && key.fifths < 0 ? -1 : 1;
-  const n = spellMidi(Math.round(m), pref);
-  return noteName(n);
-}
-function pcName(m, key){ return midiName(m, key).replace(/-?\d+$/, ""); }
 
 function tonicNote(key, octave){
   const t = key.tonic;
@@ -793,15 +778,29 @@ function intervalNote(n, code, dir){
   const natural = (oct+1)*12 + NAT[li];
   return makeNote(li, n.midi + semis - natural, oct);
 }
-const CHORD_TYPES = {
-  maj:{ name:"major", tones:[0,4,7] }, min:{ name:"minor", tones:[0,3,7] }, dim:{ name:"diminished", tones:[0,3,6] },
-  dom7:{ name:"dominant 7th", tones:[0,4,7,10] }
-};
+// Play chords' voicing, every level: the left hand plays the root between G2 and F#3, like the key chord; the right hand
+// three notes from about G3 to E5, each chord moving as little as possible from the last. pcsOf(c) gives a chord's
+// { root, rh }: the root and the right hand's three notes as pitch classes (0 to 11). Returns { s, ticks, lh, rh }.
+function voiceChords(chords, pcsOf){
+  let prev = null;
+  return chords.map(c => {
+    const { root, rh } = pcsOf(c);
+    let lh = 36 + root; while (lh < 43) lh += 12; while (lh > 54) lh -= 12;
+    const cands = rh.map(p => { const o = []; for (let m = 55; m <= 76; m++) if (m % 12 === p) o.push(m); return o; });
+    let best = null;
+    for (const a of cands[0]) for (const b of cands[1]) for (const x of cands[2]) {
+      const v = [a, b, x].sort((p, q) => p - q);
+      if (v[2] - v[0] > 12) continue;
+      const cost = prev ? v.reduce((s, m, i) => s + Math.abs(m - prev[i]), 0) : Math.abs(v[2] - 67) + Math.abs(v[0] - 60);
+      if (!best || cost < best.cost) best = { v, cost };
+    }
+    prev = best.v;
+    return { s: c.s, ticks: c.ticks, lh, rh: best.v };
+  });
+}
 const MEMBER_NAMES = ["root","3rd","5th","7th"];
 
-function rand(a, b){ return a + Math.floor(Math.random()*(b - a + 1)); }
 function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
-function shuffle(a){ a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 function median(a){ if (!a.length) return NaN; const s = a.slice().sort((x,y)=>x-y); const m = s.length >> 1; return s.length % 2 ? s[m] : (s[m-1]+s[m])/2; }
 function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
 
@@ -809,7 +808,7 @@ function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
 // ================= Notation renderer =================
 // score = { clef: "treble"|"treble8"|"bass"|"perc", key, ts: [n, d] | null, bars: [[ev...]...] }
 // ev = { ticks, rest, note, tieNext, label, sub, state, wholeBar, chord }
-// chord (Train your ears, Show score): every note of a chord, drawn stacked as semibreves at one x; ev.note is the note
+// chord (Intervals' Show score and Chord notes): every note of a chord, drawn stacked as semibreves at one x; ev.note is the note
 // to sing, drawn in blue (class "tgt") and used for the marks.
 // ticks: semiquaver = 1, quaver = 2, crotchet = 4, minim = 8, semibreve = 16 (dotted values 3, 6, 12)
 const SP = 12, GK = SP / 360;
@@ -947,7 +946,6 @@ function renderScore(svg, score, opts={}){
   });
 
   // --- stems and beams
-  const midDia = bDia + 4;
   const groups = [];
   let curG = null;
   evs.forEach((e, i) => {
@@ -1063,7 +1061,7 @@ function renderScore(svg, score, opts={}){
   // beams
   for (const gr of groups) if (gr.items.length >= 2) {
     const first = gr.items[0], last = gr.items[gr.items.length - 1];
-    const th = 5, dir = gr.up ? 1 : -1;
+    const th = 5;
     const by = gr.up ? gr.beamY : gr.beamY - th;
     sel("rect", { x: first.sx - 0.6, y: by, width: last.sx - first.sx + 1.2, height: th, class: "beam" }, fg);
     // secondary beams for semiquavers
@@ -1187,14 +1185,6 @@ function scrollIntoViewX(L, x){
   if (Math.abs(target - box.scrollLeft) > 0.5) box.scrollLeft = target;
 }
 
-// Split a duration in ticks into drawable values (used by the MusicXML importer)
-function splitTicks(t){
-  const out = [];
-  const vals = [16, 12, 8, 6, 4, 3, 2, 1];
-  while (t > 0) { const v = vals.find(v => v <= t) || 1; out.push(v); t -= v; }
-  return out;
-}
-
 // ==== FILE: 03-audio.js ====
 // ================= Audio: microphone, pitch detection, sounds =================
 /*DETECT-START*/
@@ -1283,14 +1273,7 @@ async function startMic(){
   document.body.classList.add("mic-on");
   return true;
 }
-function stopMic(){
-  AUDIO.listening = false;
-  if (AUDIO.stream) AUDIO.stream.getTracks().forEach(t => t.stop());
-  AUDIO.stream = null; AUDIO.analyser = null;
-  document.body.classList.remove("mic-on");
-}
 // One shared analysis loop. Calls AUDIO.onFrame({ t, midi, rms, voiced, ignored })
-let frameToggle = false;
 function audioLoop(){
   requestAnimationFrame(audioLoop);
   if (!AUDIO.listening || !AUDIO.analyser) return;
@@ -1363,7 +1346,6 @@ function tone(midi, when, dur, opt={}){
   o1.start(when); o1.stop(when + dur + 0.5);
   if (!opt.noIgnore) AUDIO.ignoreUntil = Math.max(AUDIO.ignoreUntil, when + dur + 0.5);
 }
-function chord(midis, when, dur, opt={}){ midis.forEach(m => tone(m, when, dur, { vol: (opt.vol ?? 0.2) / Math.sqrt(midis.length) * 1.3, ...opt })); }
 // The metronome is a short burst of filtered noise, so it has no pitch to clash with the key (the old square-wave
 // click sounded like a D flat). Beat 1 of each bar is clearly different (Isaac, 18 October): about twice as loud, a
 // low, woody band of noise (around 650 Hz) that rings three times longer. The other beats are a short, light tick.
@@ -1408,27 +1390,6 @@ function handClap(when){
   src.start(when); src.stop(when + 0.22);
 }
 let CLAP_NOISE = null;
-// Sustained drone; returns a stop function
-function startDrone(midis, vol=0.11){
-  const ctx = ensureCtx();
-  const out = ctx.createGain(); out.gain.setValueAtTime(0, ctx.currentTime); out.gain.linearRampToValueAtTime(vol, ctx.currentTime + 0.4);
-  const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 2200;
-  out.connect(lp); lp.connect(AUDIO.master);
-  const oscs = [];
-  for (const m of midis) {
-    const f = 440 * Math.pow(2, (m - 69)/12);
-    for (const [type, mul, gv] of [["sine", 1, 0.7], ["triangle", 1, 0.25], ["sine", 2, 0.22], ["sine", 3, 0.08]]) {
-      const o = ctx.createOscillator(); o.type = type; o.frequency.value = f * mul;
-      const g = ctx.createGain(); g.gain.value = gv / midis.length; o.connect(g); g.connect(out); o.start(); oscs.push(o);
-    }
-  }
-  let stopped = false;
-  return () => {
-    if (stopped) return; stopped = true;
-    const t = ctx.currentTime; out.gain.cancelScheduledValues(t); out.gain.setValueAtTime(out.gain.value, t); out.gain.linearRampToValueAtTime(0, t + 0.25);
-    oscs.forEach(o => o.stop(t + 0.3));
-  };
-}
 let scheduledStops = [];
 function stopAllSound(){
   if (!AUDIO.ctx) return;
@@ -1444,8 +1405,8 @@ function stopAllSound(){
   AUDIO.ignoreUntil = 0;
 }
 
-// ---- Claps and "tah" (Tap the rhythm, Isaac 18 October) ----
-// The microphone is read in small blocks of samples, so the moment each clap or "tah" starts is found to within a
+// ---- Claps (Tap the rhythm, Isaac 18 October) ----
+// The microphone is read in small blocks of samples, so the moment each clap starts is found to within a
 // couple of milliseconds. A block counts as the start of a sound when it is much louder than the quiet just before it
 // and than the background, and at least 90 ms after the last one (so the ring of a clap doesn't count twice).
 // cb(t, peak): t is in AudioContext time (with a fixed device delay that each attempt measures and takes off).
@@ -1676,60 +1637,6 @@ function genL1MelodyRaw(bars){
   return { key, tonic, degs, notes, bars: scoreBars, timeSig: [4, 4] };
 }
 
-// ---- Harmony: chords change on beats 1 and 3 at most ----
-// Rules: a note sounding on beat 1 or 3 must belong to the chord. A crotchet on beat 2 or 4 may be a passing or
-// neighbour note (stepped into and out of); otherwise it must belong to the chord too. The piece starts on I, ends on
-// I, and the chord before the final Do is V, V7 or IV (a perfect or plagal cadence). Chord moves follow common
-// practice (for example, no V to IV).
-const L1_CHORDS = { I: [0, 2, 4], ii: [1, 3, 5], IV: [3, 5, 0], V: [4, 6, 1], V7: [4, 6, 1, 3], vi: [5, 0, 2] };
-const L1_NEXT = { I: ["I", "IV", "V", "vi", "ii", "V7"], ii: ["ii", "V", "V7"], IV: ["IV", "I", "V", "ii", "V7"],
-  V: ["V", "I", "V7", "vi"], V7: ["I", "vi"], vi: ["vi", "IV", "ii", "V"] };
-const L1_CHORD_W = { I: 5, IV: 4, V: 4, V7: 2, ii: 2, vi: 2 };
-function harmoniseL1(mel){
-  const degs = mel.degs, ev = [];
-  let g = 0;
-  mel.bars.flat().forEach((e, i) => { ev.push({ s: g, e: g + e.ticks, d: ((degs[i] % 7) + 7) % 7, i }); g += e.ticks; });
-  const slots = g / 8;
-  const need = [];
-  for (let k = 0; k < slots; k++) {
-    const s = k * 8, e = s + 8, must = new Set();
-    ev.forEach(n => {
-      if (n.e <= s || n.s >= e) return;
-      if (n.s <= s) { must.add(n.d); return; }
-      const prev = degs[n.i - 1], next = degs[n.i + 1], cur = degs[n.i];
-      const passing = next !== undefined && Math.abs(cur - prev) === 1 && Math.abs(next - cur) === 1;
-      if (!passing) must.add(n.d);
-    });
-    need.push([...must]);
-  }
-  const finalSlot = Math.floor(ev[ev.length - 1].s / 8);
-  const out = [];
-  const fits = (c, k) => need[k].every(d => L1_CHORDS[c].includes(d));
-  const walk = k => {
-    if (k === slots) return true;
-    const prev = out[k - 1];
-    let cands = k === 0 ? ["I"] : L1_NEXT[prev];
-    if (k >= finalSlot) cands = cands.filter(c => c === "I");
-    else if (k === finalSlot - 1) cands = cands.filter(c => c === "V" || c === "V7" || c === "IV");
-    cands = cands.filter(c => fits(c, k));
-    // random order, weighted: change chord at the bar line, often keep it for the second half of a bar
-    const scored = cands.map(c => { let w = L1_CHORD_W[c] * Math.random();
-      if (c === prev) w *= k % 2 ? 1.6 : 0.25;
-      if (k === finalSlot - 1 && c === "IV") w *= 0.4;
-      return { c, w }; }).sort((a, b) => b.w - a.w);
-    for (const { c } of scored) { out[k] = c; if (walk(k + 1)) return true; }
-    return false;
-  };
-  if (!walk(0)) return null;
-  // merge a chord that fills a whole bar
-  const chords = [];
-  out.forEach((c, k) => {
-    const last = chords[chords.length - 1];
-    if (last && last.name === c && k % 2 === 1) last.ticks += 8; else chords.push({ s: k * 8, ticks: 8, name: c });
-  });
-  return chords;
-}
-
 // ---- Solfège: 4 bars of minims, Level 1 moves, untimed ----
 function genL1Solfa(){
   const key = pickKey(), tonic = chooseTonic(key);
@@ -1798,11 +1705,7 @@ function genL1Part(bars){
   return mel;
 }
 
-// ---- Train your ears (untimed: the app waits for each note) ----
-const AURAL_TASKS = {
-  interval: { name: "Intervals" },
-  chord: { name: "Chord notes" }
-};
+// ---- Intervals and Chord notes (untimed: the app waits for each note) ----
 function genAural(type){
   const key = pickKey();
   const tonic = chooseTonic(key);
@@ -1838,10 +1741,8 @@ function genSecondTask(key, tonic){
 // - Keys C, F and G major. Notes from low La up to La, but each melody uses only the part of that octave that fits
 //   the singer in the chosen key (fitL2), so G major for Sopranos might run from low La to So.
 // - Moves: everything Level 1 allows, plus leaps of a 3rd in Do Mi So and in La Do Mi (l2MoveOK).
-// - Every melody starts on Do. About 1 in 4 ends on La (low La or La, whichever fits); the rest end on Do.
-//   Phrases may spend time around La; there is no other rule for the minor colour. Starting on La waits for Level 3.
-//   Of the La endings, 80% step down Ti to low La (Isaac, 17 October); the rest are Do down to low La or So up to La.
-//   Where low La is out of the singer's range, a Ti-La ending can't happen, so that melody ends on Do instead.
+// - Every melody starts and ends on Do (no minor until Level 4: Isaac took out the La endings on 18 October, so
+//   L2.laEnd is 0; the La-ending code is kept switched off). Do endings come from Re, Ti, Mi, So or low La.
 // - 4/4, 3/4 or 2/4. Sight sing is 4 bars, or 8 bars of 2/4. Crotchets, minims, semibreves in 4/4, the dotted minim
 //   for a whole bar of 3/4, and crotchet rests on weak beats only (2 and 4 in 4/4, 2 and 3 in 3/4, 2 in 2/4).
 // - Quaver pairs, beamed on one beat (Isaac, 18 October): exactly two in every Tap the rhythm and Sight sing piece,
@@ -1889,23 +1790,6 @@ const L2_END = {
 };
 const hasRest = bar => bar.some(t => t < 0);
 const wholeBar = bar => bar.length === 1;
-// Quaver pairs: split `pairs` crotchets into two quavers, each in a bar with no rest, never the last note, and in
-// different bars where there's room. Returns null if the rhythm hasn't enough crotchets to split.
-function addQuaverPairs(out, pairs){
-  if (!pairs) return out;
-  const last = out.length - 1, lastIdx = out[last].length - 1;
-  const spots = [];
-  out.forEach((bar, b) => { if (!hasRest(bar)) bar.forEach((t, i) => { if (t === 4 && !(b === last && i === lastIdx)) spots.push({ b, i }); }); });
-  if (spots.length < pairs) return null;
-  let chosen = null;
-  for (let k = 0; k < 30 && !chosen; k++) {
-    const c = shuffle(spots).slice(0, pairs);
-    if (new Set(c.map(x => x.b)).size === pairs || k === 29) chosen = c;
-  }
-  // split from the right so earlier indices stay put
-  chosen.sort((x, y) => y.b - x.b || y.i - x.i).forEach(({ b, i }) => out[b].splice(i, 1, 2, 2));
-  return out;
-}
 // Phrase-shaped (Isaac, 18 October, the shared melody rules): bars from Level 2's patterns, the second unit often
 // repeating the first, the last the cadence. Quaver pairs are split from crotchets as each bar is made, and the piece
 // must have exactly `pairs` of them; rests stay on weak beats, at most maxRests, never in two bars running, never in a
@@ -2009,15 +1893,6 @@ function laEnding(fit, plan){
   return opts.length ? pick(opts) : null;
 }
 
-// Build bars of events from a rhythm (negative = rest) and the degrees for its notes
-function l2Bars(key, tonic, rhythm, degs){
-  let k = 0;
-  return rhythm.map(bar => bar.map(t => {
-    if (t < 0) return { ticks: -t, rest: true };
-    const d = degs[k++];
-    return { ticks: t, note: degreeNote(key, tonic, d), deg: d };
-  }));
-}
 // About half the melodies have a rest or two
 const pickMaxRests = () => Math.random() < 0.5 ? 0 : Math.random() < 0.6 ? 1 : 2;
 // A Level 2 line with the shared melody rules (phraseLine): a phrase-shaped rhythm, quick notes moving by step or a
@@ -2184,7 +2059,7 @@ function l2Roots(mel){
   return bars;
 }
 
-// ---- Train your ears at Level 2 ----
+// ---- Intervals and Chord notes at Level 2 ----
 // Keeps the Level 1 tasks (2nds) and adds major and minor 3rds. Chord notes use the I, IV and V chords of the key
 // (in C: C, F and G major), in root position or an inversion. The minor chord was taken out (Isaac, 18 October).
 const L2_AURAL_CHORDS = [ { root: 0, w: 3 }, { root: 3, w: 2 }, { root: 4, w: 2 } ];
@@ -2243,12 +2118,13 @@ function genThirdTask(key, tonic){
 //   way (l3MoveOK). Every melody of 6 or more notes has one of those leaps, low So, or starts on Mi or So (l3Flavour).
 // - No minor until Level 4 (Isaac, 18 October): every melody ends on Do. About 1 in 4 starts on Mi or So (low So, Mi
 //   or So, whichever fit) instead of Do; the key chord is then followed by that note. The harmony starts on I.
-// - Rhythm: Level 2's, plus 3 to 5 quaver pairs (any beat, more than one in a bar), a dotted quaver-semiquaver in
-//   about half the pieces and a dotted crotchet-quaver in about half (independently). A single quaver only follows a
-//   dotted crotchet. The semiquaver always steps from the dotted quaver. Hold your part: 2 pairs, no dotted notes.
+// - Rhythm: Level 2's, plus 3 to 5 quaver pairs (any beat, more than one in a bar) and one dotted idea per melody
+//   (pickFeatureL3: a dotted quaver-semiquaver in about a third, a dotted crotchet-quaver in about a third, none in the
+//   rest; 19 October). A single quaver only follows a dotted crotchet. The semiquaver always steps from the dotted
+//   quaver. Hold your part: 2 pairs, no dotted notes.
 // - Hold your part: the other part is a bass line, roots with some first inversions so it can step (l3Bass).
-// - Train your ears: Intervals add perfect 4ths and 5ths; Chord notes add the minor chord vi (La Do Mi).
-const L3 = { keys: ["C", "F", "G", "A", "Eb"], lo: -3, hi: 5, recent: 3, otherStart: 0.25, dotQ: 0.5, dotC: 0.5 };
+// - Intervals add the perfect 5th (no 4ths until Level 4; Isaac, 19 October); Chord notes add the minor chord vi.
+const L3 = { keys: ["C", "F", "G", "A", "Eb"], lo: -3, hi: 5, otherStart: 0.25 };
 
 // The octave of Do, and the stretch of low So to La around it that fits the singer (strictly inside the range)
 function fitL3(key){
@@ -2328,46 +2204,6 @@ function l3PartMoveOK(prev, d, history){
 // The note before the last: as Level 2, and Do may also be reached from low So
 const L3_BEFORE = { 0: [1, -1, 2, 4, -2, -3], [-2]: [-1, 0], 5: [4] };
 function l3Flavour(degs){ return degs[0] !== 0 || degs.includes(-3) || degs.some((d, i) => i && isL3New(degs[i - 1], d)); }
-// start: the first degree (Do, or Mi or So). stepAt: note indices that must step from the note before (semiquavers).
-function genL3Degrees(count, fit, opt = {}){
-  const start = opt.start ?? 0, end = opt.end ?? 0, moveOK = opt.moveOK || l3MoveOK, leapW = opt.leapW ?? 2;
-  const before = opt.before || L3_BEFORE[end], stepAt = opt.stepAt || new Set();
-  for (let attempt = 0; attempt < 4000; attempt++) {
-    const out = [start];
-    let ok = true;
-    for (let i = 1; i < count; i++) {
-      const cur = out[i - 1], last = i === count - 1;
-      let cands = [];
-      for (let d = fit.lo; d <= fit.hi; d++) if (moveOK(cur, d, out) && melodicOK(out, d)) cands.push(d);
-      if (stepAt.has(i)) cands = cands.filter(d => Math.abs(d - cur) === 1);
-      if (last) cands = cands.filter(d => d === end);
-      else if (i === count - 2) cands = cands.filter(d => before.includes(d));
-      if (!cands.length) { ok = false; break; }
-      const w = [];
-      const dir = i >= 2 ? Math.sign(out[i - 1] - out[i - 2]) : 1;
-      for (const d of cands) {
-        let k = Math.abs(d - cur) === 1 ? 6 : isL3New(cur, d) ? leapW + 2 : leapW;   // mostly steps; favour the new leaps
-        if (Math.sign(d - cur) === dir && Math.abs(d - cur) === 1) k += 2;
-        if (i >= 2 && d === out[i - 2]) k = Math.max(1, k - 4);
-        if (i >= 3 && d === out[i - 2] && out[i - 1] === out[i - 3]) k = 0;
-        if (d === 0 && !last) k = Math.max(1, k - 3);
-        const fig = [out[i - 3], out[i - 2], out[i - 1], d];
-        if (i >= 7 && fig.every((x, j) => x === out[i - 7 + j])) k = 0;
-        for (let s = 2; s + 2 < i; s++) if (out[s - 2] === out[i - 2] && out[s - 1] === out[i - 1] && out[s] === d) { k = Math.min(k, 1); break; }
-        for (let j = 0; j < k; j++) w.push(d);
-      }
-      if (!w.length) { ok = false; break; }
-      out.push(pick(w));
-    }
-    if (!ok) continue;
-    if (new Set(out).size < Math.min(3, count - 1)) continue;
-    if (count >= 8 && Math.max(...out) - Math.min(...out) < 3) continue;
-    if (!contourOK(out)) continue;
-    if (count >= 6 && !l3Flavour(out)) continue;
-    return out;
-  }
-  return null;
-}
 // Starts on Mi or So: about 1 in 4. Which: low So, Mi or So, whichever fit.
 function otherStartDeg(fit){ const o = [-3, 2, 4].filter(d => d >= fit.lo && d <= fit.hi); return o.length ? pick(o) : null; }
 // The ending plan for a melody: { end, before } or null for a Do ending
@@ -2509,7 +2345,7 @@ function l3Bass(mel){
   return bars;
 }
 
-// ---- Train your ears at Level 3 ----
+// ---- Intervals and Chord notes at Level 3 ----
 // Intervals: 2nds, 3rds and perfect 5ths (no 4ths until Level 4). Chord notes: I, IV, V and the minor chord vi (La Do Mi).
 const L3_AURAL_CHORDS = [ { root: 0, w: 3 }, { root: 3, w: 2 }, { root: 4, w: 2 }, { root: 5, w: 2 } ];
 function genAuralL3(type){
@@ -2617,7 +2453,6 @@ const L4_ENDS = { 4: [{ r: [8], b: 2, w: 5 }, { r: [16], b: 4, w: 1 }], 3: [{ r:
   2: [{ r: [8], b: 2, w: 1 }], c2: [{ r: [6], b: 1, w: 4 }, { r: [12], b: 2, w: 1 }] };
 const L4_BUSY = { P: 1, DQ: 1, QR: 1, SY: 2, DC: 1, Q3: 1, CQ: 1 };       // beats with more than one note, or off the beat
 const L4_TWO_AT = { 4: [0, 2], 3: [0, 1], 2: [0] };                         // where a two-beat figure may start in a bar
-const restCell = c => c.r[0] < 0;
 const L4_LONG = ["C", "M", "D", "DM"];                                       // figures that end on a note a beat or longer
 // opts: { feature: null | "DQ" | "DC" | "SY" | "tie" | "QR", rest: a breath rest, part: Hold your part (plainer) }.
 // Returns { bars (tick lengths, negative = rest), ties: [[bar, index]] (tied to the first note of the next bar),
@@ -3102,7 +2937,7 @@ const L4_HARM = {
 };
 function harmoniseL4(mel, opts = {}){
   const H = L4_HARM[mel.minor ? "min" : "maj"], allow = opts.allow || Object.keys(H.chords);
-  const ts = mel.timeSig, barT = barTicksTS(ts), bt = beatTicksTS(ts), nBars = mel.bars.length;
+  const ts = mel.timeSig, barT = barTicksTS(ts), nBars = mel.bars.length;
   const flat = mel.bars.flat(), ev = [];
   let g = 0, ni = 0;
   flat.forEach((e, j) => {
@@ -3170,21 +3005,9 @@ function harmoniseL4(mel, opts = {}){
 function chordVoicingsL4(mel){
   const pc = ((mel.doTonic.midi % 12) + 12) % 12, minor = mel.minor, H = L4_HARM[minor ? "min" : "maj"];
   const pcOf = d => (pc + semisL4(minor, m7(d))) % 12;
-  let prev = null;
-  return mel.chords.map(c => {
+  return voiceChords(mel.chords, c => {
     const tones = H.chords[c.name];
-    let lh = 36 + pcOf(tones[0]); while (lh < 43) lh += 12; while (lh > 54) lh -= 12;
-    const rhDegs = c.name === "V7" ? (minor ? [4, 1, 2] : [6, 3, 4]) : tones;
-    const cands = rhDegs.map(d => { const o = []; for (let m = 55; m <= 76; m++) if (m % 12 === pcOf(d)) o.push(m); return o; });
-    let best = null;
-    for (const a of cands[0]) for (const b of cands[1]) for (const x of cands[2]) {
-      const v = [a, b, x].sort((p, q) => p - q);
-      if (v[2] - v[0] > 12) continue;
-      const cost = prev ? v.reduce((s, m, i) => s + Math.abs(m - prev[i]), 0) : Math.abs(v[2] - 67) + Math.abs(v[0] - 60);
-      if (!best || cost < best.cost) best = { v, cost };
-    }
-    prev = best.v;
-    return { s: c.s, ticks: c.ticks, lh, rh: best.v };
+    return { root: pcOf(tones[0]), rh: (c.name === "V7" ? (minor ? [4, 1, 2] : [6, 3, 4]) : tones).map(pcOf) };
   });
 }
 
@@ -3217,7 +3040,6 @@ function genL4Part(opts = {}){
     const K = pickKeyL4(opts.minor), metre = opts.metre || weighted(L4_PART_METRES), fit = fitL4(K);
     if (!fit) continue;
     const startOther = !K.minor && Math.random() < L4.otherStart, endPlan = Math.random();
-    const beats = metre.ts[1] === 8 ? metre.ts[0] / 3 : metre.ts[0], total = beats * metre.bars;
     const rh = { feature: null, rest: false, part: true };
     const allow = K.minor ? ["i", "iv", "V", "V7", "VI"] : ["I", "ii", "IV", "V", "V7", "vi"];
     for (let i = 0; i < 20; i++) {
@@ -3402,7 +3224,7 @@ function elaborateBass(mel, line, env){
   return best;
 }
 
-// ---- Train your ears at Level 4 ----
+// ---- Intervals and Chord notes at Level 4 ----
 // Intervals: 2nds, 3rds and 5ths (Level 3's) plus perfect 4ths and octaves (in a major key, above or below the given note).
 // Chord notes (Isaac, 18 October: "Chord notes really isn't dependent on a key"): major, minor and dominant 7th chords
 // on any root, with no key signature, in root position or an inversion; sing one of their notes. Levels 4 and 5 only.
@@ -3438,9 +3260,15 @@ const L4_CHORD_ROOTS = { maj: ["C", "Db", "D", "Eb", "E", "F", "G", "Ab", "A", "
 const L4_CHORD_IV = { maj: ["M3", "P5"], min: ["m3", "P5"], dom7: ["M3", "P5", "m7"] };
 const L4_Q_NAME = { maj: "major", min: "minor", dom7: "dominant 7th" };
 function genChordTaskL4(){
-  const V = voiceInfo(), q = wpick(L4_CHORD_Q).q, root = pick(L4_CHORD_ROOTS[q]), opts = [];
+  const q = wpick(L4_CHORD_Q).q, root = pick(L4_CHORD_ROOTS[q]);
+  return keylessChordTask(q, L4_Q_NAME[q], root, r => [r].concat(L4_CHORD_IV[q].map(c => intervalNote(r, c, 1))));
+}
+// A chord with no key (Levels 4 and 5): root position or an inversion, placed so the note to sing is inside the range
+// and nothing sounds below C3; the inversion and the note to sing are picked evenly. tonesOf(r): its notes up from root r.
+function keylessChordTask(q, qualityName, root, tonesOf){
+  const V = voiceInfo(), opts = [];
   for (let oct = 1; oct <= 5; oct++) {
-    const r = parseNote(root + oct), tones = [r].concat(L4_CHORD_IV[q].map(c => intervalNote(r, c, 1))), size = tones.length;
+    const r = parseNote(root + oct), tones = tonesOf(r), size = tones.length;
     for (let inv = 0; inv < size; inv++) {
       const notes = tones.map((n, i) => i < inv ? makeNote(n.li, n.alter, n.oct + 1) : n).sort((a, b) => a.midi - b.midi);
       for (let which = 0; which < size; which++) {
@@ -3456,7 +3284,7 @@ function genChordTaskL4(){
   const part = MEMBER_NAMES[member];
   const place = o.size === 3 ? ["bottom", "middle", "top"][o.which] : ["bottom", "second", "third", "top"][o.which];
   const where = o.size === 4 && (o.which === 1 || o.which === 2) ? `${place} note up` : `${place} note`;
-  return { type: "chord", quality: q, qualityName: L4_Q_NAME[q], minor: q === "min", keyless: true, key: KEY_BY_NAME.C, tonic: parseNote("C4"),
+  return { type: "chord", quality: q, qualityName: qualityName, minor: q === "min", keyless: true, key: KEY_BY_NAME.C, tonic: parseNote("C4"),
     chordRoot: root, chord: o.notes, answer: [target], place, part, prompt: `Sing the ${where} (the ${part}).` };
 }
 
@@ -3474,15 +3302,17 @@ function genChordTaskL4(){
 // - Minor melodies start on La, Do or Mi (the key chord, then that note). Major melodies start as at Level 4.
 // - Chromatic notes. Minor: Si as the leading note, natural So coming down (La So Fa), and Fi Si La going up (melodic
 //   minor). About 1 in 3 major melodies turn to the tonic minor at the third unit (as both of Isaac's D major examples)
-//   and end in minor; Do stays put, so the minor notes read Me, Le and Te (Ti stays the leading note). Fi (rising to So)
-//   and Te (falling to La) appear in about 1 in 4 of the other major melodies, as passing or neighbour notes.
+//   and end in minor; Do stays put, so the minor notes read Me, Le and Te (Ti stays the leading note). The third bar
+//   restates the first in the minor. Fi (rising to So) and Te (falling to La) come in about 3 in 10 of the other major
+//   Sight sing melodies, only as the second bar restating the first with Fa raised or Ti lowered (19 October).
 // - Rhythm: Level 4's, plus quaver ties (across the middle of the bar or the barline, quaver to quaver), quaver triplets,
 //   the off-beat dotted crotchet (a quaver, then a dotted crotchet), quaver-two-semiquavers both ways round, and in 6/8
 //   dotted quaver-semiquaver-quaver. One or two rhythmic ideas per melody, and busier: about 18 to 23 notes in 4 bars
 //   of 4/4, quavers the main moving value.
-// - Solfège: 12 notes, with a chromatic note or an augmented 2nd in most. Hold your part: a part above and a part below
-//   the singer (score order, the singer in the middle), Level 4's lengths. Train your ears: Intervals add major and
-//   minor 7ths and the tritone; Chord notes add diminished and augmented triads and major and minor 7th chords.
+// - Solfège: 12 notes, no Fi or Te; most minor ones have natural So or the augmented 2nd. Hold your part: one
+//   countermelody above or below the singer (always above for Basses; drawn in score order), Level 4's lengths.
+//   Intervals add major and minor 7ths, 6ths and the tritone; Chord notes add diminished and augmented triads and
+//   major and minor 7th chords.
 // - Notes are degrees (counted from Do of the major key, the relative major for a minor key, as at Level 4) with an
 //   alteration in semitones (alts): Si in a minor key is So +1, Fi is Fa +1, Me after a turn is Mi -1, and so on.
 const L5 = { majors: ["C", "G", "D", "A", "E", "F", "Bb", "Eb", "Ab"], minors: ["A", "E", "B", "F#", "C#", "D", "G", "C", "F"],
@@ -4082,26 +3912,14 @@ function l5Chords(plan, starts, total, barT){
   });
   return out;
 }
-// Play chords at Level 5: as chordVoicingsL4, from each chord's own tones (V7's right hand: Ti, Fa and So; vii7: Re, Fa and
+// Play chords at Level 5 (voiceChords in 01-music.js), from each chord's own tones (V7's right hand: Ti, Fa and So; vii7: Re, Fa and
 // Ti or Si)
 function chordVoicingsL5(mel){
   const pc0 = ((mel.doTonic.midi % 12) + 12) % 12;
-  let prev = null;
-  return mel.chords.map(c => {
-    const t = chordTonesL5(c.sec, c.name), pcs = t.map(x => (pc0 + x.pc) % 12);
-    let lh = 36 + pcs[0]; while (lh < 43) lh += 12; while (lh > 54) lh -= 12;
-    const rhPcs = c.name === "V7" ? [pcs[1], pcs[3], pcs[0]] : c.name === "vii7" ? [pcs[1], pcs[2], pcs[3]] : pcs.slice(0, 3);
-    const cands = rhPcs.map(p => { const o = []; for (let m = 55; m <= 76; m++) if (m % 12 === p) o.push(m); return o; });
-    let best = null;
-    for (const a of cands[0]) for (const b of cands[1]) for (const x of cands[2]) {
-      const v = [a, b, x].sort((p, q) => p - q);
-      if (v[2] - v[0] > 12) continue;
-      const cost = prev ? v.reduce((s, m, i) => s + Math.abs(m - prev[i]), 0) : Math.abs(v[2] - 67) + Math.abs(v[0] - 60);
-      if (!best || cost < best.cost) best = { v, cost };
-    }
-    prev = best.v;
-    return { s: c.s, ticks: c.ticks, lh, rh: best.v, name: c.name };
-  });
+  return voiceChords(mel.chords, c => {
+    const pcs = chordTonesL5(c.sec, c.name).map(x => (pc0 + x.pc) % 12);
+    return { root: pcs[0], rh: c.name === "V7" ? [pcs[1], pcs[3], pcs[0]] : c.name === "vii7" ? [pcs[1], pcs[2], pcs[3]] : pcs.slice(0, 3) };
+  }).map((v, k) => ({ ...v, name: mel.chords[k].name }));
 }
 
 // ---- Melodies ----
@@ -4396,7 +4214,7 @@ function l5Counter(mel, above){
   return bars;
 }
 
-// ---- Train your ears at Level 5 ----
+// ---- Intervals and Chord notes at Level 5 ----
 // Intervals: Level 4's, plus major and minor 7ths and the tritone (above or below, in a major key). Chord notes: Level 4's
 // major, minor and dominant 7th chords, plus diminished and augmented triads and major and minor 7th chords, on any root
 // with no key signature, in root position or an inversion.
@@ -4436,28 +4254,9 @@ function ivNote(n, steps, semis){
 // roots whose chord needs no double sharp or flat, and no E sharp, B sharp, C flat or F flat
 const plainNote = n => Math.abs(n.alter) <= 1 && !(n.alter === 1 && (n.li === 2 || n.li === 6)) && !(n.alter === -1 && (n.li === 0 || n.li === 3));
 function genChordTaskL5(){
-  const V = voiceInfo(), q = wpick(L5_CHORD_Q).q, def = L5_CHORD_DEF[q];
+  const q = wpick(L5_CHORD_Q).q, def = L5_CHORD_DEF[q];
   const roots = ROOT_NAMES.filter(r => { const n = parseNote(r + "4"); return plainNote(n) && def.every(([s, m]) => plainNote(ivNote(n, s, m))); });
-  const root = pick(roots), opts = [];
-  for (let oct = 1; oct <= 5; oct++) {
-    const r = parseNote(root + oct), tones = [r].concat(def.map(([s, m]) => ivNote(r, s, m))), size = tones.length;
-    for (let inv = 0; inv < size; inv++) {
-      const notes = tones.map((n, i) => i < inv ? makeNote(n.li, n.alter, n.oct + 1) : n).sort((a, b) => a.midi - b.midi);
-      for (let which = 0; which < size; which++) {
-        if (notes[which].midi < V.lo || notes[which].midi > V.hi) continue;
-        if (notes.some(n => n.midi + V.tr < 48)) continue;                   // never below C3 (Isaac, 19 October)
-        opts.push({ inv, which, notes, tones, size, fit: notes.filter(n => n.midi >= V.lo && n.midi <= V.hi).length });
-      }
-    }
-  }
-  const pv = pick([...new Set(opts.map(x => x.inv * 4 + x.which))]), mine = opts.filter(x => x.inv * 4 + x.which === pv);
-  const full = mine.filter(x => x.fit === x.size), o = pick(full.length ? full : mine);
-  const target = o.notes[o.which], member = o.tones.findIndex(t => ((t.midi - target.midi) % 12 + 12) % 12 === 0);
-  const part = MEMBER_NAMES[member];
-  const place = o.size === 3 ? ["bottom", "middle", "top"][o.which] : ["bottom", "second", "third", "top"][o.which];
-  const where = o.size === 4 && (o.which === 1 || o.which === 2) ? `${place} note up` : `${place} note`;
-  return { type: "chord", quality: q, qualityName: L5_Q_NAME[q], minor: q === "min", keyless: true, key: KEY_BY_NAME.C, tonic: parseNote("C4"),
-    chordRoot: root, chord: o.notes, answer: [target], place, part, prompt: `Sing the ${where} (the ${part}).` };
+  return keylessChordTask(q, L5_Q_NAME[q], pick(roots), r => [r].concat(def.map(([s, m]) => ivNote(r, s, m))));
 }
 
 // ==== FILE: 05-analyse.js ====
@@ -4472,7 +4271,7 @@ function semisApart(sung, target, anyOct){
 }
 function medianOf(arr, a, b){ const s = arr.slice(a, b).filter(x => !Number.isNaN(x)); return s.length ? median(s) : NaN; }
 
-// ---- Split a free-time performance into sung notes ----
+// ---- Split what was sung into notes (voiceChanges uses this to find where the voice moves to each new note) ----
 function segmentFrames(frames){
   const n = frames.length;
   if (n < 4) return [];
@@ -4550,43 +4349,12 @@ function segmentFrames(frames){
 }
 
 // ---- Match sung notes to written notes (allows extra or missing notes) ----
-function alignSegments(segs, targets, anyOct){
-  const m = targets.length, n = segs.length;
-  const cost = (i, j) => Math.min(Math.abs(semisApart(segs[j].pitch, targets[i], anyOct)), 3);
-  const skipSeg = j => segs[j].dur < 0.3 ? 0.7 : 1.6;
-  const SKIP_NOTE = 2.2;
-  const D = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(Infinity));
-  const B = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
-  D[0][0] = 0;
-  for (let i = 0; i <= m; i++) for (let j = 0; j <= n; j++) {
-    if (i === 0 && j === 0) continue;
-    let best = Infinity, how = 0;
-    if (i > 0 && j > 0 && D[i-1][j-1] + cost(i-1, j-1) < best) { best = D[i-1][j-1] + cost(i-1, j-1); how = 1; }
-    if (j > 0 && D[i][j-1] + skipSeg(j-1) < best) { best = D[i][j-1] + skipSeg(j-1); how = 2; }
-    if (i > 0 && D[i-1][j] + SKIP_NOTE < best) { best = D[i-1][j] + SKIP_NOTE; how = 3; }
-    D[i][j] = best; B[i][j] = how;
-  }
-  const match = new Array(m).fill(-1);
-  let i = m, j = n;
-  while (i > 0 || j > 0) {
-    const h = B[i][j];
-    if (h === 1) { match[i-1] = j-1; i--; j--; }
-    else if (h === 2) j--;
-    else i--;
-  }
-  return match;
-}
 
 // Result for each written note: { sung (midi or null), cents (or null), state: ok | near | wrong | missed }
 function judgeNote(sungMidi, target, anyOct, tol){
   if (sungMidi === null || Number.isNaN(sungMidi)) return { sung: null, cents: null, state: "missed" };
   const c = semisApart(sungMidi, target, anyOct) * 100;
   return { sung: sungMidi, cents: c, state: Math.abs(c) <= tol ? "ok" : Math.abs(c) < 100 ? "near" : "wrong" };
-}
-function analyseFree(frames, targets, anyOct, tol){
-  const segs = segmentFrames(frames);
-  const match = alignSegments(segs, targets, anyOct);
-  return { segs, notes: targets.map((tg, i) => judgeNote(match[i] >= 0 ? segs[match[i]].pitch : null, tg, anyOct, tol)) };
 }
 // The delay between the click and the singer's voice reaching the app: the speakers or headphones (Bluetooth can
 // add a quarter of a second), the microphone, and the time to take each reading. It changes from device to device and
@@ -4701,33 +4469,6 @@ function makeSmoother(){
     reset(){ buf = []; shown = null; }
   };
 }
-// Live note follower for free time: moves along the melody as new notes start
-function makeFollower(){
-  let segStart = null, segPitches = [], lastVoiced = -1, idx = -1, lastE = 0, peakE = 0, dipped = false;
-  return {
-    push(f){
-      const v = f.raw !== null && f.raw !== undefined;
-      if (!v) { if (lastVoiced >= 0 && f.t - lastVoiced > 0.08) { segStart = null; } return idx; }
-      let newNote = false;
-      if (segStart === null) newNote = true;
-      else {
-        peakE = Math.max(peakE * 0.97, f.rms);
-        if (f.rms < 0.45 * peakE) dipped = true;
-        else if (dipped && f.rms > 0.7 * peakE && f.t - segStart > 0.15) { newNote = true; }
-        if (!newNote && f.t - segStart > 0.15 && segPitches.length > 12) {
-          const recent = median(segPitches.slice(-9).map(x => x));
-          const body = median(segPitches.slice(0, -9));
-          if (Math.abs(recent - body) > 0.75) newNote = true;
-        }
-      }
-      if (newNote) { idx++; segStart = f.t; segPitches = []; dipped = false; peakE = f.rms; }
-      segPitches.push(f.raw);
-      lastVoiced = f.t;
-      return idx;
-    },
-    get index(){ return idx; }
-  };
-}
 
 // ---- Extra notes (Isaac, 18 October) ----
 // Before this, a sung note where none is written was simply ignored, so an attempt could still be marked all right.
@@ -4792,11 +4533,11 @@ const $ = id => document.getElementById(id);
 const STORE_KEY = "sightSinger.level1.v1";
 const APP = {
   settings: { voice: null, tenorClef: "treble8", minorSolfege: "la", anyOct: true,
-    level: 1, activity: "rhythm", bars: { read: 4, rhythm: 4, part: 4 },
+    level: 1, activity: "rhythm",
     tuning: false, click: false, tempo: 72, rtempo: 72, audTempo: 72, audKeys: {}, solf: false, names: false, counts: true, auralType: "mix", latency: null },
   stats: {}
 };
-function load(){ try { const r = JSON.parse(localStorage.getItem(STORE_KEY) || "null"); if (r) { Object.assign(APP.settings, r.settings || {}); APP.settings.bars = Object.assign({ read: 4, rhythm: 4, part: 4 }, (r.settings || {}).bars || {}); APP.stats = r.stats || {}; } } catch (e) {} }
+function load(){ try { const r = JSON.parse(localStorage.getItem(STORE_KEY) || "null"); if (r) { Object.assign(APP.settings, r.settings || {}); APP.stats = r.stats || {}; } } catch (e) {} }
 function save(){ try { localStorage.setItem(STORE_KEY, JSON.stringify({ settings: APP.settings, stats: APP.stats })); } catch (e) {} }
 function stat(act){ const k = "L" + APP.settings.level + ":" + act; return APP.stats[k] || (APP.stats[k] = { attempts: 0, items: 0, best: 0 }); }
 function showAlert(msg){ const a = $("alert"); a.textContent = msg; a.hidden = !msg; }
@@ -4898,7 +4639,7 @@ function musicClicks(start, tick, total, ts, vol = 0.07){ const c = clickTicksOf
 // ---------- New items never repeat the one before (Isaac, 17 October) ----------
 function itemSig(ex){
   if (!ex) return "";
-  if (ex.prompt) return ex.type + "|" + ex.prompt;          // Train your ears: a new task always asks something different
+  if (ex.prompt) return ex.type + "|" + ex.prompt;          // Intervals and Chord notes: a new task always asks something different
   return (ex.key ? ex.key.name : "") + "|" + JSON.stringify(ex.bars.map(b => b.map(e => typeof e === "number" ? e : [e.ticks, e.rest ? "r" : e.note.midi])));
 }
 function freshItem(gen, prev, tries = 40){
@@ -4931,14 +4672,15 @@ function countCues(t0, beat, labels){
 }
 const COUNT = { el: null, run: 0 };
 function setDim(on){ const d = $("dim"); if (d) d.hidden = !on; document.body.classList.toggle("counting", !!on); }
-function showCountIn(anchor, t0, beat, extra = [], labels = ["1", "2", "3", "4"]){
+// times (optional): when each count falls, for a count-in that follows a recording's own beats (Practice songs)
+function showCountIn(anchor, t0, beat, extra = [], labels = ["1", "2", "3", "4"], times = null){
   const card = anchor.closest(".card");
   if (!COUNT.el) { COUNT.el = document.createElement("div"); COUNT.el.className = "countin"; COUNT.el.setAttribute("aria-live", "assertive"); }
   const el = COUNT.el;
   card.appendChild(el);
   // over a stave it sits just above the staff lines, so it never hides the notes
   el.style.top = (anchor.offsetTop + (anchor.querySelector("svg.score") ? 14 : Math.max(anchor.offsetHeight, 40) / 2)) + "px";
-  const cues = countCues(t0, beat, labels).concat(extra);
+  const cues = countCues(t0, beat, labels).map((c, k) => times ? { ...c, t: times[k] } : c).concat(extra);
   const run = ++COUNT.run;
   let shown = null;
   const loop = () => {
@@ -4961,26 +4703,13 @@ function showCountIn(anchor, t0, beat, extra = [], labels = ["1", "2", "3", "4"]
 function hideCountIn(){ COUNT.run++; if (COUNT.el) COUNT.el.hidden = true; setDim(false); }
 
 // ---------- Play chords (Sight sing helper) ----------
-// Left hand: the root between G2 and F#3, like the key chord. Right hand: three notes from about G3 to E5, each
-// chord moving as little as possible from the last (V7 uses Ti, Fa and So).
+// Play chords at Levels 1 to 3 (voiceChords in 01-music.js); V7's right hand uses Ti, Fa and So
 function chordVoicings(key, tonic, chords){
   const pc = ((tonic.midi % 12) + 12) % 12;
   const pcOf = d => (pc + SCALE.maj[((d % 7) + 7) % 7]) % 12;
-  let prev = null;
-  return chords.map(c => {
+  return voiceChords(chords, c => {
     const tones = L2_CHORDS[c.name];          // Level 1's chords plus iii (Level 2)
-    let lh = 36 + pcOf(tones[0]); while (lh < 43) lh += 12; while (lh > 54) lh -= 12;
-    const rhDegs = c.name === "V7" ? [6, 3, 4] : tones;
-    const cands = rhDegs.map(d => { const o = []; for (let m = 55; m <= 76; m++) if (m % 12 === pcOf(d)) o.push(m); return o; });
-    let best = null;
-    for (const a of cands[0]) for (const b of cands[1]) for (const x of cands[2]) {
-      const v = [a, b, x].sort((p, q) => p - q);
-      if (v[2] - v[0] > 12) continue;
-      const cost = prev ? v.reduce((s, m, i) => s + Math.abs(m - prev[i]), 0) : Math.abs(v[2] - 67) + Math.abs(v[0] - 60);
-      if (!best || cost < best.cost) best = { v, cost };
-    }
-    prev = best.v;
-    return { s: c.s, ticks: c.ticks, lh, rh: best.v };
+    return { root: pcOf(tones[0]), rh: (c.name === "V7" ? [6, 3, 4] : tones).map(pcOf) };
   });
 }
 // A chord that fills a whole bar is struck again (more softly) on beat 3
@@ -5310,7 +5039,7 @@ document.addEventListener("click", e => {
 const KB = { lo: 36, hi: 84 };                 // C2 to C6
 const GTR = [64, 59, 55, 50, 45, 40];          // strings from the top line: high E, B, G, D, A, low E (sounding)
 const FRETS = 12;
-// INSTR.hold: notes held lit while Train your ears shows its task ({ m: sounding midi, soft: true for chord notes that
+// INSTR.hold: notes held lit while Intervals or Chord notes shows its task ({ m: sounding midi, soft: true for chord notes that
 // aren't sung }), on top of whatever the piano is playing
 const INSTR = { keys: {}, dots: {}, sig: "", hold: [] };
 function isBlack(m){   // also used by the tuning keyboard (06-core.js)
@@ -5427,7 +5156,7 @@ requestAnimationFrame(tuneLitTick);
 // A helper is offered only where it makes sense (Isaac, 17 October; a standing rule for every level):
 // - timing helpers (beat numbers, Play chords) only where there is a click;
 // - note helpers (letter names, solfège, Click notes to hear, keyboard, fretboard) only where there are notes to read, and
-//   never where they would give away what the activity is testing unasked. Train your ears hides the notes until the
+//   never where they would give away what the activity is testing unasked. Intervals hides the notes until the
 //   answer, but offers Show score, Show keyboard and Show guitar fretboard as supports a student chooses to turn on
 //   (Isaac, 18 October): they show the interval or chord to be sung. It has no names or solfège. Chord notes always shows
 //   its chord (Isaac, 19 October), so it has no Show score; Intervals has Show reminder, a tune that starts with the
@@ -5464,7 +5193,7 @@ function markHelpers(){
 document.querySelectorAll(".helpbtn").forEach(b => b.addEventListener("click", () => { APP.settings.helpersOpen = !APP.settings.helpersOpen; save(); markHelpers(); }));
 
 // ==== FILE: 06-steady.js ====
-// ================= Untimed singing: wait for each note (Solfège, Train your ears) =================
+// ================= Untimed singing: wait for each note (Solfège, Intervals, Chord notes) =================
 // No click. For each note the app waits for the singer to find the pitch and hold it in tune, then moves on by itself.
 // The clock for a note starts when the singer's voice is first heard on it (so a breath between notes costs nothing).
 // Found and held within 2 seconds: green. Found later: orange. Not found within 5 seconds: red, and the app moves on.
@@ -5545,8 +5274,9 @@ function steadyComment(key, notes, results, opts = {}){
 // ================= Activities with a stave to sing: Solfège, Hold your part, Sight sing =================
 // cfg.untimed (Solfège): minims, no click; the app waits for each note (06-steady.js).
 // cfg.lower (Hold your part): 2 bars. The piano plays the singer's part, then a count-in, the singer sings it on
-//   their own, then another count-in and they sing it with the other part (above or below in pitch, but always drawn
-//   on the stave underneath). The click runs throughout.
+//   their own, then another count-in and they sing it with the other part (above or below in pitch; drawn on the
+//   stave underneath at Levels 1 to 4, and in score order at Level 5, where it's a countermelody). The click runs
+//   throughout.
 // Otherwise (Sight sing): 4 bars to the click (8 of 2/4 at Level 2), with Play chords available.
 // Level 2 brings 3/4 and 2/4 and crotchet rests: ex.bars holds rests ({ ticks, rest: true }) as well as notes, while
 // ex.notes and ex.degs hold notes only. A.nIdx maps note i to its event on the stave.
@@ -5999,7 +5729,7 @@ function makeMelodyActivity(cfg){
   // any note at their own pace. A box on the stave marks the note they're practising, and the keyboard outlines the
   // same note. They move the box on with the arrow keys, by dragging it, by clicking or tapping a note, or with the
   // Previous note and Next note buttons (for phones). Nothing is marked or counted. After an attempt the box goes to the
-  // first note that wasn't in tune. Train your ears isn't included: its notes stay hidden until the answer.
+  // first note that wasn't in tune. Intervals and Chord notes aren't included.
   A.pi = 0;
   const practising = () => PRACTISING === A;
   const coarse = () => window.matchMedia && matchMedia("(pointer: coarse)").matches;
@@ -6109,7 +5839,7 @@ function makeMelodyActivity(cfg){
 // ================= Activity 1: Tap the rhythm =================
 const RH = { ex: null, L: null, state: "idle", taps: [], lastMarks: null, attempts: 0, best: -1 };
 const DUMMY = makeNote(6, 0, 4);
-// RH.ex.bars: tick lengths per bar; a negative number is a crotchet rest (Level 2). RH.ex.ts is the time signature.
+// RH.ex.bars: tick lengths per bar; a negative number is a rest (-4 a crotchet rest, -2 a quaver rest). RH.ex.ts is the time signature.
 // Every level's rhythms are phrase-shaped, as its melodies are (Isaac, 18 October). RH.ex.ties (Level 4): [bar, index]
 // of a note tied to the next note (Level 5 also ties a quaver to a quaver in the middle of a bar); a tied note is
 // clapped once. Level 5's triplet quavers are 4/3 of a tick.
@@ -6291,7 +6021,7 @@ function rhClaps(run){
   return rel.map(t => t - delay);
 }
 function rhEvaluate(){
-  const { onsets, beat, tick } = RH.run;
+  const { onsets, beat } = RH.run;
   if (RH.stopOnsets) { RH.stopOnsets(); RH.stopOnsets = null; }
   RH.taps = rhClaps(RH.run);
   RH.state = "idle"; BUSY = null;
@@ -7315,21 +7045,40 @@ function songListenPlay(){
 }
 
 // ================= A recording, with the score following (Listen) =================
-// A recording's bar times (seconds from its start, one per bar from bar 1) map song ticks to the recording and back;
-// past the last tapped bar the last bar's length carries on
+// A recording's taps map song ticks to the recording's time and back. Every bar has its first beat's time (barTimes,
+// seconds from the start, one per bar from bar 1). A bar tapped beat by beat also has its other beats' times
+// (beatTimes[bar]: evenly spaced through the bar, so 3 taps in 3/4, 2 or 6 in 6/8; Isaac, 23 October: "for songs with
+// lots of rubato, we'll need the option to tap every beat"). Between two taps the score moves evenly; past the last tap
+// it carries on at the speed between the last two.
+function recAnchors(rec){
+  if (rec.anchors && rec.anchors.bt === rec.barTimes && rec.anchors.bb === rec.beatTimes) return rec.anchors.list;
+  const st = SG.timeline.starts, bT = SG.song.barTicks, list = [];
+  rec.barTimes.forEach((t, i) => {
+    if (i >= bT.length) return;
+    list.push({ k: st[i], t });
+    const b = rec.beatTimes && rec.beatTimes[i];
+    if (Array.isArray(b)) b.forEach((u, j) => list.push({ k: st[i] + (j + 1) * bT[i] / (b.length + 1), t: u }));
+  });
+  rec.anchors = { bt: rec.barTimes, bb: rec.beatTimes, list };
+  return list;
+}
+// ticks a second from tap i to the next one (or from the one before, after the last tap; a lone tap: a bar in 2 s)
+function recRate(a, i){
+  if (i + 1 < a.length) return (a[i + 1].k - a[i].k) / (a[i + 1].t - a[i].t);
+  if (i > 0) return (a[i].k - a[i - 1].k) / (a[i].t - a[i - 1].t);
+  return SG.song.barTicks[0] / 2;
+}
 function recTick(t){
-  const bt = SG.rec.barTimes, st = SG.timeline.starts, bT = SG.song.barTicks;
-  if (!bt.length || t <= bt[0]) return 0;
-  let i = bt.length - 1; while (i > 0 && bt[i] > t) i--;
-  const len = i + 1 < bt.length ? bt[i + 1] - bt[i] : (i ? bt[i] - bt[i - 1] : 2);
-  return clamp(st[i] + (t - bt[i]) / len * bT[i], 0, songTotal());
+  const a = recAnchors(SG.rec);
+  if (!a.length || t <= a[0].t) return 0;
+  let i = a.length - 1; while (i > 0 && a[i].t > t) i--;
+  return clamp(a[i].k + (t - a[i].t) * recRate(a, i), 0, songTotal());
 }
 function recTime(tick){
-  const bt = SG.rec.barTimes, st = SG.timeline.starts, bT = SG.song.barTicks;
-  if (!bt.length) return 0;
-  let i = clamp(st.findIndex(x => x > tick + 1e-6) - 1, 0, bT.length - 1); if (i < 0) i = bT.length - 1;
-  const j = Math.min(i, bt.length - 1), len = j + 1 < bt.length ? bt[j + 1] - bt[j] : (j ? bt[j] - bt[j - 1] : 2);
-  return Math.max(0, bt[j] + (tick - st[j]) / bT[j] * len + (i > j ? (i - j) * len : 0));
+  const a = recAnchors(SG.rec);
+  if (!a.length) return 0;
+  let i = a.length - 1; while (i > 0 && a[i].k > tick + 1e-6) i--;
+  return Math.max(0, a[i].t + (tick - a[i].k) / recRate(a, i));
 }
 // The singer's part on the piano with the recording (Isaac, 21 October: "for the bass voice it plays both the piano bass
 // voice and the youtube link at the same time"). Each frame, the notes due in the next 0.3 s of the recording are handed
@@ -7364,23 +7113,28 @@ function recOwnStep(run, rec, to = Infinity){
 const SONG_REC_URL = {};
 function songRecording(s){
   if (!s.barTimes) return null;
-  if (s.youtube && ytId(s.youtube)) return { kind: "yt", id: ytId(s.youtube), barTimes: s.barTimes, name: "YouTube" };
+  if (s.youtube && ytId(s.youtube)) return { kind: "yt", id: ytId(s.youtube), barTimes: s.barTimes, beatTimes: s.beatTimes || null, name: "YouTube" };
   if (typeof SONG_AUDIO === "undefined" || !SONG_AUDIO[s.id]) return null;
   if (!SONG_REC_URL[s.id]) {
     const a = SONG_AUDIO[s.id], bin = atob(a.b64), bytes = new Uint8Array(bin.length);
     for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
     SONG_REC_URL[s.id] = URL.createObjectURL(new Blob([bytes], { type: a.mime }));
   }
-  return { kind: "file", url: SONG_REC_URL[s.id], barTimes: s.barTimes, name: s.id };
+  return { kind: "file", url: SONG_REC_URL[s.id], barTimes: s.barTimes, beatTimes: s.beatTimes || null, name: s.id };
 }
 // Edits saved from the teacher page (teacher.html): songs/<id>-timings.json and songs/<id>-sections.json in the
 // repository beside the app. On a web address the app reads them from its own site as it starts (nothing goes anywhere
 // else), so new bar times and sections reach students without a new build; a downloaded copy keeps the ones built in.
 const okSecs = l => Array.isArray(l) && l.length > 0 && l.every(x => x && [x.a, x.z, x.s, x.e].every(Number.isFinite) && x.e > x.s);
+// beatTimes (optional): per bar, null or the bar's later beats' times, each after the one before and before the next bar
+const okBeats = (bb, bt) => bb == null || (Array.isArray(bb) && bb.length <= bt.length && bb.every((b, i) => b == null ||
+  (Array.isArray(b) && b.every(Number.isFinite) && b.every((u, j) => u > (j ? b[j - 1] : bt[i])) && (i + 1 >= bt.length || b[b.length - 1] < bt[i + 1]))));
 function songApplyTimings(s, tm){
   if (!tm || tm.song !== s.id || !Array.isArray(tm.barTimes) || tm.barTimes.length < 2 || !tm.barTimes.every(Number.isFinite)) return false;
-  if (tm.youtube && ytId(tm.youtube)) { s.youtube = tm.youtube; s.barTimes = tm.barTimes; return true; }
-  if (!tm.youtube && typeof SONG_AUDIO !== "undefined" && SONG_AUDIO[s.id]) { s.barTimes = tm.barTimes; return true; }
+  if (!okBeats(tm.beatTimes, tm.barTimes)) return false;
+  const beats = tm.beatTimes && tm.beatTimes.some(Array.isArray) ? tm.beatTimes : null;
+  if (tm.youtube && ytId(tm.youtube)) { s.youtube = tm.youtube; s.barTimes = tm.barTimes; s.beatTimes = beats; return true; }
+  if (!tm.youtube && typeof SONG_AUDIO !== "undefined" && SONG_AUDIO[s.id]) { s.barTimes = tm.barTimes; s.beatTimes = beats; return true; }
   return false;
 }
 function songApplySections(s, sx){
@@ -7463,6 +7217,29 @@ function songPartSections(pt, starts){
   };
   return { learn: build(1, 5, 6), practice: build(3, 10, 10) };
 }
+// Songs added on the teacher page (Isaac, 23 October): songs/list.json { songs: [{ id, show }] } names them, and
+// songs/<id>.json is each one's data (made by 09-teacher-import.js exactly as songs/import.py makes it). Students get the
+// songs Isaac has chosen to show; the teacher page gets them all. One with the id of a song built in replaces it (a
+// corrected score).
+const SONG_ID = /^[a-z0-9][a-z0-9-]{0,59}$/;
+function okSong(s, id){
+  const n = s && Array.isArray(s.barTicks) ? s.barTicks.length : 0;
+  return !!s && s.id === id && typeof s.title === "string" && n > 0 && s.barTicks.every(x => Number.isFinite(x) && x > 0)
+    && Array.isArray(s.barLabels) && s.barLabels.length === n && Array.isArray(s.ts) && s.ts.length === 2 && s.key && Number.isFinite(s.key.fifths)
+    && Number.isFinite(s.tempo) && Array.isArray(s.parts) && s.parts.length > 0 && s.parts.every(q => okPart(q, n) && q.sections && okSecs(q.sections.practice))
+    && Array.isArray(s.accomp);
+}
+// put a song into the list (or in place of the one with its id), with its own parts kept for Back to the score
+function songAdopt(s, entry){
+  const i = SONGS.findIndex(x => x.id === s.id), old = i >= 0 ? SONGS[i] : null;
+  if (old) SONGS[i] = s; else SONGS.push(s);
+  SONG_SCORE[s.id] = JSON.parse(JSON.stringify(s.parts));
+  if (TEACH) TEACH.adopted(s, entry, old);
+  if (old && SG.song === old) {
+    if (SG.view === "song" && SG.state === "idle" && MODE === "songs" && !SG.tapping) songOpen(s, true); else SG.song = s;
+  }
+  return old;
+}
 async function songLoadEdits(){
   // parts changed on the teacher page and built in (build.py keeps songs/<id>-parts.json as partsEdit)
   // and the phrases saved with them (songs/<id>-sections.json, as sectionsEdit)
@@ -7476,6 +7253,13 @@ async function songLoadEdits(){
   const web = /^https?:$/.test(location.protocol);
   const site = async f => { if (!web) return null; try { const r = await fetch(`songs/${f}?t=${Date.now()}`, { cache: "no-store" }); return r.ok ? await r.json() : null; } catch (e) { return null; } };
   const get = async f => { const v = TEACH ? await TEACH.get(f) : undefined; return v === undefined ? site(f) : v; };
+  const list = await get("list.json");
+  if (list && Array.isArray(list.songs)) {
+    const want = list.songs.filter(e => e && typeof e.id === "string" && SONG_ID.test(e.id) && (e.show === true || TEACH));
+    const got = await Promise.all(want.map(e => get(`${e.id}.json`)));
+    want.forEach((e, k) => { if (okSong(got[k], e.id)) songAdopt(got[k], e); });
+    if (SG.view === "list" && MODE === "songs") songList();
+  }
   await Promise.all(SONGS.map(async s => {
     const [px, tm, sx] = await Promise.all([get(`${s.id}-parts.json`), get(`${s.id}-timings.json`), get(`${s.id}-sections.json`)]);
     const parts = songApplyParts(s, px);
@@ -7716,8 +7500,10 @@ function songRecStage(run, g, now){
       // the count-in over the bar before (and any beats before the first note)
       const c = clickTicksOf(SG.song.ts), barBeats = Math.round(barTicksOf(SG.song.ts) / c), nb = Math.round((tg[0].t - run.lead) / c);
       if (nb > 0) {
+        // each count on its own beat of the recording, so a count-in over a slowing bar slows with it (beat taps)
         const beat = (recTime(tg[0].t) - recTime(run.lead)) / nb;
-        showCountIn($("song-box"), at(run.lead), beat, [], Array.from({ length: nb }, (_, k) => String(k % barBeats + 1)));
+        showCountIn($("song-box"), at(run.lead), beat, [], Array.from({ length: nb }, (_, k) => String(k % barBeats + 1)),
+          Array.from({ length: nb }, (_, k) => at(run.lead + k * c)));
       }
     }
     g.goAt = at(tg[0].t);
@@ -8020,7 +7806,8 @@ function songsShow(){
 }
 function songList(){
   $("songs-items").innerHTML = SONGS.map((s, i) => `<button type="button" class="go" data-i="${i}"><span class="ht">${escHTML(s.title)}</span>`
-    + `<span class="hs">${escHTML([s.composer, s.parts.map(p => p.name).join(", ")].filter(Boolean).join(" · "))}</span></button>`).join("");
+    + `<span class="hs">${escHTML([s.composer, s.parts.map(p => p.name).join(", ")].filter(Boolean).join(" · "))}</span>`
+    + (TEACH && TEACH.note(s) ? `<span class="hs asnote">${escHTML(TEACH.note(s))}</span>` : "") + `</button>`).join("");
   $("songs-items").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { ensureCtx(); songOpen(SONGS[+b.dataset.i], true); }));
 }
 // The part that matches the voice part in Settings (or the first part)
@@ -8332,7 +8119,6 @@ function syncOptions(){
   document.querySelectorAll("[data-rtempo-val]").forEach(s => s.textContent = APP.settings.rtempo);
   document.querySelectorAll("[data-songtempo-val]").forEach(s => s.textContent = APP.settings.songTempo);
   document.querySelectorAll("[data-term]").forEach(s => s.textContent = APP.settings.level >= 3 || s.dataset.term === "audTempo" || s.dataset.term === "songTempo" ? tempoTerm(APP.settings[s.dataset.term]) : "");
-  document.querySelectorAll('[data-tempo-for="click"]').forEach(s => s.hidden = !APP.settings.click);
   // 6/8 is clicked in six (Level 4): the marking shows a quaver at twice the slider's number
   document.querySelectorAll(".tempomark").forEach(tm => {
     const card = tm.closest(".card.act"), id = card ? card.id.replace("act-", "") : "";
@@ -8359,15 +8145,6 @@ document.querySelectorAll("[data-opt]").forEach(inp => {
     if (["score", "keyboard", "guitar", "reminder"].includes(k)) AURALS.forEach(A => { if (A.state !== "listening") A.helpers(); });
   });
 });
-document.querySelectorAll("[data-bars]").forEach(seg => {
-  const act = seg.dataset.bars;
-  seg.querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
-    if (BUSY) return;
-    APP.settings.bars[act] = +b.dataset.b; save(); markBars();
-    if (act === "read") READ.newItem(true); else if (act === "part") PART.newItem(true); else rhNew();
-  }));
-});
-function markBars(){ document.querySelectorAll("[data-bars]").forEach(seg => seg.querySelectorAll("button").forEach(b => b.classList.toggle("sel", +b.dataset.b === APP.settings.bars[seg.dataset.bars]))); }
 
 // ---- Voice part ----
 document.querySelectorAll("#partBtns button").forEach(b => b.addEventListener("click", () => {
@@ -8437,7 +8214,7 @@ if (APP.settings.keyboard) { APP.settings.tuning = true; APP.settings.keyboard =
 initAudio();
 if (APP.settings.activity === "aural") APP.settings.activity = APP.settings.auralType === "chord" ? "chords" : "intervals";   // before the split
 if (!LEVEL_INFO[APP.settings.level] || !LEVEL_INFO[APP.settings.level].built) APP.settings.level = 1;
-refreshLevel(); syncOptions(); markBars(); markHelpers(); INSTR.refresh();
+refreshLevel(); syncOptions(); markHelpers(); INSTR.refresh();
 refreshVoice(); setMode("home");
 songLoadEdits();                 // bar times and sections saved from the teacher page (09-songs.js)
 if (!APP.settings.voice) openVoice();
