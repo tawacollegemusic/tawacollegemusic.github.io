@@ -132,6 +132,7 @@ svg.score .you.ok { fill: var(--ok); } svg.score .you.near { fill: var(--warn); 
 .tunekb { width: 100%; height: auto; display: block; }
 #iv-remind { margin-top: 6px; font-family: var(--display); color: var(--brand-ink); }
 svg.score .tup { font-family: var(--display); font-size: 12px; font-style: italic; font-weight: 600; fill: currentColor; text-anchor: middle; }
+svg.score .tupb { fill: none; stroke: currentColor; stroke-width: 1; }
 .tunekb .tk.w { fill: #FFFFFF; stroke: #B9B9C6; stroke-width: 1; }
 .tunekb .tk.b { fill: #2B2B2B; }
 .tunekb .tk.target { stroke: var(--banner); stroke-width: 3.5; }
@@ -319,6 +320,8 @@ svg.score .ev.dim { color: var(--miss); opacity: 0.55; }
 body.editing-parts #teach { display: none !important; }
 #act-song.editing #song-box svg.score { cursor: pointer; }
 svg.score .ev.picked { color: var(--brand); }
+svg.score .ev.needw { color: var(--warn); }
+.wordin { position: absolute; z-index: 6; width: 92px; font: inherit; font-size: 0.95rem; text-align: center; padding: 3px 6px; border-radius: 6px; border: 2px solid var(--brand); background: var(--card); color: var(--ink); }
 .tbadge { font-family: var(--body); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.02em; border: 1.5px solid #fff; border-radius: 999px; padding: 1px 9px; margin-left: 10px; vertical-align: 3px; }
 .teach h3 { margin: 18px 0 0; font-family: var(--display); font-size: 1.05rem; }
 .teach select, .teach input[type=text], .teach input[type=password] { font: inherit; font-size: 0.95rem; padding: 7px 10px; border-radius: 8px; border: 1.5px solid var(--line); background: var(--card); color: var(--ink); min-width: 0; max-width: 100%; }
@@ -466,6 +469,7 @@ body.mode-start #status { font-size: 1.35rem; }
         <div id="as-form" hidden>
           <div class="row"><label class="fld">Title<input type="text" id="as-title"></label><label class="fld">Composer<input type="text" id="as-composer"></label><label class="fld">Words by<input type="text" id="as-words"></label></div>
           <div class="row"><label class="fld">This is<select id="as-as"></select></label></div>
+          <div id="as-staves"></div>
           <div id="as-report"></div>
           <div class="row"><button type="button" class="primary" id="as-open">Open it</button></div>
         </div>
@@ -483,11 +487,17 @@ body.mode-start #status { font-size: 1.35rem; }
     <!-- the teacher page's part editor (09-teacher.js) -->
     <div class="partedit" id="pe">
       <div class="row" id="pe-tools"><button type="button" id="pe-edit">Edit</button><button type="button" id="pe-dup">Duplicate</button><button type="button" id="pe-new">Create new</button><button type="button" id="pe-ren">Rename</button><button type="button" class="quietbtn" id="pe-del">Delete</button></div>
+      <div class="row" id="pw-tools"><button type="button" id="pw-words">Words</button><button type="button" id="pw-copy">Copy words to all parts</button><button type="button" class="quietbtn" id="pw-uncopy" hidden>Take the copied words off</button></div>
       <div class="row" id="pe-form" hidden><input type="text" id="pe-name" maxlength="40" aria-label="Part name" placeholder="Part name" autocomplete="off"><select id="pe-voice" aria-label="Clef"><option value="S">Soprano (treble clef)</option><option value="A">Alto (treble clef)</option><option value="T">Tenor (treble 8)</option><option value="B">Bass (bass clef)</option></select><button type="button" class="primary" id="pe-ok">Create</button><button type="button" id="pe-cancel">Cancel</button></div>
       <div id="pe-editing" hidden>
         <p class="pe-say" id="pe-say" aria-live="polite"></p>
         <div class="row"><button type="button" id="pe-undo">Undo</button><button type="button" class="primary" id="pe-finish">Finish</button><button type="button" id="pe-discard">Cancel</button></div>
       </div>
+      <div id="pw-editing" hidden>
+        <p class="pe-say" id="pw-say" aria-live="polite"></p>
+        <div class="row"><button type="button" id="pw-undo">Undo</button><button type="button" class="primary" id="pw-finish">Finish</button><button type="button" id="pw-cancel">Cancel</button></div>
+      </div>
+      <input type="text" class="wordin" id="pw-in" hidden autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Words for this note">
       <p class="muted small" id="pe-msg" aria-live="polite"></p>
     </div>
 
@@ -906,7 +916,12 @@ function renderScore(svg, score, opts={}){
   // - ev.pchord: a chord of any length (the accompaniment), every note black, one stem, each note's own tie (n.tieOut)
   //   and printed accidental (n.fa); ev.clef: the clef from this note on (a small clef is drawn where it changes);
   // - opts.printedAcc: accidentals only where the score prints them (ev.forceAcc), exactly as written;
-  // - opts.tight: less room above and below (a stave that only shows the music).
+  // - opts.tight: less room above and below (a stave that only shows the music);
+  // - score.tsAt[i]: drawn bar i's time signature, when it changes (drawn at the bar where it changes; beams and beat
+  //   numbers follow each bar's own); score.keyAt[i]: drawn bar i's key, when it changes (drawn at the bar where it
+  //   changes, with naturals for the old key's sharps or flats it drops; accidentals follow each bar's own);
+  // - ev.shown: the written value of a note in a triplet (a triplet crotchet is 8/3 ticks long but drawn as a crotchet,
+  //   ev.tup 3); triplets not under one beam get a bracket with its 3.
   const ov = opts.overlay || null;
   if (!ov) svg.innerHTML = "";
   const perc = score.clef === "perc";
@@ -940,35 +955,50 @@ function renderScore(svg, score, opts={}){
     if (score.clef === "treble8") sel("text", { x: x + 13, y: top + 3*SP + 42, class: "oct8" }, hdr).textContent = "8";
     x += 38;
   }
-  if (!perc && score.key) {
-    const shift = score.clef === "bass" ? -14 : 0;
-    const n = Math.abs(score.key.fifths);
-    for (let i = 0; i < n; i++) {
-      if (score.key.fifths > 0) glyph("accidentalSharp", x + i*11, yForDia(SHARP_POS[i] + shift), hdr);
-      else glyph("accidentalFlat", x + i*11, yForDia(FLAT_POS[i] + shift), hdr);
+  // a key signature at x (after `old`, naturals first for the sharps or flats it drops); returns its width
+  const drawKey = (key, x, old) => {
+    const shift = score.clef === "bass" ? -14 : 0, f = key ? key.fifths : 0, of = old ? old.fifths : 0;
+    const drop = of > 0 ? SHARP_ORDER.slice(f > 0 ? f : 0, of).map(L => SHARP_POS[SHARP_ORDER.indexOf(L)])
+      : of < 0 ? FLAT_ORDER.slice(f < 0 ? -f : 0, -of).map(L => FLAT_POS[FLAT_ORDER.indexOf(L)]) : [];
+    let w = 0;
+    drop.forEach(pos => { glyph("accidentalNatural", x + w, yForDia(pos + shift), hdr); w += 10; });
+    if (drop.length) w += 4;
+    for (let i = 0; i < Math.abs(f); i++) {
+      if (f > 0) glyph("accidentalSharp", x + w, yForDia(SHARP_POS[i] + shift), hdr);
+      else glyph("accidentalFlat", x + w, yForDia(FLAT_POS[i] + shift), hdr);
+      w += 11;
     }
-    x += n * 11 + (n ? 6 : 0);
-  }
-  if (score.ts) {
-    const [tn, td] = score.ts;
-    const w = Math.max(glyphW("timeSig" + tn), glyphW("timeSig" + td));
+    return w + (w ? 6 : 0);
+  };
+  if (!perc && score.key) x += drawKey(score.key, x, null);
+  // a time signature at x; returns its width
+  // (a number of two digits, as in 12/8, is drawn digit by digit)
+  const numW = n => String(n).split("").reduce((w, d) => w + glyphW("timeSig" + d), 0);
+  const num = (n, x, y) => String(n).split("").forEach(d => { glyph("timeSig" + d, x, y, hdr); x += glyphW("timeSig" + d); });
+  const drawTs = ([tn, td], x) => {
+    const w = Math.max(numW(tn), numW(td));
     const yTop = perc ? mid - SP : top + SP, yBot = perc ? mid + SP : top + 3*SP;
-    glyph("timeSig" + tn, x + (w - glyphW("timeSig" + tn))/2 - 1, yTop, hdr);
-    glyph("timeSig" + td, x + (w - glyphW("timeSig" + td))/2 - 1, yBot, hdr);
-    x += w + 10;
-  }
+    num(tn, x + (w - numW(tn))/2 - 1, yTop);
+    num(td, x + (w - numW(td))/2 - 1, yBot);
+    return w;
+  };
+  if (score.ts) x += drawTs(score.ts, x) + 10;
   x += 6;
 
   // --- layout events
   const evs = [];
   let g = 0;
-  const beatLen = score.ts && score.ts[1] === 8 ? 6 : 4;
+  const tsAt = bi => (score.tsAt && score.tsAt[bi]) || score.ts;
+  const keyAt = bi => (score.keyAt && score.keyAt[bi]) || score.key;
+  const beatLen = bi => tsAt(bi) && tsAt(bi)[1] === 8 ? 6 : 4;
   const barXs = [];
   let clefNow = score.clef;
   score.bars.forEach((bar, bi) => {
     const mem = {};
     let bt = 0;
     x += bi === 0 ? 4 : 14;      // room after each barline
+    if (bi > 0 && score.keyAt && !perc && keyAt(bi).fifths !== keyAt(bi - 1).fifths) x += drawKey(keyAt(bi), x, keyAt(bi - 1));      // a new key
+    if (bi > 0 && score.tsAt && tsAt(bi) && String(tsAt(bi)) !== String(tsAt(bi - 1))) x += drawTs(tsAt(bi), x) + 10;      // a new time signature
     const barStart = x;
     bar.forEach((ev, ei) => {
       const prev = evs[evs.length - 1];
@@ -976,14 +1006,14 @@ function renderScore(svg, score, opts={}){
       if (!ev.rest && ev.note && !perc) {
         const n = ev.note;
         const tiedIn = prev && prev.ev.tieNext && prev.ev.note && prev.ev.note.midi === n.midi;
-        const cur = n.dia in mem ? mem[n.dia] : keySigAlter(score.key, LETTERS[n.li]);
+        const cur = n.dia in mem ? mem[n.dia] : keySigAlter(keyAt(bi), LETTERS[n.li]);
         if (opts.printedAcc) { if (ev.forceAcc && !ev.tiedIn) acc = n.alter; }
         else if (!tiedIn && (n.alter !== cur || ev.forceAcc)) acc = n.alter;
         mem[n.dia] = n.alter;
       }
       // a stacked chord's own accidentals (Level 4's chords have no key), top note first, each in its own column
       if (ev.chord && !perc) {
-        chordAcc = (ev.pchord ? ev.chord.filter(cn => cn.fa) : ev.chord.filter(cn => cn.alter !== keySigAlter(score.key, LETTERS[cn.li]))).sort((a, b) => b.dia - a.dia);
+        chordAcc = (ev.pchord ? ev.chord.filter(cn => cn.fa) : ev.chord.filter(cn => cn.alter !== keySigAlter(keyAt(bi), LETTERS[cn.li]))).sort((a, b) => b.dia - a.dia);
         if (!chordAcc.length) chordAcc = null; else acc = null;
       }
       // a clef change: a small clef in front of the note it applies to
@@ -1021,19 +1051,20 @@ function renderScore(svg, score, opts={}){
     else sel("line", { x1: bx, x2: bx, y1: sTop, y2: sBot }, lines);
   });
 
-  // --- stems and beams
+  // --- stems and beams (vt: the value a note is drawn as)
+  const vt = ev => ev.shown || ev.ticks;
   const groups = [];
   let curG = null;
   evs.forEach((e, i) => {
-    const t = e.ev.ticks;
+    const t = vt(e.ev);
     const beamable = !e.ev.rest && t < 4 && !e.ev.wholeBar;
-    const beatIdx = e.bar + ":" + Math.floor((e.bt + 1e-6) / beatLen);     // (Level 5 triplets make ticks of thirds)
+    const beatIdx = e.bar + ":" + Math.floor((e.bt + 1e-6) / beatLen(e.bar));     // (Level 5 triplets make ticks of thirds)
     if (beamable && curG && curG.key === beatIdx && evs[i-1] === curG.items[curG.items.length-1]) curG.items.push(e);
     else { curG = beamable ? { key: beatIdx, items: [e] } : null; if (curG) groups.push(curG); }
   });
   for (const gr of groups) if (gr.items.length >= 2) for (const e of gr.items) e.group = gr;
 
-  const headName = e => e.ev.ticks >= 16 ? "noteheadWhole" : e.ev.ticks >= 8 && e.ev.ticks !== 12 ? "noteheadHalf" : e.ev.ticks === 12 ? "noteheadHalf" : "noteheadBlack";
+  const headName = e => vt(e.ev) >= 16 ? "noteheadWhole" : vt(e.ev) >= 8 ? "noteheadHalf" : "noteheadBlack";
   // how far a note (or a chord's middle) sits above the stave's middle line, in steps
   const relMid = e => (e.ev.chord && e.ev.pchord ? e.ev.chord.reduce((s, c) => s + c.dia, 0) / e.ev.chord.length : e.ev.note.dia) - (e.bd + 4);
   const stemUpFor = e => perc ? true : e.ev.stem ? e.ev.stem === "up" : relMid(e) < 0;
@@ -1064,11 +1095,11 @@ function renderScore(svg, score, opts={}){
       }
       else if (ev.wholeBar) { const rx = (barXs[e.bar].start + barXs[e.bar].end)/2 - glyphW("restWhole")/2; glyph("restWhole", rx, (perc ? mid : mid - SP) + (ev.restDy || 0), grp); e.cx = rx + glyphW("restWhole")/2; }
       else {
-        const base = ev.ticks >= 16 ? "restWhole" : ev.ticks >= 8 ? "restHalf" : ev.ticks >= 4 ? "restQuarter" : ev.ticks >= 2 ? "rest8th" : "rest16th";
+        const v = vt(ev), base = v >= 16 ? "restWhole" : v >= 8 ? "restHalf" : v >= 4 ? "restQuarter" : v >= 2 ? "rest8th" : "rest16th";
         const ry = (base === "restWhole" ? (perc ? mid : mid - SP) : mid) + (ev.restDy || 0);
         glyph(base, e.x, ry, grp);
         e.cx = e.x + glyphW(base)/2;
-        if ([3,6,12].includes(ev.ticks)) sel("circle", { cx: e.x + glyphW(base) + 4, cy: ry - SP/2, r: 1.8, class: "dot" }, grp);
+        if ([3,6,12].includes(v)) sel("circle", { cx: e.x + glyphW(base) + 4, cy: ry - SP/2, r: 1.8, class: "dot" }, grp);
       }
       return;
     }
@@ -1117,19 +1148,19 @@ function renderScore(svg, score, opts={}){
         if (!pc) h2.setAttribute("class", "gl oth");     // the other chord notes stay black when the target is marked
       });
     }
-    if ([3,6,12].includes(ev.ticks)) (ev.pchord ? ev.chord : [n]).forEach(cn => {
+    if ([3,6,12].includes(vt(ev))) (ev.pchord ? ev.chord : [n]).forEach(cn => {
       const onLine = perc || ((cn.dia - bDia) % 2 === 0);
       sel("circle", { cx: e.x + hw + 4 + (ev.pchord ? offOf(cn.dia) : 0), cy: yForDia(cn.dia) - (onLine ? SP/2 : 0), r: 1.8, class: "dot" }, grp);
     });
-    if (ev.ticks < 16) {
+    if (vt(ev) < 16) {
       const up = e.group ? e.group.up : stemUpFor(e);
       e.up = up;
       const sx = up ? e.x + hw - 0.65 : e.x + 0.65;
       const endY = e.group ? e.group.beamY : (up ? e.yTop - 3.5*SP : e.yBot + 3.5*SP);
       sel("line", { x1: sx, x2: sx, y1: (up ? e.yBot : e.yTop) + (up ? -1.5 : 1.5), y2: endY, class: "stem" }, grp);
       e.sx = sx; e.endY = endY;
-      if (!e.group && ev.ticks < 4) {
-        const f = ev.ticks <= 1 ? (up ? "flag16thUp" : "flag16thDown") : (up ? "flag8thUp" : "flag8thDown");
+      if (!e.group && vt(ev) < 4) {
+        const f = vt(ev) <= 1 ? (up ? "flag16thUp" : "flag16thDown") : (up ? "flag8thUp" : "flag8thDown");
         glyph(f, sx - 0.65, endY, grp);
       }
     }
@@ -1143,11 +1174,10 @@ function renderScore(svg, score, opts={}){
     // secondary beams for semiquavers
     const y2 = gr.up ? gr.beamY + th + 3 : gr.beamY - 2*th - 3;
     gr.items.forEach((e, k) => {
-      if (e.ev.ticks !== 1 && e.ev.ticks !== 3) return;
-      if (e.ev.ticks === 3) return;
+      if (vt(e.ev) !== 1) return;
       const nxt = gr.items[k+1], prv = gr.items[k-1];
-      if (nxt && nxt.ev.ticks === 1) sel("rect", { x: e.sx - 0.6, y: y2, width: nxt.sx - e.sx + 1.2, height: th, class: "beam" }, fg);
-      else if (!(prv && prv.ev.ticks === 1)) {
+      if (nxt && vt(nxt.ev) === 1) sel("rect", { x: e.sx - 0.6, y: y2, width: nxt.sx - e.sx + 1.2, height: th, class: "beam" }, fg);
+      else if (!(prv && vt(prv.ev) === 1)) {
         const toward = prv ? -1 : 1;
         const len = 8;
         sel("rect", { x: toward < 0 ? e.sx - len : e.sx - 0.6, y: y2, width: len + 0.6, height: th, class: "beam" }, fg);
@@ -1158,6 +1188,18 @@ function renderScore(svg, score, opts={}){
   for (const gr of groups) if (gr.items.length >= 2 && gr.items.every(e => e.ev.tup === 3)) {
     const a = gr.items[0], b = gr.items[gr.items.length - 1];
     sel("text", { x: ((a.sx + b.sx) / 2).toFixed(1), y: (gr.up ? gr.beamY - 6 : gr.beamY + 15).toFixed(1), class: "tup" }, fg).textContent = "3";
+  }
+  // triplets of crotchets or minims (Practice songs, ev.shown): a bracket with its 3 over each group of three
+  for (let i = 0; i < evs.length; i++) {
+    const e0 = evs[i]; if (e0.ev.tup !== 3 || !e0.ev.shown || e0.group) continue;
+    let j = i, sum = 0;
+    while (j < evs.length && evs[j].ev.tup === 3 && evs[j].bar === e0.bar && !evs[j].group && sum < 2 * e0.ev.shown - 1e-3) { sum += evs[j].ev.ticks; j++; }
+    const run = evs.slice(i, j), y = Math.min(top - 8, ...run.filter(e => !e.ev.rest).map(e => (e.up !== false ? e.endY : e.yTop) - 8));
+    const x1 = run[0].x - 2, x2 = run[run.length - 1].x + 14;
+    const mx = (x1 + x2) / 2;
+    sel("path", { d: `M${x1} ${y + 5}V${y}H${mx - 7}M${mx + 7} ${y}H${x2}V${y + 5}`, class: "tupb" }, fg);
+    sel("text", { x: mx.toFixed(1), y: (y + 4).toFixed(1), class: "tup" }, fg).textContent = "3";
+    i = j - 1;
   }
   // ties
   evs.forEach((e, i) => {
@@ -1216,9 +1258,9 @@ function renderScore(svg, score, opts={}){
     // a beat inside a held note sits part-way across that note's own space, so beats stay evenly spread
     // (a whole-bar rest's beats spread from the start of the bar, as its rest sits in the middle)
     const beatX = t => { const e = evs.find(v => t >= v.g && t < v.g + v.ev.ticks); return e ? (e.ev.wholeBar ? e.x + 10 : e.cx) + (t - e.g) / e.ev.ticks * (e.ev.wholeBar ? e.w - 20 : e.w) : tickX(t); };
-    const step = score.ts && score.ts[1] === 8 ? 2 : beatLen;      // 6/8 is counted in six quavers (Isaac, 18 October)
     barXs.forEach(b => { if (score.bars[b.bi].some(e => e.multi)) return;
-      for (let t = 0, k = 0; t < b.ticks; t += step, k++)
+      const step = tsAt(b.bi) && tsAt(b.bi)[1] === 8 ? 2 : beatLen(b.bi);      // 6/8 is counted in six quavers (Isaac, 18 October)
+      for (let t = 0, k = 0; t < b.ticks - 1e-3; t += step, k++)      // (a bar of triplets can add up to a hair over)
       sel("text", { x: beatX(b.g0 + t), y: by, class: "lbl beat" }, fg).textContent = String(score.ts ? k + 1 : k % 4 + 1); });
   }
   // bar numbers (Practice songs: the song's own numbers, opts.barNums[i] for drawn bar i), at each bar's barline
@@ -6694,9 +6736,28 @@ const SG = { view: "list", song: null, part: null, phrase: -1, nbn: false, sc: n
   yt: null, syncSrc: null, recWait: null };
 
 const songKey = s => makeKey(s.key.fifths, s.key.mode === "min" ? "min" : "maj");
+// The key of bar bi: songs/import.py's keyChanges ([[bar, fifths, "maj" or "min"], ...], when it changes), else s.key
+function songKeyAt(s, bi){ let k = null; for (const [b, f, m] of s.keyChanges || []) { if (b > bi) break; k = [f, m]; } return k ? makeKey(k[0], k[1] === "min" ? "min" : "maj") : songKey(s); }
 const midiOfP = p => 12 * (p[2] + 1) + NAT[LETTERS.indexOf(p[0])] + p[1];
 const noteOfP = (p, octUp) => makeNote(LETTERS.indexOf(p[0]), p[1], p[2] + (octUp || 0));
 const escHTML = t => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+// The time signature of bar bi: songs/import.py's tsChanges ([[bar, beats, beat type], ...], when it changes), else s.ts
+function songTsAt(s, bi){ let t = s.ts; for (const [b, n, d] of s.tsChanges || []) { if (b > bi) break; t = [n, d]; } return t; }
+// The beats (the clicks) from song tick a to b: each bar's own (quavers in 6/8), k its beat in the bar (0 is beat 1). A
+// short first bar (a pickup) has the last beats of a full bar.
+function songBeats(a, b){
+  const s = SG.song, st = SG.timeline.starts, out = [];
+  s.barTicks.forEach((len, bi) => {
+    if (st[bi + 1] <= a + 1e-6 || st[bi] >= b - 1e-6) return;
+    const ts = songTsAt(s, bi), c = clickTicksOf(ts), full = barTicksOf(ts), off = bi === 0 && len < full - 1e-6 ? full - len : 0;
+    for (let p = Math.ceil(off / c - 1e-6) * c; p < off + len - 1e-6; p += c) {
+      const t = st[bi] + p - off;
+      if (t >= a - 1e-6 && t < b - 1e-6) out.push({ t, k: Math.round(p / c), down: p < 1e-6 });
+    }
+  });
+  return out;
+}
+const songClicks = (start, tick, from, beats, vol = 0.07) => beats.forEach(x => click(start + (x.t - from) * tick, x.down, { vol }));
 function songBarStarts(s){ const a = [0]; s.barTicks.forEach(t => a.push(a[a.length - 1] + t)); return a; }
 const sung = (pt, bi) => pt.bars[bi].some(e => e.p);
 // The part's span: from the bar of its first note to the bar of its last
@@ -6765,7 +6826,7 @@ function secWords(pt, sc){
   const st = SG.timeline.starts, out = [];
   pt.bars.forEach((b, bi) => b.forEach(e => {
     const v = e.p && e.verses && e.verses["1"];
-    if (v && v.text && st[bi] + e.t >= sc.s - 1e-6 && st[bi] + e.t < sc.e - 1e-6) out.push(v.text + ((v.syl === "begin" || v.syl === "middle") && !v.text.endsWith("-") ? "-" : " "));
+    if (v && v.text && st[bi] + e.t >= sc.s - 1e-6 && st[bi] + e.t < sc.e - 1e-6) out.push(v.text.trim() + ((v.syl === "begin" || v.syl === "middle") && !v.text.trim().endsWith("-") ? "-" : " "));
   }));
   const w = out.join("").replace(/- ?/g, "").replace(/\s+/g, " ").trim();
   return w.length > 44 ? w.slice(0, 42).replace(/\s\S*$/, "") + "…" : w;
@@ -6788,7 +6849,8 @@ function songPlan(a, z){
   for (let bi = a; bi <= z; bi++) {
     const empty = !staves.some(st => has(st, bi));
     let bj = bi;
-    if (empty) while (bj + 1 <= z && !staves.some(st => has(st, bj + 1))) bj++;
+    const same = j => songTsAt(s, j).join() === songTsAt(s, bi).join() && songKeyAt(s, j).fifths === songKeyAt(s, bi).fifths;
+    if (empty) while (bj + 1 <= z && same(bj + 1) && !staves.some(st => has(st, bj + 1))) bj++;
     const ticks = s.barTicks.slice(bi, bj + 1).reduce((x, t) => x + t, 0);
     plan.push({ a: bi, b: bj, g0: g, ticks, multi: bj > bi ? bj - bi + 1 : 0 });
     g += ticks; bi = bj;
@@ -6798,7 +6860,7 @@ function songPlan(a, z){
 // A voice part's events for one drawn bar. ctx carries a tie or a held word across the barline; own: the singer's part,
 // whose notes are listed in SG.notes (with where they sit in the song and on the stave). Notes outside the section are grey.
 function vocalBar(pt, item, ctx, own, sec){
-  const s = SG.song, t8 = pt.clef === "treble8", key = songKey(s), labels = own && (APP.settings.names || APP.settings.solf);
+  const s = SG.song, t8 = pt.clef === "treble8", key = songKeyAt(s, item.a), labels = own && (APP.settings.names || APP.settings.solf);
   if (item.multi) { ctx.prev = null; ctx.ext = false; return [{ ticks: item.ticks, rest: true, multi: item.multi }]; }
   const bi = item.a;
   if (!sung(pt, bi)) { ctx.prev = null; ctx.ext = false; return [{ ticks: item.ticks, rest: true, wholeBar: true }]; }
@@ -6813,7 +6875,7 @@ function vocalBar(pt, item, ctx, own, sec){
     const v = e.verses && e.verses["1"];
     const ev = { ticks: e.d, note, tieNext: e.tie === "start" || e.tie === "both", tiedIn: !!tiedIn, forceAcc: !!e.acc, songT: t, src: { pt: pt.id, bi, k } };
     if (split) ev.stem = "up";
-    if (v && v.text) { ev.lyric = v.text + ((v.syl === "begin" || v.syl === "middle") && !v.text.endsWith("-") ? "-" : ""); ctx.ext = !!v.ext; }
+    if (v && v.text.trim()) { const w = v.text.trim(); ev.lyric = w + ((v.syl === "begin" || v.syl === "middle") && !w.endsWith("-") ? "-" : ""); ctx.ext = !!v.ext; }
     else if (ctx.ext) ev.ext = true;
     if (labels && !tiedIn) { ev.label = noteLabel(key, note); ev.hand = noteHand(key, note); }
     if (own) {
@@ -6934,7 +6996,8 @@ function songColumns(passes, plan, beats){
     const next = i + 1 < list.length && list[i + 1] < barEnd ? list[i + 1] : barEnd, len = Math.max(0, next - k);
     W.set(k, Math.max(16, (beats ? Math.max(11, labelGap() / 4) * len : 12 + 10 * Math.sqrt(len)) + (pad.get(k) || 0)));
   });
-  const span = (g, ticks) => { let w = 0; for (const k of list) { if (k >= key(g + ticks) - 1e-6) break; if (k >= key(g) - 1e-6) w += W.get(k); } return w; };
+  // (a column within 0.002 of a place is that place: triplets' thirds round differently by where they're added up)
+  const span = (g, ticks) => { let w = 0; for (const k of list) { if (k >= key(g + ticks) - 0.002) break; if (k >= key(g) - 0.002) w += W.get(k); } return w; };
   need.forEach((arr, k) => arr.forEach(x => { const have = span(k, x.ticks); if (have < x.w) W.set(k, W.get(k) + x.w - have); }));
   // a multi-bar rest is twice as wide as a typical bar of this score (Isaac, 21 October: a 15-bar rest drawn by its
   // length hid the music coming up), however many bars it stands for; each bar ends with 6px after it
@@ -6942,12 +7005,12 @@ function songColumns(passes, plan, beats){
   plan.forEach(item => { if (item.multi) W.set(key(item.g0), 2 * (typical + 6) - 6); });
   // the widths summed in order, so each event's width is a quick look-up
   const pre = [0]; list.forEach(k => pre.push(pre[pre.length - 1] + W.get(k)));
-  const at = g => { const t = key(g) - 1e-6; let lo = 0, hi = list.length; while (lo < hi) { const m = (lo + hi) >> 1; if (list[m] < t) lo = m + 1; else hi = m; } return lo; };
+  const at = g => { const t = key(g) - 0.002; let lo = 0, hi = list.length; while (lo < hi) { const m = (lo + hi) >> 1; if (list[m] < t) lo = m + 1; else hi = m; } return lo; };
   return { colW: (g, ticks) => pre[at(g + ticks)] - pre[at(g)], colPad: g => pad.get(key(g)) || 0 };
 }
 // Draws the score: every stave in the scroll box, all lined up, with the bar numbers on the top one
 function songDraw(){
-  const s = SG.song, key = songKey(s), V = voiceInfo(), box = $("song-box"), sec = songSec(), [a, z] = songBars();
+  const s = SG.song, V = voiceInfo(), box = $("song-box"), sec = songSec(), [a, z] = songBars();
   const keepScroll = SG.drawnFor === SG.phrase + "|" + a + "|" + z ? box.scrollLeft : 0;
   const { staves, plan } = songPlan(a, z);
   SG.notes = [];
@@ -6965,9 +7028,15 @@ function songDraw(){
       if (st.src && st.pt.more) { st.more = plan.map(item => moreBar(st.pt, item)); passes.push({ bars: st.more, main: false, clef0: st.clef }); }
     }
   });
+  // a note in a triplet (8/3 ticks: a triplet crotchet) is drawn as the value it's written as, with its 3
+  const std = [1, 2, 3, 4, 6, 8, 12, 16], isStd = v => std.some(x => Math.abs(x - v) < 1e-3);
+  passes.forEach(p => p.bars.forEach(b => b.forEach(ev => { if (!ev.hidden && !ev.multi && !ev.wholeBar && !isStd(ev.ticks) && isStd(ev.ticks * 1.5)) { ev.shown = Math.round(ev.ticks * 1.5); ev.tup = 3; } })));
   const cols = songColumns(passes, plan, beats);
   box.innerHTML = "";
   const printedAcc = !!s.printedAcc, barNums = plan.map(p => s.barLabels[p.a]), Ls = [];
+  // the time signature at the start, and each drawn bar's when it changes in the song
+  const ts = songTsAt(s, a), tsAt = s.tsChanges ? plan.map(p => songTsAt(s, p.a)) : null;
+  const key = songKeyAt(s, a), keyAt = s.keyChanges ? plan.map(p => songKeyAt(s, p.a)) : null;      // and the key
   let first = true;
   SG.L = null; SG.L2 = null;
   staves.forEach(st => {
@@ -6981,23 +7050,23 @@ function songDraw(){
     svg.__st = st;
     const common = { ...cols, printedAcc, barNums: first ? barNums : null, final: true };
     if (st.kind === "acc") {
-      const L = renderScore(svg, { clef: st.clef, key, ts: s.ts, bars: st.passes[0] }, { ...common, tight: true, tr: 0 });
-      st.passes.slice(1).forEach(bars => renderScore(svg, { clef: st.clef, key, ts: s.ts, bars }, { ...cols, printedAcc, overlay: L }));
+      const L = renderScore(svg, { clef: st.clef, key, ts, tsAt, keyAt, bars: st.passes[0] }, { ...common, tight: true, tr: 0 });
+      st.passes.slice(1).forEach(bars => renderScore(svg, { clef: st.clef, key, ts, tsAt, keyAt, bars }, { ...cols, printedAcc, overlay: L }));
       Ls.push(L);
     } else if (st.kind === "part") {
-      const L = renderScore(svg, { clef: st.clef, key, ts: s.ts, bars: st.bars }, { ...common, tight: true, tr: 0 });
-      if (st.more) L.overlays = [renderScore(svg, { clef: st.clef, key, ts: s.ts, bars: st.more }, { ...cols, printedAcc, overlay: L })];
+      const L = renderScore(svg, { clef: st.clef, key, ts, tsAt, keyAt, bars: st.bars }, { ...common, tight: true, tr: 0 });
+      if (st.more) L.overlays = [renderScore(svg, { clef: st.clef, key, ts, tsAt, keyAt, bars: st.more }, { ...cols, printedAcc, overlay: L })];
       Ls.push(L);
     } else {
       // the singer's part: labels, beat numbers and marks (a tenor's go on the bass clef copy beneath)
       const lab = !!(APP.settings.names || APP.settings.solf);
       const plain = V.alt ? st.bars.map(b => b.map(e => ({ ...e, label: "", hand: null }))) : st.bars;
-      SG.L = renderScore(svg, { clef: V.clef, key, ts: s.ts, bars: plain }, { ...common, labels: lab && !V.alt, beats });
+      SG.L = renderScore(svg, { clef: V.clef, key, ts, tsAt, keyAt, bars: plain }, { ...common, labels: lab && !V.alt, beats });
       Ls.push(SG.L);
       if (V.alt && !(TEACH && TEACH.editing())) {         // (not while the teacher page edits the part)
         const c2 = document.createElement("div"); c2.className = "partlabel"; c2.textContent = "Same notes in bass clef"; box.appendChild(c2);
         const svg2 = sel("svg", { class: "score", role: "img", "aria-label": "The same notes in bass clef" }, box);
-        SG.L2 = renderScore(svg2, { clef: V.alt, key, ts: s.ts, bars: shiftBars(st.bars, V.altShift) }, { ...cols, printedAcc, labels: lab, tr: V.tr - V.altShift, lyrics: false, final: true });
+        SG.L2 = renderScore(svg2, { clef: V.alt, key, ts, tsAt, keyAt, bars: shiftBars(st.bars, V.altShift) }, { ...cols, printedAcc, labels: lab, tr: V.tr - V.altShift, lyrics: false, final: true });
         Ls.push(SG.L2);
       }
     }
@@ -7341,7 +7410,7 @@ async function songLoadEdits(){
     const parts = songApplyParts(s, px);
     if (TEACH) TEACH.hadParts(s, !!px);
     const changed = parts | songApplyTimings(s, tm) | songApplySections(s, sx);
-    if (changed && SG.song === s && SG.view === "song" && SG.state === "idle" && MODE === "songs" && !SG.tapping && !(TEACH && TEACH.editing())) {
+    if (changed && SG.song === s && SG.view === "song" && SG.state === "idle" && MODE === "songs" && !SG.tapping && !(TEACH && TEACH.busy())) {
       if (parts) { SG.timeline = songTimeline(s); SG.part = s.parts.find(p => p.id === SG.part.id) || songDefaultPart(s); songPartButtons(s); }
       SG.rec = songRecording(s); SG.useRec = !!SG.rec; recSelect(); songSet();
     }
@@ -7444,7 +7513,7 @@ function songMsg(t){ $("song-msg").textContent = t || ""; }
 function songShowPitch(n, p, cents){
   const V = voiceInfo();
   if (p === null || !n || n.ev === undefined) { SG.ring.hide(); if (SG.ring2) SG.ring2.hide(); LIVE.needle(null, null, n ? n.note.midi : null); return; }
-  const cls = tuningClass(cents), key = songKey(SG.song);
+  const cls = tuningClass(cents), key = songKeyAt(SG.song, n.bar);
   SG.ring.show(SG.L.evs[n.ev].cx, ringY(SG.L, key, n.note, n.note.midi + cents / 100), cls);
   if (SG.L2) { const t2 = down(n.note, V.altShift); SG.ring2.show(SG.L2.evs[n.ev].cx, ringY(SG.L2, key, t2, t2.midi + cents / 100), cls); }
   LIVE.needle(cents, cls, n.note.midi, p - V.tr); LIVE.sung(tuningWords(cents));
@@ -7472,7 +7541,7 @@ function songLive(run, show){
   };
 }
 // The count-in labels: a bar, then the beats before the first note when the section starts part-way through its bar
-function upbeatCount(tg, S0){ const c = clickTicksOf(SG.song.ts); return Array.from({ length: Math.round((tg[0].t - S0) / c) }, (_, k) => String(k + 1)); }
+function upbeatCount(tg, S0){ return songBeats(S0, tg[0].t).map(x => String(x.k + 1)); }
 // Every event of the singer's part in the phrase (rests too), for finding extra notes. at(t): when song tick t is heard,
 // in audio time (the click's time, or the recording's); from: when the listening for this go began
 function songPass(tg, at, from){
@@ -7483,7 +7552,7 @@ function songPass(tg, at, from){
     evs.push({ start: at(t), end: at(t + e.ev.ticks), rest: !!e.ev.rest, n: e.ev.rest ? -1 : local, j });
   });
   const ms = at(tg[0].t), me = at(sc.e);
-  return { events: evs, musicStart: ms, musicEnd: me, from, to: me + 1.0, beat: (at(tg[0].t + clickTicksOf(SG.song.ts)) - ms) };
+  return { events: evs, musicStart: ms, musicEnd: me, from, to: me + 1.0, beat: (at(tg[0].t + clickTicksOf(songTsAt(SG.song, tg[0].bar))) - ms) };
 }
 // 1 Learn it and 3 Sing it. With the recording (when it's chosen and can play) the recording leads; otherwise the piano.
 async function songGo(kind){
@@ -7574,12 +7643,11 @@ function songRecStage(run, g, now){
       tg.forEach(x => { run.windows.push({ start: at(x.t), end: at(x.t + x.d) }); run.targets.push(sound(x)); });
       window.__timed = { musicStart: at(tg[0].t), windows: run.windows.slice(g.w0), notes: run.targets.slice(g.w0) };
       // the count-in over the bar before (and any beats before the first note)
-      const c = clickTicksOf(SG.song.ts), barBeats = Math.round(barTicksOf(SG.song.ts) / c), nb = Math.round((tg[0].t - run.lead) / c);
+      const bs = songBeats(run.lead, tg[0].t), nb = bs.length;
       if (nb > 0) {
         // each count on its own beat of the recording, so a count-in over a slowing bar slows with it (beat taps)
         const beat = (recTime(tg[0].t) - recTime(run.lead)) / nb;
-        showCountIn($("song-box"), at(run.lead), beat, [], Array.from({ length: nb }, (_, k) => String(k % barBeats + 1)),
-          Array.from({ length: nb }, (_, k) => at(run.lead + k * c)));
+        showCountIn($("song-box"), at(run.lead), beat, [], bs.map(x => String(x.k + 1)), bs.map(x => at(x.t)));
       }
     }
     g.goAt = at(tg[0].t);
@@ -7603,12 +7671,12 @@ function songRecStage(run, g, now){
 }
 // On their own: a bar's count-in, then the click through the phrase at the recording's speed
 function songSoloStart(run, g, now){
-  const tg = run.tg, sc = run.sc, ts = SG.song.ts, S0 = run.S0, c = clickTicksOf(ts);
+  const tg = run.tg, sc = run.sc, ts = songTsAt(SG.song, sc.a), S0 = run.S0, c = clickTicksOf(ts);
   let tick = (recTime(sc.e) - recTime(S0)) / (sc.e - S0);
   if (!(tick > 0.02 && tick < 1)) tick = tickSecOf(ts, songTempo());
   const beat = c * tick, cl = countLabels(ts), c1 = now + 0.3, s2 = c1 + cl.length * beat;
   countInClicks(c1, beat, ts);
-  musicClicks(s2, tick, Math.ceil((sc.e - S0) / c) * c, ts);
+  songClicks(s2, tick, S0, songBeats(S0, sc.e));
   g.w0 = run.windows.length;
   tg.forEach(x => { run.windows.push({ start: s2 + (x.t - S0) * tick, end: s2 + (x.t - S0 + x.d) * tick }); run.targets.push(sound(x)); });
   g.start = s2; g.tick = tick; g.end = s2 + (sc.e - S0) * tick + 1.0; g.goAt = s2 + (tg[0].t - S0) * tick;
@@ -7627,17 +7695,14 @@ function songSoloStage(run, g, now){
 // it with the accompaniment (and the other parts if that switch is on). The click runs all the way through.
 function songLearnPiano(){
   const s = SG.song, run = SG.run, tg = run.tg, sc = singSec(), st = SG.timeline.starts;
-  const S0 = st[sc.a], L = st[sc.z + 1] - S0, ts = s.ts, tick = tickSecOf(ts, songTempo()), cT = clickTicksOf(ts), beat = cT * tick;
+  const S0 = st[sc.a], L = st[sc.z + 1] - S0, ts = songTsAt(s, sc.a), tick = tickSecOf(ts, songTempo()), cT = clickTicksOf(ts), beat = cT * tick;
   const cl = countLabels(ts), bar = cl.length * beat, labels = cl.concat(upbeatCount(tg, S0)), ctx = AUDIO.ctx;
   LIVE.open(true, "Listen.");
   const sec = L * tick, s1 = ctx.currentTime + 0.3, c1 = s1 + sec, s2 = c1 + bar, c2 = s2 + sec, s3 = c2 + bar;
   tg.forEach(n => tone(sound(n), s1 + (n.t - S0) * tick, n.d * tick * 0.95, { vol: 0.26 }));
-  const beats = Math.round((s3 + sec - s1) / beat), barBeats = barTicksOf(ts) / cT;
-  for (let b = 0; b < beats; b++) {
-    const t = s1 + b * beat, inCount = (t >= c1 - 1e-3 && t < s2 - 1e-3) || (t >= c2 - 1e-3 && t < s3 - 1e-3);
-    const k = t < c1 - 1e-3 ? b : t < s2 - 1e-3 ? Math.round((t - c1) / beat) : t < c2 - 1e-3 ? Math.round((t - s2) / beat) : t < s3 - 1e-3 ? Math.round((t - c2) / beat) : Math.round((t - s3) / beat);
-    click(t, k % barBeats === 0, { vol: inCount ? 0.18 : 0.07 });
-  }
+  const bs = songBeats(S0, S0 + L);                 // each bar's own beats (the time signature can change)
+  [s1, s2, s3].forEach(t => songClicks(t, tick, S0, bs));
+  countInClicks(c1, beat, ts); countInClicks(c2, beat, ts);
   SG.stream = {};
   songStream(songEvents(S0, S0 + L, { songOwn: false, songAccomp: true }), s3, S0, tick, { noIgnore: true, acc: true });
   const wins = start => tg.map(n => ({ start: start + (n.t - S0) * tick, end: start + (n.t - S0 + n.d) * tick }));
@@ -7655,7 +7720,7 @@ function songLearnPiano(){
 // what's switched on
 function songSingPiano(){
   const s = SG.song, run = SG.run, tg = run.tg, sc = singSec(), st = SG.timeline.starts;
-  const S0 = st[sc.a], ts = s.ts, tick = tickSecOf(ts, songTempo()), beat = clickTicksOf(ts) * tick, cl = countLabels(ts), ctx = AUDIO.ctx;
+  const S0 = st[sc.a], ts = songTsAt(s, Math.max(0, sc.a - 1)), tick = tickSecOf(ts, songTempo()), beat = clickTicksOf(ts) * tick, cl = countLabels(ts), ctx = AUDIO.ctx;
   LIVE.open(true, "Listen for the count-in.");
   LIVE.target(tg[0].note.midi);
   const t0 = ctx.currentTime + 0.3;
@@ -7663,13 +7728,14 @@ function songSingPiano(){
   SG.stream = {};
   if (sc.a > 0) {                                                    // the bar before, on the piano
     const lt = s.barTicks[sc.a - 1];
-    musicClicks(start, tick, lt, ts);
+    const bs = songBeats(S0 - lt, S0);
+    songClicks(start, tick, S0 - lt, bs);
     songStream(songEvents(S0 - lt, S0), start, S0 - lt, tick, { noIgnore: true, acc: true });
-    lead = Array.from({ length: Math.round(lt / clickTicksOf(ts)) }, (_, k) => String(k + 1));
+    lead = bs.map(x => String(x.k + 1));
     start += lt * tick;
   }
   const len = (sc.e - S0) * tick;
-  musicClicks(start, tick, Math.ceil((sc.e - S0) / clickTicksOf(ts)) * clickTicksOf(ts), ts);
+  songClicks(start, tick, S0, songBeats(S0, sc.e));
   songStream(songEvents(S0, sc.e, { ownFrom: sc.s, ownTo: sc.e }), start, S0, tick, { noIgnore: true, acc: true });
   run.windows = tg.map(n => ({ start: start + (n.t - S0) * tick, end: start + (n.t - S0 + n.d) * tick }));
   run.targets = tg.map(sound);
@@ -7917,7 +7983,7 @@ function songOpen(s, fresh){
 function songPartButtons(s){
   $("song-parts").innerHTML = s.parts.map(p => `<button type="button" data-p="${p.id}">${escHTML(p.name)}</button>`).join("");
   $("song-parts").querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
-    if (SG.state === "listening" || (TEACH && TEACH.editing())) return;
+    if (SG.state === "listening" || (TEACH && TEACH.busy())) return;
     SG.part = s.parts.find(p => p.id === b.dataset.p); SG.marks = null; SG.phrase = -1; SG.pos = 0;
     ensureCtx(); songSet();
   }));
@@ -8202,8 +8268,95 @@ function scoreMeta(xml){
     words: txt('identification > creator[type="lyricist"]') || txt('identification > creator[type="poet"]') };
 }
 
-// The song data, as songs/import.py makes it: { song, warn, problems }. warn: things worth checking (as import.py's
+// The song data, as songs/import.py makes it: { song, warn, problems, staves }. staves: each one-stave voice part, { id,
+// name, kind: "one", "SA" or "TB" } (meta.staves: { id: kind } says what a stave is, as import.py's --stave does). warn: things worth checking (as import.py's
 // NOTE lines); problems: things the app can't show yet, which stop the song being added.
+// A one-stave voice part is "SA" or "TB" when two voice parts share it (closed score), else "one" (import.py's stave_kind)
+const IMPORT_CLOSED = [["SA", /^(women|ladies|upper voices|treble voices)\b|^s\.?\s*[&/+]?\s*a\.?$|\bsop.*\b(alto|contralto)|\b(alto|contralto).*\bsop/],
+  ["TB", /^(men|lower voices)\b|^t\.?\s*[&/+]?\s*b\.?$|\bten.*\b(bass|bar)|\b(bass|bar).*\bten/]];
+const IMPORT_HALVES = { SA: [["S", "Soprano"], ["A", "Alto"]], TB: [["T", "Tenor"], ["B", "Bass"]] };
+function importStaveKind(name, bars, clef){
+  const low = name.toLowerCase().trim();
+  for (const [kind, rx] of IMPORT_CLOSED) if (rx.test(low)) return kind;
+  if (IMPORT_VOICES.some(([, rx]) => rx.test(low))) return "one";
+  let sung = 0, two = 0;
+  for (const bar of bars) {
+    if (!bar.some(e => e.p)) continue;
+    sung++;
+    if (new Set(bar.filter(e => e.p).map(e => e.voice)).size > 1 || bar.some(e => e.chord && e.p)) two++;
+  }
+  return sung && two * 2 >= sung ? (clef === "bass" || clef === "treble8" ? "TB" : "SA") : "one";
+}
+// Rests filling d ticks from t, in written values; and a closed-score stave's bars as two parts (import.py's split_closed)
+function importRests(t, d){
+  const out = [];
+  while (d > 1e-6) { const v = [16, 12, 8, 6, 4, 3, 2, 1].find(x => x <= d + 1e-6) || d; out.push({ t: Math.round(t * 1e6) / 1e6, d: v, r: 1 }); t += v; d = Math.round((d - v) * 1e6) / 1e6; }
+  return out;
+}
+function importSplitClosed(bars, label, barLabels, warn, midiOf){
+  const r6 = x => Math.round(x * 1e6) / 1e6, up = [], upm = [], lo = [], lom = [], divisi = [];
+  let two = 0, shared = 0;
+  bars.forEach((bar, bi) => {
+    // each voice's notes and rests, with a chord's notes together (highest first)
+    const slots = [], cur = {};
+    for (const e of bar) {
+      const v = e.voice;
+      if (e.chord && cur[v]) { cur[v].notes.push(e); continue; }
+      cur[v] = { t: e.t, d: e.d, notes: [e], upper: /^\d+$/.test(v) ? +v % 2 === 1 : v === "1" };
+      slots.push(cur[v]);
+    }
+    slots.forEach(sl => sl.notes.sort((a, b) => (a.p ? -midiOf(a.p) : 0) - (b.p ? -midiOf(b.p) : 0)));
+    const seen = slots.filter(sl => !(sl.notes[0].r && sl.notes[0].hid));
+    const covered = (upper, a, b) => seen.filter(sl => sl.upper === upper).reduce((n, sl) => n + Math.max(0, Math.min(b, sl.t + sl.d) - Math.max(a, sl.t)), 0);
+    const mine = new Map([[true, [[], []]], [false, [[], []]]]);         // main events, split events
+    const verses = sl => { const out = {}; for (const n of sl.notes) for (const k in n.verses || {}) if (!(k in out)) out[k] = n.verses[k]; return out; };
+    const give = (upper, sl, notes) => {
+      const [main, more] = mine.get(upper);
+      if (!notes.length || !notes[0].p) { main.push({ t: sl.t, d: sl.d, r: 1 }); return; }
+      notes.forEach((n, i) => {
+        const x = {}; for (const k of ["t", "d", "p", "tie", "acc"]) if (k in n) x[k] = n[k];
+        x.t = sl.t; x.d = sl.d;
+        if (i === 0) { const vs = verses(sl); if (Object.keys(vs).length) x.verses = vs; main.push(x); }
+        else more.push(x);
+      });
+    };
+    let both = false, alone = false;
+    for (const sl of seen) {
+      const got = covered(!sl.upper, sl.t, sl.t + sl.d);
+      let notes = sl.notes.filter(n => n.p); if (!notes.length) notes = sl.notes.slice(0, 1);
+      if (got > 1e-6) {                                   // the other voice is written here too: each part its own voice
+        both = true;
+        if (got < sl.d - 1e-6) warn.push(`${label} bar ${barLabels[bi]}: the two voices only partly overlap; check the ${sl.upper ? "lower" : "upper"} part there`);
+        give(sl.upper, sl, notes[0].p ? notes : []);
+      } else {                                            // one voice for both parts: shared out by how many notes
+        alone = true;
+        if (!notes[0].p || notes.length === 1) { give(true, sl, notes[0].p ? notes : []); give(false, sl, notes[0].p ? notes : []); continue; }
+        const k = Math.floor((notes.length + 1) / 2);
+        give(true, sl, notes.slice(0, k)); give(false, sl, notes.slice(k));
+      }
+    }
+    two += both; shared += alone && !both;
+    const end = Math.max(0, ...bar.map(e => e.t + e.d));
+    for (const [upper, barsOut, moreOut] of [[true, up, upm], [false, lo, lom]]) {
+      const [main, more] = mine.get(upper);
+      main.sort((a, b) => a.t - b.t);
+      let out = [], at = 0;
+      for (const x of main) {
+        if (x.t < at - 1e-6) {
+          warn.push(`${label} bar ${barLabels[bi]}: two notes at once in the ${upper ? "upper" : "lower"} part; one is kept as a split`);
+          if (x.p) { const y = { ...x }; delete y.verses; more.push(y); }
+          continue;
+        }
+        if (x.t > at + 1e-6) out = out.concat(importRests(at, x.t - at));
+        out.push(x); at = r6(x.t + x.d);
+      }
+      if (bar.length && end > at + 1e-6) out = out.concat(importRests(at, end - at));
+      barsOut.push(out); moreOut.push(more.slice().sort((a, b) => a.t - b.t));
+      if (more.length && !divisi.includes(barLabels[bi])) divisi.push(barLabels[bi]);
+    }
+  });
+  return { up, upm, lo, lom, two, shared, divisi };
+}
 const IMPORT_VOICES = [["S", /^(sop|soprano|treble|s\b|s\d)/], ["A", /^(alto|contralto|a\b|a\d)/], ["T", /^(ten|tenor|t\b|t\d)/], ["B", /^(bass|bar|baritone|b\b|b\d)/]];
 function scoreImport(xml, meta){
   const doc = new DOMParser().parseFromString(xml.replace(/<!DOCTYPE[^>]*>/, ""), "application/xml");
@@ -8223,13 +8376,13 @@ function scoreImport(xml, meta){
   const barT = t => t ? t[0] * (16 / t[1]) : null;
   const names = {};
   [...root.getElementsByTagName("score-part")].forEach(sp => { names[sp.getAttribute("id")] = (text(sp, "part-name") || "").trim(); });
-  const warn = [], problems = [], partsOut = [], accompOut = [], allDisplay = [];
-  let barLabels = null, barTs = null, tempo = null;
+  const warn = [], problems = [], partsOut = [], accompOut = [], allDisplay = [], staveInfo = [];
+  let barLabels = null, barTs = null, barKeys = null, tempo = null;
   const keys = [];
   for (const part of kids(root, "part")) {
     const pid = part.getAttribute("id"), name = names[pid] || "";
-    let div = 1, ts = null, clef = null, staves = 1, hasLyrics = false;
-    const bars = [], labels = [], tss = [], curClefs = {}, clefChanges = {};
+    let div = 1, ts = null, clef = null, staves = 1, hasLyrics = false, kcur = null;
+    const bars = [], labels = [], tss = [], kss = [], curClefs = {}, clefChanges = {};
     for (const m of kids(part, "measure")) {
       labels.push(m.getAttribute("number"));
       let pos = 0, lastStart = 0;
@@ -8241,7 +8394,7 @@ function scoreImport(xml, meta){
           const t = kid(el, "time");
           if (t && text(t, "beats")) ts = [parseInt(text(t, "beats"), 10), parseInt(text(t, "beat-type"), 10)];
           const k = kid(el, "key");
-          if (k && text(k, "fifths") !== null) keys.push([parseInt(text(k, "fifths"), 10), text(k, "mode") || "major"]);
+          if (k && text(k, "fifths") !== null) { keys.push([parseInt(text(k, "fifths"), 10), text(k, "mode") || "major"]); kcur = keys[keys.length - 1]; }
           if (text(el, "staves")) staves = parseInt(text(el, "staves"), 10);
           for (const c of kids(el, "clef")) {
             const sign = text(c, "sign"), och = parseInt(text(c, "clef-octave-change") || "0", 10);
@@ -8281,21 +8434,34 @@ function scoreImport(xml, meta){
           }
           if (Object.keys(verses).length) { hasLyrics = true; e.verses = verses; }
           e.voice = voice; e.staff = staff; e.chord = isChord;
+          if (!p && el.getAttribute("print-object") === "no") e.hid = 1;
           bar.push(e);
           if (!isChord) { lastStart = pos; pos += d; }
         }
       }
-      bars.push(bar); tss.push(ts);
+      bars.push(bar); tss.push(ts); kss.push(kcur);
     }
     let voiceGuess = null;
     const low = name.toLowerCase();
     for (const [v, rx] of IMPORT_VOICES) if (rx.test(low)) { voiceGuess = v; break; }
-    const isVocal = staves === 1 && (hasLyrics || voiceGuess !== null);
+    const kind = (meta.staves && meta.staves[pid]) || (staves === 1 ? importStaveKind(name, bars, clef) : "one");
+    const isVocal = staves === 1 && (hasLyrics || voiceGuess !== null || kind !== "one");
+    if (isVocal) staveInfo.push({ id: pid, name: name || pid, kind });
     if (barLabels === null) barLabels = labels;
     else if (JSON.stringify(labels) !== JSON.stringify(barLabels)) warn.push(`${name || pid}: bar numbers differ from the first part`);
     if (barTs === null || (pid && staves > 1)) barTs = tss;
-    const strip = e => { const x = {}; for (const k in e) if (k !== "voice" && k !== "staff" && k !== "chord") x[k] = e[k]; return x; };
-    if (isVocal) {
+    if (barKeys === null) barKeys = kss;
+    const strip = e => { const x = {}; for (const k in e) if (k !== "voice" && k !== "staff" && k !== "chord" && k !== "hid") x[k] = e[k]; return x; };
+    if (isVocal && IMPORT_HALVES[kind]) {
+      const label = name || pid, r = importSplitClosed(bars, label, barLabels, warn, midiOf), taken = new Set(partsOut.map(p => p.name));
+      IMPORT_HALVES[kind].forEach(([v, nm], i) => {
+        const out = { id: `${pid}-${i ? "low" : "up"}`, name: taken.has(nm) ? `${nm} (${label})` : nm, voice: v, clef: clef || "treble", stave: pid, bars: i ? r.lo : r.up };
+        if ((i ? r.lom : r.upm).some(b => b.length)) out.more = i ? r.lom : r.upm;
+        partsOut.push(out);
+      });
+      const [a, b] = partsOut.slice(-2).map(p => p.name);
+      warn.push(`${label}: read as ${a} and ${b} on one stave: both voices written in ${r.two} bars, one voice shared out in ${r.shared}` + (r.divisi.length ? `, a split in bar${r.divisi.length > 1 ? "s" : ""} ${r.divisi.join(", ")}` : ""));
+    } else if (isVocal) {
       const outBars = [], moreBars = [];
       bars.forEach((bar, bi) => {
         const top = bar.length ? bar[0].voice : "1";
@@ -8356,28 +8522,24 @@ function scoreImport(xml, meta){
     if (got.length && (got.length > 1 || !got.includes(want)) && !(near && Math.abs(L - want) < 1e-3))
       warn.push(bi === 0 && near && L < want ? `bar ${barLabels[0]} is a pickup (${L} semiquaver${L === 1 ? "" : "s"} long)`
         : `bar ${barLabels[bi]}: the notes add up to ${got.sort((a, b) => a - b).join(" or ")} semiquavers, but the time signature says ${want}; going by the notes`);
-    return L;
+    return want && near && Math.abs(L - want) < 1e-3 ? want : L;      // (triplets: a rounding apart, as import.py)
   });
   const tssAll = lens.map((L, bi) => { const t = barTs[bi]; return t && barT(t) === L ? t : t ? [Math.trunc(L / (16 / t[1])), t[1]] : [Math.trunc(L / 4), 4]; });
   const commonest = list => { const n = new Map(); list.forEach(x => { const k = JSON.stringify(x); n.set(k, (n.get(k) || 0) + 1); }); let best = null; n.forEach((c, k) => { if (!best || c > best[1]) best = [k, c]; }); return best && JSON.parse(best[0]); };
   const key = keys.length ? commonest(keys) : [0, "major"];
-  if (new Set(keys.map(k => JSON.stringify(k))).size > 1) warn.push(`there's more than one key signature in the score; the app uses ${key[0]} ${key[1]}`);
-  const tsSet = new Set(tssAll.filter((t, i) => i || barT(t) >= barT(barTs[0] || t)).map(t => t.join("/")));      // not a pickup's
-  if (tsSet.size > 1) warn.push(`the time signature changes (${[...tsSet].join(", ")}); the app shows one time signature for now`);
-  // Does the score print every accidental it needs? Then the app shows exactly the printed ones (song.printedAcc)
-  const KEYALT = {};
-  "FCGDAEB".split("").forEach((L, i) => { if (key[0] > i) KEYALT[L] = 1; });
-  "BEADGCF".split("").forEach((L, i) => { if (-key[0] > i) KEYALT[L] = -1; });
+  // Does the score print every accidental it needs? Then the app shows exactly the printed ones (song.printedAcc),
+  // each bar by its own key
+  const keyAlt = f0 => { const out = {}; "FCGDAEB".split("").forEach((L, i) => { if (f0 > i) out[L] = 1; }); "BEADGCF".split("").forEach((L, i) => { if (-f0 > i) out[L] = -1; }); return out; };
   let missing = 0;
-  for (const [, bars] of allDisplay) for (const bar of bars) {
-    const mem = {};
+  for (const [, bars] of allDisplay) bars.forEach((bar, bi) => {
+    const mem = {}, KEYALT = keyAlt((barKeys[bi] || key)[0]);
     for (const e of bar.slice().sort((a, b) => a.t - b.t)) {
       if (!e.p) continue;
       const k = e.staff + "|" + e.p[0] + "|" + e.p[2], cur = k in mem ? mem[k] : (KEYALT[e.p[0]] || 0);
       if (e.p[1] !== cur && e.tie !== "stop" && e.tie !== "both" && !e.acc) missing++;
       mem[k] = e.p[1];
     }
-  }
+  });
   if (missing) warn.push(`${missing} accidental${missing === 1 ? "" : "s"} the music needs aren't printed in the score, so the app works them out`);
   // what the app can't draw yet stops the song being added (ask Claude)
   const DRAWN = ["treble", "treble8", "bass"];
@@ -8386,9 +8548,14 @@ function scoreImport(xml, meta){
   const song = { id: meta.id, title: meta.title, composer: meta.composer || "", words: meta.words || "", file: meta.file,
     tempo: tempo || 80, key: { fifths: key[0], mode: key[1] === "minor" ? "min" : "maj" }, ts: commonest(tssAll) || [4, 4],
     barLabels: barLabels || [], barTicks: lens, printedAcc: missing === 0, parts: partsOut, accomp: accompOut };
+  const changes = (barTs || []).map((t, bi) => t && (bi === 0 || JSON.stringify(t) !== JSON.stringify(barTs[bi - 1])) ? [bi, t[0], t[1]] : null).filter(Boolean);
+  if (changes.length > 1) song.tsChanges = changes;
+  const kch = (barKeys || []).map((k, bi) => k && (bi === 0 || JSON.stringify(k) !== JSON.stringify(barKeys[bi - 1])) ? [bi, k[0], k[1] === "minor" ? "min" : "maj"] : null).filter(Boolean);
+  if (kch.length > 1) song.keyChanges = kch;
+  if (keys.some(k => Math.abs(k[0]) > 6)) problems.push("The score has a key with 7 sharps or flats, which the app can't show yet.");
   const starts = [0]; lens.forEach(t => starts.push(starts[starts.length - 1] + t));
   partsOut.forEach(pt => { pt.sections = songPartSections(pt, starts); });
-  return { song, warn, problems };
+  return { song, warn, problems, staves: staveInfo };
 }
 
 // ==== FILE: 09-teacher.js ====
@@ -8403,14 +8570,16 @@ function scoreImport(xml, meta){
 // - Phrases: split or join the part's phrases (its long sections) at a note.
 // - Parts (under "Your part" in the song card): Edit, Duplicate, Create new, Rename, and Delete (or Back to the score for
 //   the score's own parts). While editing, the score shows the part above every part as it was, and clicking notes puts
-//   them in the part or takes them out (22 October).
+//   them in the part or takes them out (22 October). Words: type the part's words under its notes, as in Sibelius (space
+//   for the next word, hyphen for the next syllable); Copy words to all parts (23 October).
 // - Save: the tap times, phrases and changed parts go straight into Isaac's GitHub repository (songs/<id>-timings.json,
 //   songs/<id>-sections.json and songs/<id>-parts.json beside the app) through GitHub's own API, with a token that
 //   stays in this browser. The
 //   students' app reads those files from its own site as it starts (songLoadEdits in 09-songs.js), so a save reaches
 //   them once GitHub Pages has republished (about a minute). Download files gives the same files instead.
-// - Add a song (on the song list): a MusicXML score read exactly as songs/import.py reads it; This song (for an added
-//   song): Show this song to students, Remove this song.
+// - Add a song (on the song list): a MusicXML score read exactly as songs/import.py reads it, with a choice for each
+//   voice stave (one part, or sopranos and altos or tenors and basses on one stave); This song (for an added song): Show
+//   this song to students, Remove this song.
 TEACH = (function(){
   const T = {}, el = id => document.getElementById(id), KEY = "sightSinger.teacher.v1";
   let saved = {};                 // per song: the tap times, phrases and parts as last loaded or saved (to show what's unsaved)
@@ -8422,22 +8591,31 @@ TEACH = (function(){
   // Tap once a bar (the first beat of every bar) or every beat (Isaac, 23 October: "for some songs, particularly those
   // with lots of rubato, we'll need the option to tap every beat"), and mix the two: Tap again from a bar uses the switch
   // too, so a passage can be tapped again beat by beat. In compound time (6/8, 9/8, 12/8) the switch offers dotted
-  // crotchets or quavers. A bar tapped beat by beat keeps its first beat in barTimes and the rest in beatTimes[bar];
+  // crotchets or quavers. Each bar's beats are its own time signature's, so a song whose time signature changes is tapped
+  // in each bar's beats. A bar tapped beat by beat keeps its first beat in barTimes and the rest in beatTimes[bar];
   // recAnchors (09-songs.js) turns both into the points the score follows.
-  let mode = "bar";                         // "bar", or the length in ticks of the beat to tap
+  let mode = "bar";                         // "bar", "beat" (each bar's beats) or "q" (quavers in compound time)
   const compound = ts => ts[1] === 8 && ts[0] % 3 === 0 && ts[0] > 3;
-  const modes = () => compound(SG.song.ts) ? [["bar", "Once a bar"], [6, "Dotted crotchets"], [2, "Quavers"]]
-    : [["bar", "Once a bar"], [16 / SG.song.ts[1], "Every beat"]];
+  const modes = () => {
+    const s = SG.song, comp = [...new Set(s.barTicks.map((_, i) => songTsAt(s, i)).filter(compound).map(t => t.join("/")))];
+    const all = comp.length && s.barTicks.every((_, i) => compound(songTsAt(s, i)));
+    return all ? [["bar", "Once a bar"], ["beat", "Dotted crotchets"], ["q", "Quavers"]]
+      : comp.length ? [["bar", "Once a bar"], ["beat", "Every beat"], ["q", `Quavers in ${comp.join(", ")}`]] : [["bar", "Once a bar"], ["beat", "Every beat"]];
+  };
   function modeUI(){
     const m = modes(); if (!m.some(([v]) => v === mode)) mode = "bar";
     el("sync-mode").innerHTML = m.map(([v, l]) => `<button type="button" data-m="${v}" class="${v === mode ? "sel" : ""}" aria-pressed="${v === mode}">${l}</button>`).join("");
     el("sync-mode").querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
       if (SG.tapping) return;
-      mode = b.dataset.m === "bar" ? "bar" : +b.dataset.m; modeUI(); if (SG.syncSrc) ready();
+      mode = b.dataset.m; modeUI(); if (SG.syncSrc) ready();
     }));
   }
   // how many taps bar i gets (a short bar, such as a pickup, gets fewer)
-  const tapsIn = (i, m) => m === "bar" ? 1 : Math.max(1, Math.round(SG.song.barTicks[i] / m));
+  const tapsIn = (i, m) => {
+    if (m === "bar") return 1;
+    const ts = songTsAt(SG.song, i), len = compound(ts) ? (m === "q" ? 2 : 6) : 16 / ts[1];
+    return Math.max(1, Math.round(SG.song.barTicks[i] / len));
+  };
   const what = () => mode === "bar" ? "on the first beat of every bar" : "on every beat";
   // The source: a recording just loaded, or the song's own recording (so its taps can be redone without loading it again)
   const src = () => SG.syncSrc || SG.rec;
@@ -8656,8 +8834,8 @@ TEACH = (function(){
     return out.sort((a, b) => a.t - b.t);
   }
   // rests from `from` to `to` in a bar, each on a beat it can start on
-  function restsFill(from, to){
-    const comp = isCompound(SG.song.ts), out = [];
+  function restsFill(from, to, bi){
+    const comp = isCompound(songTsAt(SG.song, bi)), out = [];
     let p = from;
     while (to - p > 1e-6) {
       const left = to - p, on = v => Math.abs(p / v - Math.round(p / v)) < 1e-6;
@@ -8682,14 +8860,14 @@ TEACH = (function(){
       const out = []; let pos = 0;
       ns.filter(x => x.bi === bi).forEach(x => {
         const t = r6(x.t - st[bi]);
-        if (t > pos + 1e-6) out.push(...restsFill(pos, t));
+        if (t > pos + 1e-6) out.push(...restsFill(pos, t, bi));
         const e = { t, d: x.d, p: x.p };
         if (x.tieOut) e.tie = x.tieOut;
         if (x.acc) e.acc = x.acc;
         if (x.verses) e.verses = x.verses;
         out.push(e); pos = r6(t + x.d);
       });
-      if (len - pos > 1e-6) out.push(...restsFill(pos, len));
+      if (len - pos > 1e-6) out.push(...restsFill(pos, len, bi));
       return out;
     });
   }
@@ -8842,7 +9020,8 @@ TEACH = (function(){
   function partsUI(){
     const s = SG.song; if (!s || !SG.part) return;
     const on = !!ED;
-    el("pe-tools").hidden = on; el("pe-editing").hidden = !on;
+    el("pe-tools").hidden = el("pw-tools").hidden = on || !!WD; el("pe-editing").hidden = !on; el("pw-editing").hidden = !WD;
+    el("pw-uncopy").hidden = !uncopy || uncopy.song !== s;
     el("act-song").classList.toggle("editing", on); document.body.classList.toggle("editing-parts", on);
     if (on) {
       const coarse = window.matchMedia && matchMedia("(pointer: coarse)").matches;
@@ -8853,7 +9032,7 @@ TEACH = (function(){
     const score = isScorePart(s, SG.part.id);
     if (!delArm) el("pe-del").textContent = score ? "Back to the score" : "Delete";
     el("pe-del").disabled = score ? sameAsScore(s, SG.part) : s.parts.length < 2;
-    ["pe-edit", "pe-dup", "pe-new", "pe-ren"].forEach(id => el(id).disabled = SG.state === "listening");
+    ["pe-edit", "pe-dup", "pe-new", "pe-ren", "pw-words", "pw-copy"].forEach(id => el(id).disabled = SG.state === "listening");
   }
   // the coloured notes: every note of the part, and the notes of the other lines that are in it
   function paint(){
@@ -8868,6 +9047,212 @@ TEACH = (function(){
         q.el.classList.toggle("picked", on);
       }));
     });
+  }
+
+  // ---------- Words (Isaac, 23 October: "give me a text editor for the lyrics similar to the functionality of the
+  // Sibelius one - that is, space bar for melisma, hyphen for syllabification") ----------
+  // Words puts a box under a note of the part: click any note to type there. Type a syllable, then a space ends the word
+  // and moves to the next note, and a hyphen ends the syllable (the word goes on) and moves on. With the box empty, a
+  // space (or _) holds the word before over this note (a melisma, with its line) and a hyphen carries the word on over
+  // it. Backspace in an empty box goes back a note; the arrow keys at either end of the box (or Tab) move a note keeping
+  // what's there. Pasted words flow note by note the same way. Undo takes back the last change, Cancel all of them, and
+  // Finish keeps them (finding the part's phrases again, unless they were changed by hand). Notes with no words that
+  // aren't held over from a word before are marked. Verse 1 only: it's what the students see.
+  // Copy words to all parts gives the notes with no words in every other part the words this part sings at that moment
+  // (Isaac: "only requiring a bit of cleaning up where the rhythms didn't match up"), and says which notes still need some.
+  let WD = null;
+  const vOf = e => e && e.verses && e.verses["1"] && e.verses["1"].text ? e.verses["1"] : null;
+  // the notes words go on, in order: every note but those tied on from the note before
+  function wordList(pt){
+    const out = []; let prev = null, rest = true;
+    pt.bars.forEach((b, bi) => b.forEach((e, k) => {
+      if (!e.p) { prev = null; rest = true; return; }
+      const tiedOn = /stop|both/.test(e.tie || "") && prev && /start|both/.test(prev.tie || "") && midiOfP(prev.p) === midiOfP(e.p);
+      if (!tiedOn) { out.push({ bi, k, rest }); rest = false; }
+      prev = e;
+    }));
+    return out;
+  }
+  // the notes that need words: no words of their own, and not held over (a hyphen or a held word before, with no rest between)
+  function needWords(pt){
+    const need = new Set(); let held = false;
+    wordList(pt).forEach(n => {
+      const v = vOf(pt.bars[n.bi][n.k]);
+      if (v) held = v.syl === "begin" || v.syl === "middle" || !!v.ext;
+      else { if (n.rest) held = false; if (!held) need.add(n.bi + ":" + n.k); }
+    });
+    return need;
+  }
+  const sameParts = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+  // a part's phrases again after its words change, unless they were changed by hand
+  function refind(pt, oldBars){
+    const st = SG.timeline.starts;
+    if (sameParts(pt.sections, songPartSections({ ...pt, bars: oldBars }, st))) pt.sections = songPartSections(pt, st);
+  }
+  function wordsStart(){
+    const s = SG.song; if (!s || ED || WD || SG.state === "listening") return;
+    songHalt(); wholeSong();
+    const old = SG.part, pt = { ...old, bars: clone(old.bars) };           // its own copy (a bar's notes can be shared)
+    s.parts = s.parts.map(p => p === old ? pt : p); SG.part = pt;
+    WD = { s, pt, old, undo: [], i: 0, list: wordList(pt) };
+    say("pe-msg", "");
+    const inp = el("pw-in"); el("act-song").appendChild(inp);
+    partsUI(); songDraw();
+    const need = needWords(pt), first = WD.list.findIndex(n => need.has(n.bi + ":" + n.k));
+    wordsGo(first < 0 ? 0 : first);
+  }
+  function wordsEnd(keep){
+    if (!WD) return;
+    const { s, pt, old } = WD;
+    WD = null; el("pw-in").hidden = true;
+    if (!keep || sameParts(pt.bars, old.bars)) s.parts = s.parts.map(p => p === pt ? old : p);
+    else refind(pt, old.bars);
+    if (SG.song === s) endEdit(pt.id);
+  }
+  // the note's place on the drawn part, and the box under it
+  const wordAt = i => { const n = WD.list[i]; return n && SG.L ? SG.L.evs.find(q => q.ev.src && !q.ev.src.more && q.ev.src.bi === n.bi && q.ev.src.k === n.k) : null; };
+  function wordsPlace(){
+    const inp = el("pw-in"), q = WD && wordAt(WD.i);
+    if (!q) { inp.hidden = true; return; }
+    const card = el("act-song").getBoundingClientRect(), r = SG.L.svg.getBoundingClientRect(), k = r.width / SG.L.width;
+    const box = $("song-box").getBoundingClientRect(), x = r.left + q.cx * k;
+    inp.hidden = x < box.left || x > box.right;
+    inp.style.left = (x - card.left - el("act-song").clientLeft - inp.offsetWidth / 2) + "px";
+    inp.style.top = (r.top + (SG.L.bot + 24) * k - card.top - el("act-song").clientTop) + "px";
+  }
+  function wordsPaint(){
+    if (!WD || !SG.L) return;
+    const need = needWords(WD.pt), cur = WD.list[WD.i];
+    SG.L.evs.forEach(q => {
+      if (!q.el || !q.ev.src || q.ev.src.more) return;
+      const key = q.ev.src.bi + ":" + q.ev.src.k;
+      q.el.classList.toggle("needw", need.has(key)); q.el.classList.toggle("picked", !!cur && key === cur.bi + ":" + cur.k);
+    });
+    el("pw-undo").disabled = !WD.undo.length;
+    const n = need.size;
+    say("pw-say", `Words for ${WD.pt.name}. Type under the note: space for the next word, a hyphen for the next syllable, space in an empty box to hold the word. ${n ? `${n} note${n === 1 ? "" : "s"} still need${n === 1 ? "s" : ""} words (marked).` : "Every note has words."}`);
+  }
+  function wordsGo(i){
+    if (!WD) return;
+    WD.i = clamp(i, 0, WD.list.length - 1);
+    const n = WD.list[WD.i], e = n && WD.pt.bars[n.bi][n.k], v = vOf(e), inp = el("pw-in");
+    inp.value = v ? v.text : "";
+    // keep the note in view
+    const q = wordAt(WD.i), box = $("song-box");
+    if (q) {
+      const r = SG.L.svg.getBoundingClientRect(), x = r.left + q.cx * r.width / SG.L.width - box.getBoundingClientRect().left;      // from the box's left edge
+      if (x < 60 || x > box.clientWidth - 90) box.scrollLeft = Math.max(0, box.scrollLeft + x - box.clientWidth / 3);
+    }
+    wordsPaint(); inp.hidden = false; wordsPlace();
+    inp.focus(); inp.select();
+  }
+  // put txt on note i. term: " " ends the word, "-" ends the syllable, "_" holds the word before; null keeps the note's own kind
+  function wordsSet(i, txt, term){
+    const { pt, list } = WD, n = list[i]; if (!n) return;
+    const e = pt.bars[n.bi][n.k], v = vOf(e);
+    let j = i - 1; while (j >= 0 && !vOf(pt.bars[list[j].bi][list[j].k])) j--;
+    const pv = j >= 0 ? vOf(pt.bars[list[j].bi][list[j].k]) : null, cont = !!pv && (pv.syl === "begin" || pv.syl === "middle");
+    const nx = list[i + 1], nextBare = !nx || !vOf(pt.bars[nx.bi][nx.k]);
+    const drop = () => { if (e.verses) { delete e.verses["1"]; if (!Object.keys(e.verses).length) delete e.verses; } };
+    txt = txt.trim();
+    if (txt) {
+      if (term === null && v && v.text === txt) return;
+      const syl = term === "-" ? (cont ? "middle" : "begin") : term === null && v ? v.syl : cont ? "end" : "single";
+      e.verses = { ...(e.verses || {}), 1: { text: txt, syl, ext: !!(v && v.ext && nextBare && syl !== "begin" && syl !== "middle") } };
+    } else if (term === " " || term === "_") { drop(); if (pv && (pv.syl === "single" || pv.syl === "end")) pv.ext = true; }
+    else if (term === "-" || (term === null && v)) drop();
+  }
+  // a change to the words, kept for Undo and drawn
+  function wordsDo(fn){
+    const before = JSON.stringify(WD.pt.bars);
+    fn();
+    if (JSON.stringify(WD.pt.bars) !== before) { WD.undo.push(JSON.parse(before)); songDraw(); }
+  }
+  // typed or pasted text: each space, hyphen or _ puts the syllable before it on the note and moves on
+  function wordsFlow(str){
+    let cur = "", end = false;
+    wordsDo(() => {
+      for (const ch of str.replace(/[\r\n\t]+/g, " ")) {
+        if (ch === " " || ch === "-" || ch === "_") {
+          wordsSet(WD.i, cur, ch); cur = "";
+          if (WD.i >= WD.list.length - 1) { end = true; return; }
+          WD.i++;
+        } else cur += ch;
+      }
+    });
+    wordsGo(WD.i);
+    const inp = el("pw-in");
+    if (cur && !end) { inp.value = cur; inp.setSelectionRange(cur.length, cur.length); }
+  }
+  function wordsKey(e){
+    e.stopPropagation();
+    if (!WD || e.isComposing) return;
+    const inp = el("pw-in"), v = inp.value, a = inp.selectionStart, b = inp.selectionEnd;
+    const move = d => { e.preventDefault(); wordsDo(() => wordsSet(WD.i, v, null)); wordsGo(WD.i + d); };
+    if (e.key === "Enter" || e.key === "Escape") { e.preventDefault(); if (e.key === "Enter") wordsDo(() => wordsSet(WD.i, v, null)); inp.hidden = true; inp.blur(); wordsPaint(); }
+    else if (e.key === "Backspace" && v === "") { e.preventDefault(); wordsGo(WD.i - 1); const x = el("pw-in"); x.setSelectionRange(x.value.length, x.value.length); }
+    else if (e.key === "Tab") move(e.shiftKey ? -1 : 1);
+    else if (e.key === "ArrowLeft" && a === 0 && b === 0) move(-1);
+    else if (e.key === "ArrowRight" && a === v.length && b === v.length) move(1);
+  }
+  function wordsInput(){
+    const inp = el("pw-in");
+    if (WD && /[ \-_]/.test(inp.value)) wordsFlow(inp.value);
+  }
+  function wordsPaste(e){
+    if (!WD) return;
+    e.preventDefault();
+    const inp = el("pw-in"), t = (e.clipboardData && e.clipboardData.getData("text")) || "";
+    wordsFlow(inp.value.slice(0, inp.selectionStart) + t.replace(/\s+/g, " ") + inp.value.slice(inp.selectionEnd));
+  }
+  function wordsClick(e){
+    if (!WD || !SG.L) return;
+    const svg = e.target.closest && e.target.closest("#song-box svg.score"); if (svg !== SG.L.svg) return;
+    const r = svg.getBoundingClientRect(), x = (e.clientX - r.left) * (SG.L.width / r.width);
+    let best = -1, bd = 30;
+    WD.list.forEach((n, i) => { const q = wordAt(i); if (q && Math.abs(q.cx - x) < bd) { bd = Math.abs(q.cx - x); best = i; } });
+    if (best < 0) return;
+    if (!el("pw-in").hidden) wordsDo(() => wordsSet(WD.i, el("pw-in").value, null));
+    wordsGo(best);
+  }
+  function wordsUndo(){
+    if (!WD || !WD.undo.length) return;
+    WD.pt.bars = WD.undo.pop(); songDraw(); wordsGo(WD.i);
+  }
+  // Copy words to all parts: each other part's notes with no words get the words this part sings at the same moment
+  // (not a note the word before is held over with its line: that's a melisma)
+  let uncopy = null;
+  function copyWords(){
+    const s = SG.song; if (!s || ED || WD || SG.state === "listening") return;
+    const src = SG.part, st = SG.timeline.starts, at = new Map();
+    wordList(src).forEach(n => { const e = src.bars[n.bi][n.k], v = vOf(e); if (v) at.set(Math.round((st[n.bi] + e.t) * 1000), v); });
+    const before = s.parts, got = [], left = [];
+    s.parts = s.parts.map(pt => {
+      if (pt === src) return pt;
+      const q = { ...pt, bars: clone(pt.bars) }; let n = 0, held = false;
+      wordList(q).forEach(w => {
+        const e = q.bars[w.bi][w.k], mine = vOf(e), v = at.get(Math.round((st[w.bi] + e.t) * 1000));
+        if (mine) { held = !!mine.ext && (mine.syl === "single" || mine.syl === "end"); return; }
+        if (w.rest) held = false;
+        if (v && !held) { e.verses = { ...(e.verses || {}), 1: clone(v) }; n++; }
+      });
+      if (!n) return pt;
+      refind(q, pt.bars);
+      got.push(`${n}${got.length ? "" : ` note${n === 1 ? "" : "s"}`} in ${q.name}`);
+      const need = [...needWords(q)].map(k => s.barLabels[+k.split(":")[0]]);
+      if (need.length) left.push(`${q.name} bar${new Set(need).size === 1 ? "" : "s"} ${[...new Set(need)].slice(0, 8).join(", ")}${new Set(need).size > 8 ? " and more" : ""}`);
+      return q;
+    });
+    if (!got.length) { say("pe-msg", `There were no notes without words at the same moments as ${src.name}'s words.`); return; }
+    uncopy = { song: s, parts: before, from: src.id };
+    SG.timeline = songTimeline(s); songPartButtons(s); songSet(); partsUI(); secs(); state();
+    const list = got.length > 1 ? got.slice(0, -1).join(", ") + " and " + got[got.length - 1] : got[0];
+    say("pe-msg", `Copied ${src.name}'s words to ${list}.` + (left.length ? ` Notes still without words: ${left.join("; ")}. Choose the part and press Words to fill them in.` : " Every note has words now."));
+  }
+  function undoCopy(){
+    if (!uncopy || uncopy.song !== SG.song) return;
+    SG.song.parts = uncopy.parts; uncopy = null;
+    endEdit(SG.part.id); say("pe-msg", "The copied words are taken off.");
   }
 
   // ---------- Save to GitHub ----------
@@ -9010,7 +9395,8 @@ TEACH = (function(){
     const t = slug(el("as-title").value), f = slug(file.name.replace(/\.(mxl|musicxml|xml)$/i, ""));
     const same = SONGS.find(s => slug(s.title) === t || s.id === f || s.id === t);
     el("as-as").value = same ? same.id : "";
-    draft = { xml, name: file.name };
+    draft = { xml, name: file.name, staves: {} };
+    el("as-staves").innerHTML = "";
     el("as-form").hidden = false; say("as-status", "");
     asCheck();
   }
@@ -9023,7 +9409,11 @@ TEACH = (function(){
   function asCheck(){
     if (!draft) return;
     const id = asId(), title = el("as-title").value.trim();
-    const r = draft.r = scoreImport(draft.xml, { id, title, composer: el("as-composer").value.trim(), words: el("as-words").value.trim(), file: `${id}.xml` });
+    const r = draft.r = scoreImport(draft.xml, { id, title, composer: el("as-composer").value.trim(), words: el("as-words").value.trim(), file: `${id}.xml`, staves: draft.staves });
+    // each voice stave: one part, or two on one stave (closed score), guessed from its name and notes (Isaac, 23 October)
+    if (r.staves && !el("as-staves").children.length) el("as-staves").innerHTML = r.staves.map(st => `<div class="row"><label class="fld">The stave “${escHTML(st.name)}” is
+      <select data-pid="${escHTML(st.id)}">${[["one", "one part"], ["SA", "sopranos and altos (closed score)"], ["TB", "tenors and basses (closed score)"]].map(([v, t]) =>
+      `<option value="${v}"${v === st.kind ? " selected" : ""}>${t}</option>`).join("")}</select></label></div>`).join("");
     const li = (t, bad) => `<li${bad ? ' class="bad"' : ""}>${escHTML(t)}</li>`;
     let h = (r.problems || []).map(p => li(p, true)).join("");
     if (!title) h += li("Type a title.", true);
@@ -9031,10 +9421,13 @@ TEACH = (function(){
       const s = r.song, V = { S: "soprano", A: "alto", T: "tenor", B: "bass" };
       s.parts.forEach(pt => {
         const ps = pt.bars.flat().filter(e => e.p), lo = ps.reduce((a, e) => midiOfP(e.p) < midiOfP(a.p) ? e : a, ps[0]), hi = ps.reduce((a, e) => midiOfP(e.p) > midiOfP(a.p) ? e : a, ps[0]);
-        h += li(`${pt.name}: the ${V[pt.voice]} part, ${ps.length} notes from ${ps.length ? pName(lo.p) : "-"} to ${ps.length ? pName(hi.p) : "-"}${pt.more ? ", with a split" : ""}.`);
+        const st = pt.stave && r.staves.find(x => x.id === pt.stave);
+        h += li(`${pt.name}: the ${V[pt.voice]} part${st ? ` (sharing the stave “${st.name}”)` : ""}, ${ps.length} notes from ${ps.length ? pName(lo.p) : "-"} to ${ps.length ? pName(hi.p) : "-"}${pt.more ? ", with a split" : ""}.`);
       });
       s.accomp.forEach(ac => h += li(`${ac.name || "Accompaniment"}: accompaniment, ${ac.staves} stave${ac.staves === 1 ? "" : "s"}, ${ac.events.length} notes.`));
-      h += li(`${s.barTicks.length} bars in ${s.ts.join("/")}, ${makeKey(s.key.fifths, s.key.mode).name}, crotchet = ${Math.round(s.tempo)}.`);
+      const tsl = s.tsChanges ? [...new Set(s.tsChanges.map(c => c[1] + "/" + c[2]))].join(", ") + " (the time signature changes)" : s.ts.join("/");
+      const kl = s.keyChanges ? [...new Set(s.keyChanges.map(c => makeKey(c[1], c[2]).name))].join(", ") + " (the key changes)" : makeKey(s.key.fifths, s.key.mode).name;
+      h += li(`${s.barTicks.length} bars in ${tsl}, ${kl}, crotchet = ${Math.round(s.tempo)}.`);
       const old = SONGS.find(x => x.id === id && el("as-as").value);
       if (old) h += li(`It replaces “${old.title}”. ${old.barTimes ? old.barTicks.length === s.barTicks.length ? "The recording's tap times are kept (the same number of bars)." : `The recording's tap times are for ${old.barTicks.length} bars and this score has ${s.barTicks.length}, so you'll need to sync it again.` : ""}`);
     }
@@ -9121,14 +9514,16 @@ TEACH = (function(){
 
   // ---------- Hooks from 09-songs.js and 10-app.js ----------
   T.editing = () => !!ED;
+  T.busy = () => !!ED || !!WD;
   T.staves = () => [{ kind: "own", pt: SG.part, name: SG.part.name, label: `${SG.part.name} (editing)` }]
     .concat(ED.sources.map(pt => ({ kind: "part", pt, name: pt.name, src: true })));
-  T.drawn = () => paint();
+  T.drawn = () => { paint(); wordsPaint(); };
   T.hadParts = (s, had) => { hadParts[s.id] = !!had; };
   T.tap = tap;
   T.open = s => {
     armed = false; say("as-songstatus", "");
-    ED = null; form = null; el("pe-form").hidden = true;
+    if (WD) wordsEnd(false);
+    ED = null; form = null; el("pe-form").hidden = true; uncopy = null;
     SG.syncSrc = null; if (SG.tapping) finish();
     ["sync-status", "tb-status", "gh-status"].forEach(id => say(id, "")); el("sync-yt").value = ""; el("sync-file").value = "";
     ["sync-tap", "sync-done"].forEach(id => el(id).disabled = true);
@@ -9158,6 +9553,18 @@ TEACH = (function(){
   el("pe-name").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); formOK(); } if (e.key === "Escape") el("pe-cancel").click(); });
   el("pe-cancel").addEventListener("click", () => { form = null; el("pe-form").hidden = true; say("pe-msg", ""); });
   el("pe-undo").addEventListener("click", () => undo());
+  el("pw-words").addEventListener("click", () => wordsStart());
+  el("pw-copy").addEventListener("click", () => copyWords());
+  el("pw-uncopy").addEventListener("click", () => undoCopy());
+  el("pw-undo").addEventListener("click", () => wordsUndo());
+  el("pw-finish").addEventListener("click", () => wordsEnd(true));
+  el("pw-cancel").addEventListener("click", () => wordsEnd(false));
+  el("pw-in").addEventListener("keydown", wordsKey);
+  el("pw-in").addEventListener("input", wordsInput);
+  el("pw-in").addEventListener("paste", wordsPaste);
+  $("song-box").addEventListener("click", wordsClick);
+  $("song-box").addEventListener("scroll", () => { if (WD) wordsPlace(); });
+  window.addEventListener("resize", () => { if (WD) wordsPlace(); });
   el("pe-finish").addEventListener("click", () => finishEdit());
   el("pe-discard").addEventListener("click", () => cancelEdit());
   el("sync-file").addEventListener("change", e => load(e.target.files[0]));
@@ -9178,6 +9585,7 @@ TEACH = (function(){
   el("as-file").addEventListener("change", e => asPick(e.target.files[0]));
   ["as-title", "as-composer", "as-words"].forEach(id => el(id).addEventListener("change", () => asCheck()));
   el("as-as").addEventListener("change", () => asCheck());
+  el("as-staves").addEventListener("change", e => { const p = e.target.dataset.pid; if (p && draft) { draft.staves[p] = e.target.value; asCheck(); } });
   el("as-open").addEventListener("click", () => asOpen());
   el("as-show").addEventListener("change", () => { const a = SG.song && SG.song.added; if (!a) return; a.show = el("as-show").checked; state(); songUI();
     say("as-songstatus", "Save to GitHub, below, to " + (a.show ? "show it to students." : "hide it from students.")); });
