@@ -177,15 +177,17 @@ svg.score .tupb { fill: none; stroke: currentColor; stroke-width: 1; }
 .levels { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .levels button { padding: 8px 14px; border-radius: 999px; font-size: 0.9rem; }
 .levels button.sel { background: var(--banner); border-color: var(--banner); color: #FFFFFF; }
+.levels .levlab { display: none; }
+
 .tabs { display: flex; gap: 4px; border-bottom: 1.5px solid var(--line); overflow-x: auto; }
 .tabs button { border: 0; border-radius: 10px 10px 0 0; background: transparent; padding: 10px 14px; color: var(--muted); border-bottom: 3px solid transparent; margin-bottom: -1.5px; white-space: nowrap; }
 .tabs button.sel { color: var(--brand-ink); border-bottom-color: var(--brand); }
 .tabs button .n { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: var(--banner); color: #FFFFFF; font-size: 0.75rem; margin-right: 7px; }
 .act[hidden] { display: none; }
-.act-intro { color: var(--muted); margin-bottom: 4px; max-width: 70ch; }
 .hp { font-size: 0.9rem; padding: 9px 12px; border-radius: 0 8px 8px 0; background: var(--gold-tint); border-left: 3px solid var(--bronze); margin-top: 12px; }   /* "good to know" panel */
-.partlabel { font-family: var(--display); font-size: 0.8rem; font-weight: 600; color: var(--muted); margin: 10px 0 -18px 4px; position: relative; z-index: 1; }
+.partlabel { font-family: var(--display); font-size: 0.8rem; font-weight: 600; color: var(--muted); margin: 10px 0 -18px 4px; position: relative; z-index: 1; width: max-content; background: var(--card); padding: 0 4px; border-radius: 4px; }
 .prompt { font-family: var(--display); font-size: 1.15rem; font-weight: 600; margin-top: 12px; min-height: 1.6em; max-width: 60ch; }
+.card.act > .prompt:first-child { margin-top: 0; }
 .answerbox { margin-top: 6px; }
 .answerbox[hidden] { display: none; }
 .altwrap[hidden], .altcap[hidden] { display: none; }
@@ -204,30 +206,12 @@ svg.score .tupb { fill: none; stroke: currentColor; stroke-width: 1; }
 .helpers[hidden] { display: none; }
 svg.score .hand { color: var(--staff); }
 svg.score .hand path { stroke: currentColor; stroke-width: 14; stroke-linejoin: round; }   /* the fine line art needs weight at this size */
-svg.score .ev.playing { color: var(--brand); }
+svg.score .ev.playing, svg.score .ev.heard { color: var(--brand); }
 body.click-hear svg.score:not(#rh-staff) { cursor: pointer; }
-.instr { display: flex; flex-direction: column; gap: 14px; }
-.instr[hidden], .instr-scroll[hidden] { display: none; }
-.instr-scroll { overflow-x: auto; }
-.instr svg { display: block; height: auto; max-width: none; }
-.kbd .kw { fill: #fbfdfd; stroke: #9fb3b4; }
-.kbd .kb { fill: #1f2d2f; }
-.kbd .kw.on, .kbd .kb.on { fill: var(--brand); }
-.kbd .kw.on.soft, .kbd .kb.on.soft { fill: var(--brand-tint); }        /* Chord notes: the other notes of the chord */
-.kbd .klbl { font-family: var(--body); font-size: 9px; fill: #6d8284; text-anchor: middle; }
-.fbd .fboard { fill: var(--paper); }
-.fbd .fret { stroke: var(--muted); stroke-width: 1.5; }
-.fbd .nut { fill: var(--staff); }
-.fbd .gstr { stroke: var(--staff); }
-.fbd .fmark { fill: var(--line); }
-.fbd .flbl { font-family: var(--body); font-size: 10px; fill: var(--muted); text-anchor: middle; }
-.fbd .fdot { fill: var(--brand); stroke: var(--card); stroke-width: 1.5; }
-.fbd .fdot.open { fill: var(--card); stroke: var(--brand); stroke-width: 2.5; }
-.fbd .fdot.soft { fill: var(--brand-tint); stroke: var(--brand); stroke-width: 1.5; }
 svg.score .gl.tgt { fill: var(--brand); }                                /* the note to sing in a chord */
 svg.score .ev .gl.oth { fill: var(--ink); } svg.score .ev .ledger.oth { stroke: var(--staff); }   /* the rest of the chord */
 svg.score .ev.ok .gl.tgt { fill: var(--ok); } svg.score .ev.near .gl.tgt { fill: var(--warn); } svg.score .ev.wrong .gl.tgt { fill: var(--bad); }
-svg.score .ev.playing .gl.oth { fill: var(--brand); }
+svg.score .ev.playing .gl.oth, svg.score .ev.heard .gl.oth { fill: var(--brand); }
 
 /* on-screen count-in */
 .card.act { position: relative; }
@@ -255,18 +239,20 @@ body.counting .card.act button.primary.on { position: relative; z-index: 43; }  
 
 /* screens (Isaac, 20 October): Home, Practice skills (the six activities) and Practice audition */
 body:not(.mode-skills) .skills-only, body:not(.mode-aud) .aud-only, body:not(.mode-home) .home-only, body:not(.mode-start) .start-only, body:not(.mode-songs) .songs-only { display: none !important; }
-body:not(.mode-skills):not(.mode-songs) #instr { display: none !important; }      /* the fretboard helper: Practice skills and songs */
 /* Practice songs */
 .songlist { margin-top: 12px; }
 .songhead { margin: -6px 0 4px -6px; }
 .songrow { margin-top: 12px; }
 .songrow .seg { flex-wrap: wrap; align-self: flex-start; }
-.songplay { display: flex; flex-wrap: wrap; gap: 10px 22px; align-items: center; margin-top: 12px; }
-.songplay .lab { flex-basis: 100%; }
+.songmix { display: grid; grid-template-columns: max-content max-content max-content; gap: 8px 22px; align-items: center; margin-top: 14px; justify-items: start; }
+.songmix .lab { justify-self: center; }
+.songmix .switch { justify-self: center; }
+.songmix > [hidden] { visibility: hidden; display: inline-flex; }      /* an empty cell keeps the grid */
+.songmix .gone { display: none !important; }
 .songrow { display: flex; flex-direction: column; gap: 6px; }
 .songrow .row { gap: 8px; }
 button.toggle[aria-pressed="true"] { background: var(--brand-tint); border-color: var(--brand); color: var(--brand-ink); }
-#song-box .partlabel { position: sticky; left: 4px; width: max-content; background: var(--card); padding: 0 4px; border-radius: 4px; }
+#song-box .partlabel { position: sticky; left: 4px; }
 #song-box .partlabel.mine { color: var(--brand-ink); }
 #song-box .pbox { pointer-events: none; }
 .transport { display: flex; align-items: center; gap: 8px; margin-top: 12px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 12px; background: var(--paper); }
@@ -278,7 +264,6 @@ button.toggle[aria-pressed="true"] { background: var(--brand-tint); border-color
 .scrub { flex: 1; min-width: 60px; accent-color: var(--brand); }
 .where { font-family: var(--display); font-weight: 600; font-variant-numeric: tabular-nums; min-width: 4.6em; text-align: right; }
 #song-recrow[hidden], #song-yt[hidden] { display: none !important; }
-#act-song .songplay .switch[hidden] { display: none !important; }
 /* a song's YouTube recording: YouTube's own player, never covered or smaller than 200px high */
 .ytbox { margin: 10px 0 4px; width: min(100%, 356px); aspect-ratio: 16 / 9; min-height: 200px; }
 .ytbox iframe { display: block; width: 100%; height: 100%; border: 0; border-radius: 8px; }
@@ -294,19 +279,19 @@ button.toggle[aria-pressed="true"] { background: var(--brand-tint); border-color
 .songacts .step.on .n { background: var(--red); }
 .songacts .step:disabled .n { opacity: 0.45; }
 #act-song .prompt { margin-top: 16px; }
-/* the tuning keyboard above the score, and the marks' key under the steps, inside the song card */
-#livePanel.insong, #results.insong { border: 0; padding: 0; background: transparent; border-radius: 0; }
-#livePanel.insong { margin: 12px 0 6px; }
-#results.insong { margin-top: 12px; }
+/* the tuning keyboard right above the music, and the marks under the buttons, inside the card on every screen
+   (Isaac, 22 October for songs, 27 October everywhere) */
+#livePanel.incard, #results.incard { border: 0; padding: 0; background: transparent; border-radius: 0; }
+#livePanel.incard { margin: 12px 0 6px; }
+#results.incard { margin-top: 14px; }
 body.counting #act-song .songacts .step.on { position: relative; z-index: 43; }
-body.counting #act-song #livePanel { position: relative; z-index: 41; background: var(--card); }
+body.counting .card.act #livePanel.incard { position: relative; z-index: 41; background: var(--card); }
 .secrow select { flex: 1; min-width: 0; }
 .secrow .tbtn svg { fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 .songtools { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; margin-top: 12px; }
-.showrow { gap: 8px; }
 svg.score .ev.dim { color: var(--miss); opacity: 0.55; }
 /* the teacher page (teacher.html) */
-.partedit { margin-top: 10px; }
+.partedit { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
 .partedit [hidden], .partedit .row[hidden] { display: none !important; }
 .partedit .row { gap: 8px; }
 .partedit input[type=text], .partedit select { font: inherit; font-size: 0.95rem; padding: 7px 10px; border-radius: 8px; border: 1.5px solid var(--line); background: var(--card); color: var(--ink); min-width: 0; max-width: 100%; }
@@ -316,7 +301,7 @@ svg.score .ev.dim { color: var(--miss); opacity: 0.55; }
 #act-song.editing #pe { position: sticky; top: 0; z-index: 5; background: var(--card); padding: 8px 0; border-bottom: 1px solid var(--line); margin-inline: -4px; padding-inline: 4px; }
 .pe-say { margin: 0 0 8px; font-family: var(--display); font-weight: 600; max-width: 70ch; }
 /* while a part is being edited, the song card shows only what editing needs */
-#act-song.editing :is(.songtools, #song-yt, .secrow, #song-tempo, #song-prompt, #song-acts, #song-hp, .helpers, .songplay, #livePanel, #results, #song-msg) { display: none !important; }
+#act-song.editing :is(.songtools, #song-yt, .secrow, #song-tempo, #song-prompt, #song-acts, #song-hp, .helpers, .songmix, #livePanel, #results, #song-msg) { display: none !important; }
 body.editing-parts #teach { display: none !important; }
 #act-song.editing #song-box svg.score { cursor: pointer; }
 svg.score .ev.picked { color: var(--brand); }
@@ -353,17 +338,22 @@ body.mode-home #homeBtn { display: none; }
 .mpt { font-family: var(--display); font-size: 0.85rem; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: var(--warn-soft); color: var(--warn); font-variant-numeric: tabular-nums; }
 .mpt.ok { background: var(--ok-soft); color: var(--ok); } .mpt.miss { background: var(--paper); color: var(--miss); border: 1px solid var(--line); }
 body.mode-start #status { font-size: 1.35rem; }
-.home button { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; text-align: left; padding: 22px 20px; border-radius: 14px; background: var(--card); min-height: 120px; }
+.home button { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; text-align: left; padding: 16px 18px; border-radius: 14px; background: var(--card); }
 .home button .ht { font-size: 1.3rem; font-weight: 700; color: var(--brand-ink); }
 .home button .hs { font-family: var(--body); font-weight: 400; font-size: 0.95rem; color: var(--muted); }
 .home button.go { border-color: var(--brand); }
 .home button.go .ht::after { content: " ▶"; font-size: 0.9rem; }
 .home button:disabled { opacity: 0.55; border-style: dashed; }
 .audhead { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.audhead[hidden] { display: none; }
+.audhead[hidden] + .prompt { margin-top: 0; }
 .audstep { font-family: var(--display); font-weight: 600; font-size: 0.85rem; color: var(--brand-ink); background: var(--brand-tint); border-radius: 999px; padding: 3px 11px; }
 .audopts { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 10px; }
 .audopts[hidden], .tempomark[hidden], .audnav[hidden] { display: none; }
-.audopts label { font-family: var(--display); font-weight: 600; font-size: 0.95rem; }
+.audopts label, .actions .lenlab { font-family: var(--display); font-weight: 600; font-size: 0.95rem; }
+.actions .lenlab { display: inline-flex; align-items: center; gap: 8px; }
+.mpadvice { margin-top: 10px; color: var(--muted); max-width: 70ch; }
+.mpadvice:empty { display: none; }
 .audnav { display: flex; justify-content: space-between; gap: 10px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
 .tabs button.done .n { background: var(--ok); }
 .sumrows { display: flex; flex-direction: column; margin-top: 8px; }
@@ -373,7 +363,21 @@ body.mode-start #status { font-size: 1.35rem; }
 .tunekb .tk.sing, .tunekb .tk.w.sing { fill: #4B44C9; }
 /* Show keyboard and tuning: notes the piano plays for the singer (blue), and an interval or chord's other notes (light) */
 .tunekb .tk.w.lit { fill: #8E89E8; } .tunekb .tk.b.lit { fill: #4B44C9; }
-.tunekb .tk.w.lit.soft { fill: #D9D7F5; } .tunekb .tk.b.lit.soft { fill: #8E89E8; }      /* the audition's chords: where the singer is, no note to sing */
+/* phones: the levels in one row, all the tabs in view, the song steps on one row (Isaac, 27 October) */
+@media (max-width: 520px) {
+  .levels { flex-wrap: nowrap; gap: 6px; }
+  .levels .levlab { display: inline; margin-right: 4px; }
+  .levels .lw { display: none; }
+  .levels button { flex: 1; padding: 8px 0; min-width: 0; }
+  .tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; border-bottom: 0; overflow: visible; }
+  .tabs button { border: 1.5px solid var(--line); border-radius: 10px; margin: 0; padding: 7px 6px; white-space: normal; text-align: left; font-size: 0.85rem; line-height: 1.25; display: flex; align-items: center; }
+  .tabs button.sel { border-color: var(--brand); background: var(--brand-tint); }
+  .tabs button .n { flex: none; margin-right: 6px; }
+  .songacts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .songacts .step { padding: 8px 6px; gap: 6px; font-size: 0.85rem; line-height: 1.2; text-align: left; }
+  .songacts .helpbtn { grid-column: 1 / -1; justify-self: start; }
+}.songmix span > [hidden] { display: none; }
+body.mode-start .sung:empty { display: none; }
 </style>
 </head>
 <body>
@@ -395,9 +399,6 @@ body.mode-start #status { font-size: 1.35rem; }
   </section>
 
   <!-- Getting started (09-start.js): Matching pitch for now; explanations of the exercises come next -->
-  <nav class="nav start-only" aria-label="Getting started">
-    <div class="tabs" role="tablist"><button type="button" role="tab" class="sel" aria-selected="true"><span class="n">1</span>Matching pitch</button></div>
-  </nav>
   <section class="card act start-only" id="act-match">
     <div class="setrow"><span class="lab">Your voice part</span>
       <div class="parts" id="mp-parts">
@@ -407,15 +408,15 @@ body.mode-start #status { font-size: 1.35rem; }
         <button type="button" data-v="B">Bass<small>Lower changed voices</small></button>
       </div>
       <p class="muted">Not sure? Choose the one where the notes feel most comfortable to sing.</p></div>
-    <p class="prompt">Listen to the note and sing it. Keep singing until you find it.</p>
+    <p class="prompt">Matching pitch: listen to the note and sing it. Keep singing until you find it.</p>
     <div class="hp">Use headphones.</div>
-    <div class="audopts"><label for="mp-len">Note length</label><select id="mp-len"></select></div>
-    <div class="actions">
+    <div class="actions" id="mp-row">
       <button type="button" class="primary" id="mp-play">Play the note</button>
       <button type="button" id="mp-new">New note</button>
+      <label class="lenlab">Note length <select id="mp-len"></select></label>
     </div>
-    <div class="hp" id="mp-advice"></div>
     <div class="mptimes" id="mp-times" hidden></div>
+    <p class="mpadvice" id="mp-advice"></p>
     <div class="actions"><button type="button" class="primary" id="mp-go" hidden></button></div>
   </section>
 
@@ -486,6 +487,7 @@ body.mode-start #status { font-size: 1.35rem; }
 
     <!-- the teacher page's part editor (09-teacher.js) -->
     <div class="partedit" id="pe">
+      <div class="row"><button type="button" class="toggle" id="pe-open" aria-pressed="false">Edit parts</button></div>
       <div class="row" id="pe-tools"><button type="button" id="pe-edit">Edit</button><button type="button" id="pe-dup">Duplicate</button><button type="button" id="pe-new">Create new</button><button type="button" id="pe-ren">Rename</button><button type="button" class="quietbtn" id="pe-del">Delete</button></div>
       <div class="row" id="pw-tools"><button type="button" id="pw-words">Words</button><button type="button" id="pw-copy">Copy words to all parts</button><button type="button" class="quietbtn" id="pw-uncopy" hidden>Take the copied words off</button></div>
       <div class="row" id="pe-form" hidden><input type="text" id="pe-name" maxlength="40" aria-label="Part name" placeholder="Part name" autocomplete="off"><select id="pe-voice" aria-label="Clef"><option value="S">Soprano (treble clef)</option><option value="A">Alto (treble clef)</option><option value="T">Tenor (treble 8)</option><option value="B">Bass (bass clef)</option></select><button type="button" class="primary" id="pe-ok">Create</button><button type="button" id="pe-cancel">Cancel</button></div>
@@ -503,7 +505,6 @@ body.mode-start #status { font-size: 1.35rem; }
 
     <div class="songtools">
       <div class="seg" id="song-recrow" hidden><button type="button" data-r="rec">Recording</button><button type="button" data-r="piano">Piano</button></div>
-      <div class="row showrow"><span class="lab">Show</span><button type="button" class="toggle" id="song-show-others" aria-pressed="false">Other parts</button><button type="button" class="toggle" id="song-show-accomp" aria-pressed="false">Accompaniment</button></div>
     </div>
     <div class="ytbox" id="song-yt" hidden></div>
     <div class="secrow">
@@ -530,11 +531,12 @@ body.mode-start #status { font-size: 1.35rem; }
     </div>
     <div class="hp" id="song-hp">Use headphones.</div>
     <div class="helpers" data-act="song" hidden></div>
-    <div class="songplay"><span class="lab">The piano plays</span>
-      <label class="switch"><input type="checkbox" data-opt="songOthers"> Other parts</label>
-      <label class="switch"><input type="checkbox" data-opt="songAccomp"> Accompaniment</label>
-      <label class="switch"><input type="checkbox" data-opt="songOwn"> My part</label>
-      <label class="switch" id="song-recown" hidden><input type="checkbox" data-opt="songRecOwn"> My part</label>
+    <!-- what shows on the score and what the piano plays, side by side (Isaac, 27 October) -->
+    <div class="songmix" id="song-mix" role="group" aria-label="Show and hear">
+      <span></span><span class="lab">Show</span><span class="lab">Hear</span>
+      <span class="mixname" data-row="others">Other parts</span><label class="switch" data-row="others"><input type="checkbox" data-opt="songShowOthers" aria-label="Show other parts"></label><label class="switch" data-row="others"><input type="checkbox" data-opt="songOthers" aria-label="Hear other parts"></label>
+      <span class="mixname" data-row="accomp">Accompaniment</span><label class="switch" data-row="accomp"><input type="checkbox" data-opt="songShowAccomp" aria-label="Show accompaniment"></label><label class="switch" data-row="accomp"><input type="checkbox" data-opt="songAccomp" aria-label="Hear accompaniment"></label>
+      <span class="mixname">My part</span><span></span><span><label class="switch"><input type="checkbox" data-opt="songOwn" aria-label="Hear my part"></label><label class="switch" id="song-recown" hidden><input type="checkbox" data-opt="songRecOwn" aria-label="Hear my part on the piano"></label></span>
     </div>
     <p class="hpmsg" id="song-msg" aria-live="polite"></p>
   </section>
@@ -592,11 +594,12 @@ body.mode-start #status { font-size: 1.35rem; }
 
   <nav class="nav skills-only" aria-label="Level and activity">
     <div class="levels" id="levels">
-      <button type="button" data-l="1" class="sel">Level 1</button>
-      <button type="button" data-l="2">Level 2</button>
-      <button type="button" data-l="3">Level 3</button>
-      <button type="button" data-l="4">Level 4</button>
-      <button type="button" data-l="5">Level 5</button>
+      <span class="lab levlab">Level</span>
+      <button type="button" data-l="1" class="sel"><span class="lw">Level </span>1</button>
+      <button type="button" data-l="2"><span class="lw">Level </span>2</button>
+      <button type="button" data-l="3"><span class="lw">Level </span>3</button>
+      <button type="button" data-l="4"><span class="lw">Level </span>4</button>
+      <button type="button" data-l="5"><span class="lw">Level </span>5</button>
     </div>
     <div class="tabs" role="tablist" id="tabs">
       <button type="button" role="tab" data-a="rhythm"><span class="n">1</span>Tap the rhythm</button>
@@ -609,10 +612,10 @@ body.mode-start #status { font-size: 1.35rem; }
   </nav>
 
   <!-- Every activity has its buttons in one order (Isaac, 18 October): Key chord and Do, I'm ready, Hear it, New task,
-       Helpers, then any buttons a helper adds. Timed activities show their tempo above the stave, as a score would. -->
+       Note by note (27 October), Helpers, then any buttons a helper adds. Timed activities show their tempo above the stave, as a score would. -->
   <!-- Activity 1: Tap the rhythm (to the click; clap, hit space or tap the screen) -->
   <section class="card act skills-only" id="act-rhythm" hidden>
-    <p class="act-intro">Clap, hit space or tap the screen at the start of each note.</p>
+    <p class="prompt">Clap, hit space or tap the screen at the start of each note.</p>
     <div class="tempomark"><span class="tterm" data-term="rtempo"></span><svg class="tnote" viewBox="0 0 14 22" aria-hidden="true"><ellipse cx="4.2" cy="18.2" rx="4" ry="2.9" transform="rotate(-22 4.2 18.2)"/><rect x="7.1" y="1.5" width="1.3" height="16.6"/><path class="tflag" d="M8.4 1.5C8.7 5.2 13.4 6.6 12.2 12.2C11.8 9 10.2 7.6 8.4 7.2Z"/></svg><span class="teq">=</span><span data-rtempo-val></span><input type="range" data-opt="rtempo" min="50" max="100" step="2" aria-label="Tempo"></div>
     <div class="staff-scroll" id="rh-box"><svg id="rh-staff" class="score" role="img" aria-label="Rhythm to clap"></svg></div>
     <div class="actions">
@@ -626,18 +629,19 @@ body.mode-start #status { font-size: 1.35rem; }
   </section>
   <!-- Activity 2: Solfège (no click: the app waits for each note) -->
   <section class="card act skills-only" id="act-solfa" hidden>
-    <p class="act-intro">Sing each note and hold it. Take your time.</p>
+    <p class="prompt">Sing each note and hold it. Take your time.</p>
     <div class="staff-scroll" id="solfa-box"><svg id="solfa-staff" class="score" role="img" aria-label="Notes to sing"></svg></div>
     <div class="actions">
       <button type="button" id="solfa-ref">Key chord and <span class="sol">Do</span></button>
       <button type="button" class="primary" id="solfa-listen">I'm ready</button>
       <button type="button" id="solfa-hear" disabled>Hear it</button>
       <button type="button" id="solfa-new">New task</button>
+      <button type="button" class="toggle nbn" id="solfa-nbn" aria-pressed="false">Note by note</button>
       <button type="button" class="helpbtn" aria-expanded="false">Helpers</button>
     </div>
     <div class="helpers" data-act="solfa" hidden></div>
   </section>
-  <!-- Activity 3: Intervals (untimed). Show reminder adds the reminder line and the Play reminder tune button. -->
+  <!-- Activity 3: Intervals (untimed). Reminder tune names a tune that starts with the interval, and plays it. -->
   <section class="card act skills-only" id="act-intervals" hidden>
     <p class="prompt" id="iv-prompt"></p>
     <p class="remind" id="iv-remind" hidden></p>
@@ -645,10 +649,10 @@ body.mode-start #status { font-size: 1.35rem; }
     <div class="answerbox" id="iv-answer" hidden><div class="staff-scroll"><svg id="iv-staff" class="score" role="img" aria-label="Answer"></svg></div></div>
     <div class="actions">
       <button type="button" id="iv-play">Play it again</button>
+      <button type="button" id="iv-remplay">Reminder tune</button>
       <button type="button" class="primary" id="iv-listen">I'm ready</button>
       <button type="button" id="iv-next">New task</button>
       <button type="button" class="helpbtn" aria-expanded="false">Helpers</button>
-      <button type="button" id="iv-remplay" hidden>Play reminder tune</button>
     </div>
     <div class="helpers" data-act="intervals" hidden></div>
   </section>
@@ -661,14 +665,12 @@ body.mode-start #status { font-size: 1.35rem; }
       <button type="button" id="ch-play">Play it again</button>
       <button type="button" class="primary" id="ch-listen">I'm ready</button>
       <button type="button" id="ch-next">New task</button>
-      <button type="button" class="helpbtn" aria-expanded="false">Helpers</button>
     </div>
-    <div class="helpers" data-act="chords" hidden></div>
   </section>
   <!-- Activity 5: Hold your part (to the click). From Level 5 the other part is a countermelody, drawn above your part when
        it sounds above (score order), below it when it sounds below. -->
   <section class="card act skills-only" id="act-part" hidden>
-    <p class="act-intro">Listen, sing your part on your own, then sing it with the piano.</p>
+    <p class="prompt">Listen, sing your part on your own, then sing it with the piano.</p>
     <div class="hp">Use headphones.</div>
     <div class="tempomark"><span class="tterm" data-term="tempo"></span><svg class="tnote" viewBox="0 0 14 22" aria-hidden="true"><ellipse cx="4.2" cy="18.2" rx="4" ry="2.9" transform="rotate(-22 4.2 18.2)"/><rect x="7.1" y="1.5" width="1.3" height="16.6"/><path class="tflag" d="M8.4 1.5C8.7 5.2 13.4 6.6 12.2 12.2C11.8 9 10.2 7.6 8.4 7.2Z"/></svg><span class="teq">=</span><span data-tempo-val></span><input type="range" data-opt="tempo" min="50" max="100" step="2" aria-label="Tempo"></div>
     <div class="staff-scroll partbox" id="part-box">
@@ -684,13 +686,14 @@ body.mode-start #status { font-size: 1.35rem; }
       <button type="button" class="primary" id="part-listen">I'm ready</button>
       <button type="button" id="part-hear">Hear it</button>
       <button type="button" id="part-new">New task</button>
+      <button type="button" class="toggle nbn" id="part-nbn" aria-pressed="false">Note by note</button>
       <button type="button" class="helpbtn" aria-expanded="false">Helpers</button>
     </div>
     <div class="helpers" data-act="part" hidden></div>
   </section>
   <!-- Activity 6: Sight sing (to the click) -->
   <section class="card act skills-only" id="act-read" hidden>
-    <p class="act-intro">Sing the melody to the click.</p>
+    <p class="prompt">Sing the melody to the click.</p>
     <div class="hp" id="read-hp" hidden>Use headphones.</div>
     <div class="tempomark"><span class="tterm" data-term="tempo"></span><svg class="tnote" viewBox="0 0 14 22" aria-hidden="true"><ellipse cx="4.2" cy="18.2" rx="4" ry="2.9" transform="rotate(-22 4.2 18.2)"/><rect x="7.1" y="1.5" width="1.3" height="16.6"/><path class="tflag" d="M8.4 1.5C8.7 5.2 13.4 6.6 12.2 12.2C11.8 9 10.2 7.6 8.4 7.2Z"/></svg><span class="teq">=</span><span data-tempo-val></span><input type="range" data-opt="tempo" min="50" max="100" step="2" aria-label="Tempo"></div>
     <div class="staff-scroll" id="read-box"><svg id="read-staff" class="score" role="img" aria-label="Melody to sing"></svg></div>
@@ -699,15 +702,11 @@ body.mode-start #status { font-size: 1.35rem; }
       <button type="button" class="primary" id="read-listen">I'm ready</button>
       <button type="button" id="read-hear" disabled>Hear it</button>
       <button type="button" id="read-new">New task</button>
+      <button type="button" class="toggle nbn" id="read-nbn" aria-pressed="false">Note by note</button>
       <button type="button" class="helpbtn" aria-expanded="false">Helpers</button>
       <button type="button" id="read-practise" hidden>Practise with chords</button>
-      <button type="button" id="read-rhythm" hidden>Play the rhythm</button>
     </div>
     <div class="helpers" data-act="read" hidden></div>
-  </section>
-  <section class="card instr" id="instr" hidden>
-    <div class="instr-scroll" id="kbWrap"><svg id="kbSvg" class="kbd" role="img" aria-label="Keyboard"></svg></div>
-    <div class="instr-scroll" id="fbWrap"><svg id="fbSvg" class="fbd" role="img" aria-label="Guitar fretboard"></svg></div>
   </section>
   <section class="card live" id="livePanel" hidden>
     <div class="tunewrap" id="tuneWrap" aria-hidden="true"><svg id="tuneKb" class="tunekb"></svg></div>
@@ -4652,7 +4651,7 @@ const STORE_KEY = "sightSinger.level1.v1";
 const APP = {
   settings: { voice: null, tenorClef: "treble8", minorSolfege: "la", anyOct: true,
     level: 1, activity: "rhythm",
-    tuning: false, click: false, tempo: 72, rtempo: 72, audTempo: 72, audKeys: {}, solf: false, names: false, counts: true, auralType: "mix", latency: null },
+    click: false, tempo: 72, rtempo: 72, audTempo: 72, audKeys: {}, solf: false, names: false, counts: false, auralType: "mix", latency: null },
   stats: {}
 };
 function load(){ try { const r = JSON.parse(localStorage.getItem(STORE_KEY) || "null"); if (r) { Object.assign(APP.settings, r.settings || {}); APP.stats = r.stats || {}; } } catch (e) {} }
@@ -4979,6 +4978,39 @@ const LIVE = {
     TUNEKB.line.setAttribute("class", "tkline " + cls);
   }
 };
+// What to say while practising note by note (Practice skills and songs, the same words)
+function practiceSay(){
+  const coarse = window.matchMedia && matchMedia("(pointer: coarse)").matches;
+  return coarse ? "Sing the note in the box. Tap a note to hear it. Use the buttons to move on."
+    : "Sing the note in the box. Click a note to hear it. Use the arrow keys or the buttons to move on.";
+}
+// The tuning keyboard and the marks sit inside the card on every screen (Isaac, 22 October for Practice songs,
+// 27 October everywhere): the keyboard right above the music, so a singer sees both at once, and the marks under the
+// buttons. livePanel and results move there for the screen showing, and back to their own spot on Home.
+const PANEL_SPOT = {};
+function placePanels(){
+  let live = null, res = null;
+  if (MODE === "skills") { const c = $("act-" + APP.settings.activity); if (c) { live = c.querySelector(".staff-scroll, .answerbox"); res = c.querySelector(".actions"); } }
+  else if (MODE === "start") live = $("mp-row");
+  else if (MODE === "aud") { live = $("aud-box"); res = $("act-aud").querySelector(".actions"); }
+  else if (MODE === "songs" && SG.view === "song") { live = $("song-box"); res = $("song-acts"); }
+  [["livePanel", live, "before"], ["results", res, "after"]].forEach(([id, at, how]) => {
+    const el = $(id);
+    if (!PANEL_SPOT[id]) { PANEL_SPOT[id] = document.createComment(id); el.before(PANEL_SPOT[id]); }
+    if (at) at[how](el); else PANEL_SPOT[id].after(el);
+    el.classList.toggle("incard", !!at);
+  });
+}
+// When singing starts, the keyboard, the music and the button to stop must all be on screen (27 October: with the
+// keyboard above Hold your part's two staves, I'm finished went below the bottom of a laptop screen). If the button
+// isn't in view, the page scrolls so the keyboard is near the top, as Practice songs does (songShowLive).
+function liveInView(btn){
+  const lp = $("livePanel");
+  if (lp.hidden || !btn) return;
+  const b = btn.getBoundingClientRect(), top = lp.getBoundingClientRect().top;
+  if (top >= 0 && b.bottom <= window.innerHeight) return;
+  window.scrollTo(0, Math.max(0, window.scrollY + top - 12));
+}
 function tuningClass(c){ return Math.abs(c) <= TOL ? "ok" : Math.abs(c) < 100 ? "near" : "off"; }
 function tuningWords(c){ return Math.abs(c) < 100 ? (Math.abs(c) <= TOL ? "in tune" : Math.round(Math.abs(c)) + " cents " + (c > 0 ? "sharp" : "flat")) : "a different note"; }
 
@@ -5117,7 +5149,7 @@ function markOctaveLeaps(results, targets){
 }
 
 // ==== FILE: 06-helpers.js ====
-// ================= Helpers: hand signs, Click notes to hear, keyboard and fretboard =================
+// ================= Helpers: hand signs, Click notes to hear, beat numbers, letter names, solfège, Play chords =================
 // Curwen hand signs from uTheory (singer's view), drawn unmodified; HAND_ART.box is each drawing's area in the file
 const HAND_W = 52, HAND_H = 42;
 function drawHand(parent, syl, cx, y){
@@ -5134,10 +5166,13 @@ function drawHand(parent, syl, cx, y){
 function noteHand(key, n){ return APP.settings.solf ? solfegeLower(key, n) : null; }   // only drawn where Show solfège is offered
 
 // ---- Click notes to hear: click a note on any stave to hear it ----
+// Always on in Practice skills (Isaac, 27 October: no switch, as in Practice songs). The note clicked turns blue and
+// stays blue until the next click, so students can see which one they heard (markHeard; Practice songs uses it too).
+let HEARD = [];
+function markHeard(els){ HEARD.forEach(e => e.classList.remove("heard")); HEARD = els.filter(Boolean); HEARD.forEach(e => e.classList.add("heard")); }
 document.addEventListener("click", e => {
-  if (!helperOn("clickHear") || (AUDIO.onFrame && !PRACTISING) || performance.now() < CLICK_SUPPRESS) return;   // not while the app is listening
+  if (MODE !== "skills" || (AUDIO.onFrame && !PRACTISING) || performance.now() < CLICK_SUPPRESS) return;   // not while the app is listening
   const svg = e.target.closest && e.target.closest("svg.score");
-  if (svg && svg.classList.contains("choosing")) return;          // Practice songs: tapping chooses bars
   const L = svg && svg.__L;
   if (!L || L.perc) return;
   const r = svg.getBoundingClientRect();
@@ -5150,153 +5185,52 @@ document.addEventListener("click", e => {
   if (best.ev.chord) { const y = (e.clientY - r.top) * (L.height / r.height); note = best.ev.chord.reduce((a, n) => Math.abs(L.yForDia(n.dia) - y) < Math.abs(L.yForDia(a.dia) - y) ? n : a); }
   // while practising, the tuning keyboard ignores the note it plays
   tone(note.midi + L.tr, AUDIO.ctx.currentTime + 0.02, 0.9, { vol: 0.26, noIgnore: !PRACTISING });
-  best.el.classList.add("playing"); setTimeout(() => best.el.classList.remove("playing"), 700);
+  markHeard([best.el]);
 });
 
-// ---- Keyboard and guitar fretboard: light up whatever the piano is playing ----
-const KB = { lo: 36, hi: 84 };                 // C2 to C6
-const GTR = [64, 59, 55, 50, 45, 40];          // strings from the top line: high E, B, G, D, A, low E (sounding)
-const FRETS = 12;
-// INSTR.hold: notes held lit while Intervals or Chord notes shows its task ({ m: sounding midi, soft: true for chord notes that
-// aren't sung }), on top of whatever the piano is playing
-const INSTR = { keys: {}, dots: {}, sig: "", hold: [] };
-function isBlack(m){   // also used by the tuning keyboard (06-core.js)
- return [1, 3, 6, 8, 10].includes(((m % 12) + 12) % 12); }
-function buildKeyboard(){
-  const svg = $("kbSvg"); svg.innerHTML = "";
-  const W = 22, H = 92, BW = 14, BH = 56;
-  let x = 0; const whites = [], blacks = [];
-  for (let m = KB.lo; m <= KB.hi; m++) {
-    if (isBlack(m)) blacks.push({ m, x: x - BW / 2 });
-    else { whites.push({ m, x }); x += W; }
-  }
-  whites.forEach(k => {
-    INSTR.keys[k.m] = sel("rect", { x: k.x + 0.5, y: 0.5, width: W - 1, height: H, rx: 3, class: "kw" }, svg);
-    if (k.m % 12 === 0) sel("text", { x: k.x + W / 2, y: H - 7, class: "klbl" }, svg).textContent = "C" + (k.m / 12 - 1);
-  });
-  blacks.forEach(k => { INSTR.keys[k.m] = sel("rect", { x: k.x, y: 0.5, width: BW, height: BH, rx: 2, class: "kb" }, svg); });
-  svg.setAttribute("viewBox", `0 0 ${x + 1} ${H + 2}`); svg.style.width = (x + 1) + "px";
-}
-function buildFretboard(){
-  const svg = $("fbSvg"); svg.innerHTML = "";
-  const L = 46, FW = 46, S = 17, T = 12;
-  const w = L + FRETS * FW + 8, h = T + 5 * S + 30;
-  const fretX = f => L + f * FW;
-  sel("rect", { x: L, y: T - 4, width: FRETS * FW, height: 5 * S + 8, class: "fboard" }, svg);
-  [3, 5, 7, 9].forEach(f => sel("circle", { cx: fretX(f) - FW / 2, cy: T + 2.5 * S, r: 4, class: "fmark" }, svg));
-  [1.5, 3.5].forEach(k => sel("circle", { cx: fretX(12) - FW / 2, cy: T + k * S, r: 4, class: "fmark" }, svg));
-  for (let f = 1; f <= FRETS; f++) sel("line", { x1: fretX(f), x2: fretX(f), y1: T - 4, y2: T + 5 * S + 4, class: "fret" }, svg);
-  sel("rect", { x: L - 3, y: T - 4, width: 4, height: 5 * S + 8, class: "nut" }, svg);
-  GTR.forEach((m, i) => {
-    sel("line", { x1: L - 4, x2: fretX(FRETS), y1: T + i * S, y2: T + i * S, class: "gstr", "stroke-width": 0.8 + i * 0.3 }, svg);
-    sel("text", { x: 10, y: T + i * S + 4, class: "flbl" }, svg).textContent = ["E", "B", "G", "D", "A", "E"][i];
-  });
-  [3, 5, 7, 9, 12].forEach(f => sel("text", { x: fretX(f) - FW / 2, y: T + 5 * S + 22, class: "flbl" }, svg).textContent = f);
-  INSTR.fb = { svg, L, FW, S, T, fretX };
-  svg.setAttribute("viewBox", `0 0 ${w} ${h}`); svg.style.width = w + "px";
-}
-// Place a set of pitches on different strings, keeping the hand as low on the neck as it can
-function fretPositions(midis){
-  const ms = [...new Set(midis)].sort((a, b) => a - b).slice(0, 6);
-  let best = null;
-  const walk = (i, used, acc, cost) => {
-    if (best && cost >= best.cost) return;
-    if (i === ms.length) {
-      const fr = acc.filter(p => p.f > 0).map(p => p.f);
-      const total = cost + (fr.length ? 3 * (Math.max(...fr) - Math.min(...fr)) : 0);   // keep the shape compact
-      if (!best || total < best.cost) best = { cost: total, pos: acc.slice() };
-      return;
-    }
-    let any = false;
-    GTR.forEach((open, s) => {
-      const f = ms[i] - open;
-      if (f < 0 || f > FRETS || used.has(s)) return;
-      any = true; used.add(s); acc.push({ s, f }); walk(i + 1, used, acc, cost + f); acc.pop(); used.delete(s);
-    });
-    if (!any) walk(i + 1, used, acc, cost + 40);   // can't be placed: leave it off
-  };
-  walk(0, new Set(), [], 0);
-  return best ? best.pos : [];
-}
-function instrTick(){
-  requestAnimationFrame(instrTick);
-  if ($("instr").hidden || !AUDIO.ctx) return;
-  const now = AUDIO.ctx.currentTime;
-  if (VIS.length > 200) VIS = VIS.filter(v => v.e > now);
-  const playing = VIS.filter(v => v.s <= now && v.e > now).map(v => v.m);
-  const on = [...new Set(playing.concat(INSTR.hold.map(h => h.m)))].sort((a, b) => a - b);
-  const soft = new Set(INSTR.hold.filter(h => h.soft && !playing.includes(h.m)).map(h => h.m));
-  const sig = on.join(",") + "|" + [...soft].join(",");
-  if (sig === INSTR.sig) return;
-  INSTR.sig = sig;
-  Object.entries(INSTR.keys).forEach(([m, r]) => { r.classList.toggle("on", on.includes(+m)); r.classList.toggle("soft", soft.has(+m)); });
-  if (on.length && INSTR.keys[on[0]]) {          // keep the lit keys in view on narrow screens
-    const box = $("kbWrap"), x = +INSTR.keys[on[0]].getAttribute("x");
-    if (x < box.scrollLeft + 20 || x > box.scrollLeft + box.clientWidth - 60) box.scrollLeft = Math.max(0, x - box.clientWidth / 3);
-  }
-  const fb = INSTR.fb; if (!fb) return;
-  fb.svg.querySelectorAll(".fdot").forEach(d => d.remove());
-  fretPositions(on).forEach(p => {
-    const cx = p.f === 0 ? fb.L - 15 : fb.fretX(p.f) - fb.FW / 2;
-    const sf = soft.has(GTR[p.s] + p.f);
-    sel("circle", { cx, cy: fb.T + p.s * fb.S, r: 7, class: "fdot" + (sf ? " soft" : p.f === 0 ? " open" : "") }, fb.svg);
-  });
-}
-INSTR.refresh = function(){
-  const kb = false, gt = helperOn("guitar");          // the big keyboard is gone: Show keyboard and tuning lights the tuning keyboard
-  $("instr").hidden = !(kb || gt);
-  $("kbWrap").hidden = !kb; $("fbWrap").hidden = !gt;
-  document.body.classList.toggle("click-hear", helperOn("clickHear"));
+function isBlack(m){   // used by the tuning keyboard (06-core.js)
+  return [1, 3, 6, 8, 10].includes(((m % 12) + 12) % 12); }
+// Shows or hides what the helpers add to an activity (Play chords' button and its "Use headphones.")
+function helpersRefresh(){
+  document.body.classList.toggle("click-hear", MODE === "skills");
   const pc = helperOn("playChords", "read");
   $("read-practise").hidden = !pc; $("read-hp").hidden = !pc;
-  $("read-rhythm").hidden = !helperOn("playRhythm", "read");
-  INSTR.sig = null;
-};
-buildKeyboard(); buildFretboard();
-requestAnimationFrame(instrTick);
+}
 // The tuning keyboard lights the singer's notes as they're played, folded into its range (it covers the voice part's range)
 function tuneLitTick(){
   requestAnimationFrame(tuneLitTick);
   const show = (MODE === "skills" || MODE === "songs") && TUNEKB.line && !$("livePanel").hidden && !$("tuneWrap").hidden && AUDIO.ctx;
   const now = show ? AUDIO.ctx.currentTime : 0, tr = voiceInfo().tr;
+  if (show && VIS.length > 200) VIS = VIS.filter(v => v.e > now);
   const fold = m => { m -= tr; while (m < TUNEKB.lo) m += 12; while (m > TUNEKB.hi) m -= 12; return m; };
-  const playing = show ? VIS.filter(v => !v.acc && v.s <= now && v.e > now).map(v => fold(v.m)) : [];
-  const hold = show ? INSTR.hold.map(h => ({ m: fold(h.m), soft: h.soft })) : [];
-  const on = new Set(playing.concat(hold.filter(h => !h.soft).map(h => h.m))), soft = new Set(hold.filter(h => h.soft && !on.has(h.m)).map(h => h.m));
-  const sig = [...on].join(",") + "|" + [...soft].join(",") + "|" + TUNEKB.voice;
+  const on = new Set(show ? VIS.filter(v => !v.acc && v.s <= now && v.e > now).map(v => fold(v.m)) : []);
+  const sig = [...on].join(",") + "|" + TUNEKB.voice;
   if (sig === TUNEKB.litSig) return;
   TUNEKB.litSig = sig;
-  Object.entries(TUNEKB.keys).forEach(([m, k]) => { k.classList.toggle("lit", on.has(+m) || soft.has(+m)); k.classList.toggle("soft", soft.has(+m)); });
+  Object.entries(TUNEKB.keys).forEach(([m, k]) => k.classList.toggle("lit", on.has(+m)));
 }
 requestAnimationFrame(tuneLitTick);
 
 // ---- The Helpers on each activity ----
 // A helper is offered only where it makes sense (Isaac, 17 October; a standing rule for every level):
 // - timing helpers (beat numbers, Play chords) only where there is a click;
-// - note helpers (letter names, solfège, Click notes to hear, keyboard, fretboard) only where there are notes to read, and
-//   never where they would give away what the activity is testing unasked. Intervals hides the notes until the
-//   answer, but offers Show score, Show keyboard and Show guitar fretboard as supports a student chooses to turn on
-//   (Isaac, 18 October): they show the interval or chord to be sung. It has no names or solfège. Chord notes always shows
-//   its chord (Isaac, 19 October), so it has no Show score; Intervals has Show reminder, a tune that starts with the
-//   interval, and its Play reminder tune button;
+// - note helpers (letter names, solfège) only where there are notes to read, and never where they would give away what
+//   the activity is testing unasked. Intervals hides the notes until the answer, but offers Show score, a support a
+//   student chooses to turn on (Isaac, 18 October). Chord notes always shows its chord (Isaac, 19 October), so it has no
+//   helpers at all;
 // - Play chords only where nothing else plays the harmony (not Hold your part).
-// - Play the rhythm (claps the melody's rhythm) only where the rhythm is read, not heard first (Sight sing).
-// Show keyboard and tuning (Isaac, 20 October): the old Show keyboard (C2 to C6) is folded into the tuning keyboard,
-// which is smaller and stays still. It lights the singer's notes as the piano plays them (Do after the key chord, not the
-// chord; clicked notes; the melody; an interval or chord to sing) but not harmony (Play chords, the other part).
-const HELPER_LABELS = { tuning: "Show keyboard and tuning", score: "Show score", reminder: "Show reminder", counts: "Show beat numbers", names: "Show letter names", solf: "Show solfège",
-  clickHear: "Click notes to hear", keyboard: "Show keyboard", guitar: "Show guitar fretboard", playChords: "Play chords",
-  playRhythm: "Play the rhythm" };
+// Gone on 27 October (Isaac went through them one by one): Show keyboard and tuning (Note by note and the keyboard that
+// is always there while singing replace it), Click notes to hear (always on), Show guitar fretboard, Play the rhythm,
+// and Show reminder (now the Reminder tune button in Intervals). Show beat numbers is off at first, and the notes are
+// spaced as if it were on, so turning it on doesn't move them.
+const HELPER_LABELS = { score: "Show score", counts: "Show beat numbers", names: "Show letter names", solf: "Show solfège", playChords: "Play chords" };
 const HELPERS = {
   rhythm: ["counts"],
-  solfa: ["tuning", "names", "solf", "clickHear", "guitar"],
-  intervals: ["tuning", "score", "reminder", "clickHear", "guitar"],
-  chords: ["tuning", "clickHear", "guitar"],             // the chord is always shown (Isaac, 19 October)
-  part: ["tuning", "counts", "names", "solf", "clickHear", "guitar"],
-  read: ["tuning", "counts", "names", "solf", "clickHear", "guitar", "playChords", "playRhythm"],
-  // Practice songs: Sight sing's, apart from Play chords, Play the rhythm and Click notes to hear (the playback bar plays
-  // the music, and clicking the score chooses bars)
-  song: ["counts", "names", "solf", "guitar"]      // Practice songs always shows the tuning keyboard while they sing (22 October)
+  solfa: ["names", "solf"],
+  intervals: ["score"],
+  part: ["counts", "names", "solf"],
+  read: ["counts", "names", "solf", "playChords"],
+  song: ["counts", "names", "solf"]      // Practice songs: Sight sing's, apart from Play chords (the play bar plays the music)
 };
 function helperOn(key, act = APP.settings.activity){
   if (MODE === "songs") act = "song"; else if (MODE !== "skills") return false;      // no helpers in the practice audition
@@ -5396,8 +5330,12 @@ function steadyComment(key, notes, results, opts = {}){
 //   stave underneath at Levels 1 to 4, and in score order at Level 5, where it's a countermelody). The click runs
 //   throughout.
 // Otherwise (Sight sing): 4 bars to the click (8 of 2/4 at Level 2), with Play chords available.
+// The tuning keyboard is always there while they sing (Isaac, 27 October), right above the stave (placePanels), and
+// the Note by note button (NBN, shared by the three activities) practises one note at a time between attempts.
 // Level 2 brings 3/4 and 2/4 and crotchet rests: ex.bars holds rests ({ ticks, rest: true }) as well as notes, while
 // ex.notes and ex.degs hold notes only. A.nIdx maps note i to its event on the stave.
+let NBN = false;      // Note by note is on (Practice skills; Practice songs has its own, SG.nbn)
+function markNbn(){ document.querySelectorAll(".nbn").forEach(b => { b.setAttribute("aria-pressed", NBN); }); }
 function makeMelodyActivity(cfg){
   const A = { id: cfg.id, ex: null, L: null, L2: null, LL: null, ring: null, ring2: null, state: "idle", run: null, lastResults: null };
   const el = s => $(cfg.id + "-" + s);
@@ -5409,6 +5347,9 @@ function makeMelodyActivity(cfg){
   const leadTicks = ex => { let t = 0; for (const e of ex.bars[0]) { if (!e.hidden) break; t += e.ticks; } return t; };
   const chordsOn = () => !cfg.lower && !cfg.untimed && helperOn("playChords", cfg.id) && A.ex && A.ex.chords;
   const beatsOn = () => !cfg.untimed && helperOn("counts", cfg.id);
+  // where beat numbers are offered, the notes are always spaced as if they showed (Isaac, 27 October), so turning
+  // them on doesn't move anything
+  const beatsSpacing = !cfg.untimed && !cfg.aud;
 
   A.newItem = function(playRef){
     A.stop(true);
@@ -5486,7 +5427,7 @@ function makeMelodyActivity(cfg){
     const opts = { labels: showLbl, minGap: labelGap() };
     // even spacing when beats show. With letter names or solfège showing, short notes (quavers, and the Level 3
     // semiquaver) still get room for their labels, except in Hold your part, whose two staves must line up.
-    if (cfg.lower || V.alt || beatsOn()) { opts.prop = Math.max(11, labelGap() / 4); if (cfg.lower || !showLbl) delete opts.minGap; }
+    if (cfg.lower || V.alt || beatsSpacing) { opts.prop = Math.max(11, labelGap() / 4); if (cfg.lower || !showLbl) delete opts.minGap; }
     // Hold your part with labels: both staves share column widths, each at least wide enough for a label and hand sign,
     // so quavers' solfège never collides and the two parts still line up (Isaac, 18 October)
     if (cfg.lower && showLbl) {
@@ -5596,7 +5537,7 @@ function makeMelodyActivity(cfg){
   A.practise = function(){
     if (A.state === "listening") return;
     const pb = el("practise");
-    if (A.state === "playing") { stopAllSound(); A.state = "idle"; BUSY = null; A.ph(-20); pb.textContent = "Practise with chords"; el("rhythm").textContent = "Play the rhythm"; return; }
+    if (A.state === "playing") { stopAllSound(); A.state = "idle"; BUSY = null; A.ph(-20); pb.textContent = "Practise with chords"; return; }
     ensureCtx(); if (waitForPiano(() => A.practise())) return;
     stopAllSound();
     const ctx = AUDIO.ctx, ts = tsOf(A.ex), tick = tickSecOf(ts, tempo()), beat = clickTicksOf(ts) * tick, t0 = ctx.currentTime + 0.2;
@@ -5609,23 +5550,7 @@ function makeMelodyActivity(cfg){
     follow(start, tick, start + total * tick);
   };
 
-  // Play the rhythm (Sight sing helper): the count-in, the click and a hand clap on every note, with no pitches
-  A.playRhythm = function(){
-    if (A.state === "listening") return;
-    const rb = el("rhythm");
-    if (A.state === "playing") { stopAllSound(); A.state = "idle"; BUSY = null; A.ph(-20); rb.textContent = "Play the rhythm"; el("practise").textContent = "Practise with chords"; return; }
-    stopAllSound();
-    const ctx = ensureCtx(), ts = tsOf(A.ex), tick = tickSecOf(ts, tempo()), beat = clickTicksOf(ts) * tick, t0 = ctx.currentTime + 0.2;
-    const start = countInClicks(t0, beat, ts), total = totalTicks();
-    showCountIn(el("box"), t0, beat, [], countLabels(ts));
-    musicClicks(start, tick, total, ts);
-    soundOf(A.ex).forEach(x => handClap(start + x.t * tick));
-    rb.textContent = "Stop";
-    A.onStopPlaying = () => { rb.textContent = "Play the rhythm"; };
-    follow(start, tick, start + total * tick);
-  };
-
-  // Show the singer's pitch against note idx (Show my tuning)
+  // Show the singer's pitch against note idx (the tuning keyboard and the pill on the stave)
   function showPitch(idx, p, cents){
     const ex = A.ex, V = voiceInfo();
     // nothing heard: hide the marks, but keep the tuning keyboard on the note to sing when there is one
@@ -5641,7 +5566,8 @@ function makeMelodyActivity(cfg){
     A.draw(null);
     RESULTS.hide();
     const lb = el("listen"); lb.firstChild.textContent = "I'm finished"; lb.classList.add("on");
-    ["ref", "hear", "new"].concat(cfg.lower || cfg.untimed ? [] : ["practise", "rhythm"]).forEach(s => el(s).disabled = true);
+    ["ref", "hear", "new"].concat(cfg.lower || cfg.untimed ? [] : ["practise"]).forEach(s => el(s).disabled = true);
+    if (el("nbn")) el("nbn").disabled = true;
   }
 
   A.listen = async function(){
@@ -5652,8 +5578,8 @@ function makeMelodyActivity(cfg){
     if (cfg.aud) stopAllSound();      // a key chord still ringing would hide the first notes (the app doesn't hear while its piano sounds)
     const ex = A.ex;
     startListening();
-    const show = helperOn("tuning", cfg.id);
-    LIVE.open(show, cfg.lower ? "Listen." : "Listen for the count-in.");
+    const show = !cfg.aud;          // the keyboard is always there while singing (the audition shows it only to practise)
+    LIVE.open(show, cfg.lower ? "Listen." : "Listen for the count-in."); liveInView(el("listen"));
     const ctx = AUDIO.ctx;
     const smoother = makeSmoother(), settle = makeSettle();
     const tg = ex.notes.map(n => sounding(n)), n = tg.length;
@@ -5732,8 +5658,8 @@ function makeMelodyActivity(cfg){
   function listenSteady(){
     const ex = A.ex;
     startListening();
-    const show = helperOn("tuning", cfg.id);
-    LIVE.open(show, `Find the first note and hold it. Take your time.`);
+    const show = !cfg.aud;
+    LIVE.open(show, `Find the first note and hold it. Take your time.`); liveInView(el("listen"));
     if (show) LIVE.needle(null, null, ex.notes[0].midi);
     const tg = ex.notes.map(n => sounding(n));
     A.hl(0);
@@ -5787,7 +5713,8 @@ function makeMelodyActivity(cfg){
     el("ref").disabled = false; el("new").disabled = false;
     el("hear").disabled = !A.ex || (!cfg.lower && A.ex.attempts === 0);
     if (cfg.aud) el("listen").disabled = !A.ex || (A.ex.attempts > 0 && !(cfg.retry && cfg.retry()));   // one marked go in the practice audition (the anthem can be sung again)
-    if (!cfg.lower && !cfg.untimed) { el("practise").disabled = false; el("rhythm").disabled = false; }
+    if (!cfg.lower && !cfg.untimed) el("practise").disabled = false;
+    if (el("nbn")) el("nbn").disabled = false;
   }
   A.finish = function(){
     if (A.state !== "listening") return;
@@ -5839,25 +5766,23 @@ function makeMelodyActivity(cfg){
   el("ref").addEventListener("click", () => A.reference());
   if (!cfg.aud) el("listen").addEventListener("click", () => A.listen());       // the audition routes I'm ready itself (09-audition.js)
   el("hear").addEventListener("click", () => A.hear(!!cfg.lower));
-  // Hold your part has no Hear my part button (Isaac, 19 October): Click notes to hear plays any note of the singer's part
-  if (!cfg.lower && !cfg.untimed) { el("practise").addEventListener("click", () => A.practise()); el("rhythm").addEventListener("click", () => A.playRhythm()); }
+  // Hold your part has no Hear my part button (Isaac, 19 October): clicking a note plays any note of the singer's part
+  if (!cfg.lower && !cfg.untimed) el("practise").addEventListener("click", () => A.practise());
+  if (el("nbn")) el("nbn").addEventListener("click", () => { if (A.state === "listening") return; NBN = !NBN; markNbn(); A.syncPractice(true); });
 
-  // ---------- Practising with Show my tuning (Isaac, 18 October) ----------
-  // With Show my tuning on, the tuning keyboard stays up whenever the app isn't listening, so the singer can work on
+  // ---------- Note by note (Isaac, 18 October as Show my tuning; a button since 27 October) ----------
+  // With Note by note on, the tuning keyboard stays up whenever the app isn't listening, so the singer can work on
   // any note at their own pace. A box on the stave marks the note they're practising, and the keyboard outlines the
   // same note. They move the box on with the arrow keys, by dragging it, by clicking or tapping a note, or with the
   // Previous note and Next note buttons (for phones). Nothing is marked or counted. After an attempt the box goes to the
   // first note that wasn't in tune. Intervals and Chord notes aren't included.
   A.pi = 0;
   const practising = () => PRACTISING === A;
-  const coarse = () => window.matchMedia && matchMedia("(pointer: coarse)").matches;
-  const practiceSay = () => coarse() ? "Sing the note in the box. To move on, drag the box, tap a note or use the buttons below."
-    : "Sing the note in the box. To move on, use the arrow keys, drag the box or click a note.";
   const wantPractice = () => cfg.wantPractice ? !!A.ex && A.state !== "listening" && cfg.wantPractice()
-    : MODE === "skills" && helperOn("tuning", cfg.id) && APP.settings.activity === cfg.id && !!A.ex && A.state !== "listening" && !$("act-" + cfg.id).hidden;
+    : MODE === "skills" && NBN && APP.settings.activity === cfg.id && !!A.ex && A.state !== "listening" && !$("act-" + cfg.id).hidden;
   A.syncPractice = async function(gesture){
     if (!wantPractice()) { if (practising()) endPractice(); return; }
-    if (!AUDIO.listening && gesture) await startMic();      // turning the switch on is the press that allows the microphone
+    if (!AUDIO.listening && gesture) await startMic();      // pressing Note by note is the press that allows the microphone
     if (!wantPractice() || A.state === "listening") return;
     PRACTISING = A;
     LIVE.open(true, ""); LIVE.practice(AUDIO.listening);
@@ -5996,7 +5921,7 @@ function rhDraw(marks, extraTaps){
     if (inTie) { if (marks) e.state = marks[k - 1].state; return e; }       // the second half of a tied note: no clap of its own
     if (marks) { const m = marks[k]; e.state = m.state; e.sub = m.text; e.subCls = m.state; }
     k++; return e; }));
-  RH.L = renderScore($("rh-staff"), { clef: "perc", key: null, ts: RH.ex.ts, bars }, APP.settings.counts ? { labels: false, beats: true, prop: 11, minGap: 22 } : { labels: false, minGap: 40 });   // minGap: room for Level 5 triplets and semiquavers
+  RH.L = renderScore($("rh-staff"), { clef: "perc", key: null, ts: RH.ex.ts, bars }, { labels: false, beats: !!APP.settings.counts, prop: 11, minGap: 22 });   // spaced as if the beat numbers showed, on or off (Isaac, 27 October); minGap: room for Level 5 triplets and semiquavers
   // extra claps (Isaac, 18 October): a red cross under the line where each one fell
   if (marks && RH.lastExtra.length && RH.run) RH.lastExtra.forEach(tp => {
     const L = RH.L, t = tp / RH.run.tick;
@@ -6373,7 +6298,8 @@ function audShow(play){
   const it = audCur(), n = AUD.items[AUD.sec].length;
   audPrepare(it);
   const words = { anthem: "Anthem", chords: "Chord", read: "Melody", songs: "Song" }[AUD_SECS[AUD.sec].id];
-  $("aud-step").textContent = n > 1 ? `${words} ${AUD.idx + 1} of ${n}` : words;
+  // the pill counts the items ("Chord 1 of 9"); with one item the tab already names it (Isaac, 27 October)
+  $("aud-step").textContent = n > 1 ? `${words} ${AUD.idx + 1} of ${n}` : ""; $("aud-step").parentElement.hidden = n < 2;
   const isChord = it.kind === "chord";
   VOICE_OVR = it.kind === "read" ? audReadVoice() : null;
   $("aud-box").hidden = isChord || !it.ex; $("aud-chordbox").hidden = !isChord;
@@ -6537,10 +6463,13 @@ function audVoiceChanged(){ audReset(); audShow(false); }
 // ================= Activities 3 and 4: Intervals and Chord notes =================
 // Train your ears is two activities at every level (Isaac, 19 October): Intervals and Chord notes. Both are untimed: no
 // click; the app waits for the singer to find and hold each note (06-steady.js).
-// - Intervals: a note is played; sing it, then the interval above or below. The Show reminder helper names a tune that
-//   starts with that interval and adds a Play reminder tune button, which plays its opening from the note given.
+// - Intervals: a note is played; sing it, then the interval above or below. The Reminder tune button (Isaac,
+//   27 October: it was the Show reminder helper, which he'd never found) names a tune that starts with that interval
+//   and plays its opening from the note given.
 // - Chord notes: the chord is played and always shown on a stave (Isaac, 19 October: "show the score by default"), with
 //   the note to sing in blue; sing that note.
+// While they sing, the tuning keyboard shows where they are with no note outlined (Isaac, 27 October), so it never
+// gives the answer away.
 
 // Reminder tunes, by semitones, going up and going down. Public-domain tunes play their opening (n: semitones from the
 // first note, d: beats). For tunes still in copyright only the two notes of the interval are played; the name is shown.
@@ -6577,26 +6506,18 @@ function makeAuralActivity(cfg){
     RESULTS.hide(); LIVE.close();
     el("answer").hidden = true;
     el("prompt").innerHTML = solHTML(A.ex.prompt);
+    if (el("remind")) el("remind").hidden = true;
     const st = stat(cfg.id); st.items++; save();
     A.helpers();
     if (play) A.play();
   };
   // The stave of the task before the attempt: always in Chord notes; in Intervals only with Show score (Isaac,
-  // 18 October). Show keyboard and Show guitar fretboard hold the notes lit (the chord's other notes a lighter blue).
-  // The reminder line and button show with Show reminder.
+  // 18 October).
   A.helpers = function(){
     const ex = A.ex;
     if (!ex || APP.settings.activity !== cfg.id) return;
-    const notes = ex.type === "chord" ? ex.chord : ex.answer;
-    INSTR.hold = notes.map(n => ({ m: sounding(n), soft: ex.type === "chord" && n !== ex.answer[0] }));
-    INSTR.sig = null;
-    // Show keyboard and tuning: the keyboard stays up between attempts, showing the notes to sing
-    if (A.state !== "listening") { if (helperOn("tuning", cfg.id)) { LIVE.open(true, ""); } else LIVE.close(); }
-    if (cfg.type === "interval") {
-      const r = reminderFor(ex), on = helperOn("reminder", cfg.id) && !!r;
-      el("remind").hidden = !on; el("remplay").hidden = !on;
-      if (on) el("remind").textContent = `Reminder tune for a ${ivName(ex)} ${ex.up ? "up" : "down"}: ${r.name}`;
-    }
+    if (A.state !== "listening") LIVE.close();
+    if (el("remplay")) el("remplay").hidden = !reminderFor(ex);
     const show = (cfg.type === "chord" || helperOn("score", cfg.id)) && el("answer").hidden;
     el("preview").hidden = !show;
     const svg = el("pre"), V = voiceInfo();
@@ -6616,12 +6537,13 @@ function makeAuralActivity(cfg){
     if (ex.type === "chord") ex.chord.forEach(n => tone(sounding(n), ctx.currentTime + 0.05, 2.2, { vol: 0.2 }));
     else tone(sounding(ex.given), ctx.currentTime + 0.05, 1.4, { vol: 0.26 });
   };
-  // the reminder tune's opening, from the note given
+  // the reminder tune: its name under the prompt, and its opening from the note given
   A.playReminder = function(){
     if (A.state === "listening") return;
+    const ex = A.ex, r = reminderFor(ex); if (!r) return;
+    el("remind").textContent = `Reminder tune for a ${ivName(ex)} ${ex.up ? "up" : "down"}: ${r.name}`; el("remind").hidden = false;
     ensureCtx(); if (waitForPiano(() => A.playReminder())) return;
     stopAllSound();
-    const r = reminderFor(A.ex); if (!r) return;
     let t = AUDIO.ctx.currentTime + 0.05; const beat = 0.42, base = sounding(A.ex.given);
     r.n.forEach((x, i) => { tone(base + x, t, r.d[i] * beat * 0.95, { vol: 0.24 }); t += r.d[i] * beat; });
   };
@@ -6636,21 +6558,11 @@ function makeAuralActivity(cfg){
     RESULTS.hide(); el("answer").hidden = true; A.helpers();
     const lb = el("listen"); lb.firstChild.textContent = "I'm finished"; lb.classList.add("on");
     el("play").disabled = true; el("next").disabled = true; if (el("remplay")) el("remplay").disabled = true;
-    const show = helperOn("tuning", cfg.id);
-    LIVE.open(show, say(ex, 0));
-    if (show) LIVE.needle(null, null, ex.answer[0].midi);
+    LIVE.open(true, say(ex, 0)); liveInView(el("listen"));
+    LIVE.free(null);
     const tg = ex.answer.map(n => sounding(n));
-    const settle = makeSettle();
     A.run = { S: steadyListen(tg, {
-      onLive(idx, cents, p, f){
-        if (!show) return;
-        const tg = ex.answer[idx] ? ex.answer[idx].midi : null;
-        const h = settle.step(idx, tg, f.t, f.raw, ex.answer[idx] ? sounding(ex.answer[idx]) : null);              // hold still while moving to the second note
-        if (h === "release") A.run.S.smoother.reset();
-        else if (h) LIVE.target(tg);
-        else if (cents === null) LIVE.needle(null, null, tg);
-        else { const cls = tuningClass(cents); LIVE.needle(cents, cls, tg, p - voiceInfo().tr); LIVE.sung(tuningWords(cents)); }
-      },
+      onLive(idx, cents, p){ LIVE.free(p === null ? null : p - voiceInfo().tr); },      // where they are, no note outlined
       onNext(idx){ LIVE.status(say(ex, idx)); },
       onDone(results){ A.finish(results); }
     }) };
@@ -7031,7 +6943,7 @@ function songDraw(){
   // a note in a triplet (8/3 ticks: a triplet crotchet) is drawn as the value it's written as, with its 3
   const std = [1, 2, 3, 4, 6, 8, 12, 16], isStd = v => std.some(x => Math.abs(x - v) < 1e-3);
   passes.forEach(p => p.bars.forEach(b => b.forEach(ev => { if (!ev.hidden && !ev.multi && !ev.wholeBar && !isStd(ev.ticks) && isStd(ev.ticks * 1.5)) { ev.shown = Math.round(ev.ticks * 1.5); ev.tup = 3; } })));
-  const cols = songColumns(passes, plan, beats);
+  const cols = songColumns(passes, plan, true);        // spaced as if the beat numbers showed, on or off (Isaac, 27 October)
   box.innerHTML = "";
   const printedAcc = !!s.printedAcc, barNums = plan.map(p => s.barLabels[p.a]), Ls = [];
   // the time signature at the start, and each drawn bar's when it changes in the song
@@ -7872,7 +7784,7 @@ document.addEventListener("click", e => {
   if (!best || bd > 30) return;
   ensureCtx();
   tone(sound(best), AUDIO.ctx.currentTime + 0.02, 0.9, { vol: 0.26, noIgnore: PRACTISING !== SONGM });
-  [SG.L, SG.L2].forEach(M => { if (M) { const el = M.evs[best.ev].el; el.classList.add("playing"); setTimeout(() => el.classList.remove("playing"), 700); } });
+  markHeard([SG.L, SG.L2].map(M => M && M.evs[best.ev].el));        // blue until the next click (Isaac, 27 October)
   if (PRACTISING === SONGM && songTargets().some(n => n.i === best.i)) songBoxTo(best.i, false);
 });
 
@@ -7888,7 +7800,8 @@ function songButtons(){
   });
   $("song-learn").title = phrase ? "" : "Choose a phrase to learn it";
   const nb = $("song-nbn"); nb.disabled = busy; nb.setAttribute("aria-pressed", SG.nbn); nb.classList.toggle("sel", SG.nbn);
-  ["song-prev", "song-next", "song-sec", "song-show-others", "song-show-accomp", "song-play", "song-stop", "song-restart", "song-scrub"].forEach(id => $(id).disabled = busy);
+  ["song-prev", "song-next", "song-sec", "song-play", "song-stop", "song-restart", "song-scrub"].forEach(id => $(id).disabled = busy);
+  $("song-mix").querySelectorAll('[data-opt="songShowOthers"], [data-opt="songShowAccomp"]').forEach(i => { i.disabled = busy; });
   document.querySelectorAll("#song-parts button, #song-recrow button").forEach(b => b.disabled = busy);
   const list = phrases();
   $("song-prev").disabled = busy || SG.phrase < 0; $("song-next").disabled = busy || SG.phrase >= list.length - 1;
@@ -7908,7 +7821,7 @@ function songShowMode(){
   $("song-tempo").hidden = !!SG.useRec;
   // with the recording, the piano can only add the singer's own part (its own switch, off at first)
   const recOn = !!(SG.useRec && SG.rec);
-  card.querySelectorAll('.songplay [data-opt="songOthers"], .songplay [data-opt="songAccomp"], .songplay [data-opt="songOwn"]').forEach(i => { i.parentElement.hidden = recOn; });
+  card.querySelectorAll('.songmix [data-opt="songOthers"], .songmix [data-opt="songAccomp"], .songmix [data-opt="songOwn"]').forEach(i => { i.parentElement.hidden = recOn; });
   $("song-recown").hidden = !recOn;
   if (TEACH) TEACH.mode();
   const tSrc = TEACH ? TEACH.ytSrc() : null;
@@ -7926,24 +7839,12 @@ function songStop(){
   if (PRACTISING === SONGM) { PRACTISING = null; AUDIO.onFrame = null; }
   VOICE_OVR = null;
 }
-// The tuning keyboard goes above the score, and the marks' key under the buttons, while a song is open (Isaac,
-// 22 October: below the score, students couldn't see it while they sang). Elsewhere they go back where they were.
-const PANEL_SPOT = {};
-function songPanels(on){
-  ["livePanel", "results"].forEach(id => {
-    const el = $(id);
-    if (!PANEL_SPOT[id]) { PANEL_SPOT[id] = document.createComment(id); el.before(PANEL_SPOT[id]); }
-    if (on) (id === "livePanel" ? $("song-box") : $("song-hp")).before(el);
-    else PANEL_SPOT[id].after(el);
-    el.classList.toggle("insong", !!on);
-  });
-}
 function songsShow(){
   songStop();
   RESULTS.hide(); LIVE.close();
   $("songs-list").hidden = SG.view !== "list"; $("act-song").hidden = SG.view !== "song";
   if (TEACH) TEACH.view();
-  if (SG.view === "list") { songPanels(false); return songList(); }
+  if (SG.view === "list") { placePanels(); return songList(); }
   songOpen(SG.song, false);
 }
 function songList(){
@@ -7956,7 +7857,6 @@ function songList(){
 function songDefaultPart(s){ const v = APP.settings.voice || "S"; return s.parts.find(p => p.voice === v) || s.parts[0]; }
 function songOpen(s, fresh){
   songStop(); stopAllSound(); RESULTS.hide(); LIVE.close();
-  songPanels(true);
   if (fresh || SG.song !== s) {
     SG.song = s; SG.timeline = songTimeline(s); SG.part = songDefaultPart(s); SG.marks = null; SG.phrase = -1; SG.nbn = false;
     APP.settings.songTempo = Math.round(s.tempo); SG.pos = 0; SG.pi = 0;
@@ -7965,12 +7865,14 @@ function songOpen(s, fresh){
     if (TEACH) TEACH.open(s);
   }
   SG.view = "song"; SONGM.ex = { timeSig: s.ts };
+  placePanels();                // the tuning keyboard above the score, the marks under the steps (06-core.js)
   $("songs-list").hidden = true; $("act-song").hidden = false;
   if (TEACH) TEACH.view();
   $("song-title").textContent = s.title;
   $("song-by").textContent = [s.composer, s.words ? "words: " + s.words : ""].filter(Boolean).join(" · ");
   songPartButtons(s);
-  $("song-show-others").hidden = s.parts.length < 2; $("song-show-accomp").hidden = !s.accomp.length;
+  // Show and Hear for other parts and the accompaniment, only where the song has them
+  [["others", s.parts.length < 2], ["accomp", !s.accomp.length]].forEach(([k, none]) => $("song-mix").querySelectorAll(`[data-row="${k}"]`).forEach(e => e.classList.toggle("gone", none)));
   syncOptions();
   songSet();
   // a YouTube recording already found not to play here (opening the song again): the piano, and say why
@@ -7997,7 +7899,6 @@ function songSet(){
   songSec();
   if (SG.pos < songFrom() - 1e-6 || SG.pos > songTo() + 1e-6) SG.pos = songFrom();
   $("song-parts").querySelectorAll("button").forEach(b => b.classList.toggle("sel", b.dataset.p === pt.id));
-  ["songShowOthers", "songShowAccomp"].forEach((k, i) => { const b = $(i ? "song-show-accomp" : "song-show-others"); b.setAttribute("aria-pressed", !!APP.settings[k]); });
   songShowMode();
   songDraw();
   songScrub(); songButtons();
@@ -8018,14 +7919,6 @@ function songSecTo(k){
   $("song-sec").addEventListener("change", () => songSecTo(+$("song-sec").value));
   $("song-prev").addEventListener("click", () => songSecTo(SG.phrase - 1));
   $("song-next").addEventListener("click", () => songSecTo(SG.phrase + 1));
-  [["song-show-others", "songShowOthers"], ["song-show-accomp", "songShowAccomp"]].forEach(([id, k]) => $(id).addEventListener("click", () => {
-    if (SG.state === "listening") return;
-    APP.settings[k] = !APP.settings[k]; save();
-    $(id).setAttribute("aria-pressed", APP.settings[k]);
-    const was = SG.state === "playing";
-    songDraw(); if (was) songListenPlay();
-    songSync();
-  }));
   $("song-play").addEventListener("click", () => songListenPlay());
   $("song-stop").addEventListener("click", () => { songHalt(); SG.pos = songFrom(); songHead(SG.pos); songScrub(); if (SG.L) scrollIntoViewX(SG.L, 0); });
   $("song-restart").addEventListener("click", () => { const was = SG.state === "playing"; songHalt(); SG.pos = songFrom(); songHead(SG.pos); songScrub(); if (was) songListenPlay(); else if (SG.L) scrollIntoViewX(SG.L, 0); });
@@ -8047,6 +7940,13 @@ function songSecTo(k){
   window.addEventListener("message", ytMessage);
   ["songOthers", "songAccomp", "songOwn"].forEach(k => { if (APP.settings[k] === undefined) APP.settings[k] = true; });
 })();
+// Show other parts or Show accompaniment changed: the score is drawn again, and music playing carries on
+function songShowChanged(){
+  if (SG.view !== "song" || SG.state === "listening") return;
+  const was = SG.state === "playing";
+  songDraw(); if (was) songListenPlay();
+  songSync();
+}
 // A playback switch or the tempo changed: music playing on the piano carries on with it from where it is
 function songPlaybackChanged(){ if (SG.state === "playing" && !SG.useRec) { songHalt(); songListenPlay(); } }
 function songTempoChanged(){ if (SG.state === "playing" && !SG.useRec) { songHalt(); songListenPlay(); } }
@@ -8101,7 +8001,7 @@ function mpNew(play){
   do { m = lo + Math.floor(Math.random() * (hi - lo + 1)); } while (MP.last !== null && (m === MP.last || Math.abs(m - MP.last) > 9));
   MP.target = m; MP.last = m; MP.t0 = null; MP.found = false; MP.played = false; MP.streak = null;
   $("mp-play").textContent = "Play the note";
-  LIVE.open(true, "Press Play the note, then sing it."); LIVE.target(m);
+  LIVE.open(true, ""); LIVE.target(m);         // the prompt above says what to do (Isaac, 27 October: fewer words)
   if (play) mpPlay();
 }
 // a note played and not found counts as a miss when the student moves on
@@ -8124,7 +8024,7 @@ function mpListen(){
     const p = MP.sm.push(f), now = f.t, sounding = MP.t0 !== null && now < MP.endAt;
     if (p === null) {
       LIVE.needle(null, null, MP.target); MP.streak = null;
-      if (!MP.found) LIVE.status(MP.t0 === null ? "Press Play the note, then sing it." : sounding ? "Sing the note you hear." : "Press Play it again to hear the note.");
+      if (!MP.found) LIVE.status(MP.t0 === null ? "" : sounding ? "Sing the note you hear." : "Press Play it again to hear the note.");
       return;
     }
     const raw = p - (MP.target + voiceInfo().tr);
@@ -8175,7 +8075,8 @@ function mpAdvice(){
   else if (inTime && next) { say = `You found the last ${MP_IN_A_ROW} notes before they stopped. Try ${next === 8 ? "an" : "a"} ${next}-second note.`; btn = next; }
   else if (inTime) say = `You found the last ${MP_IN_A_ROW} notes within ${L} seconds. Keep going until you can find them in ${MP_READY} seconds or less.`;
   else if (recs.length && recs[recs.length - 1].t === null) say = "Take your time. Press Play it again whenever you want to hear the note.";
-  else say = `Find the note before it stops (${L} seconds). When you can do that ${MP_IN_A_ROW} times in a row, try a shorter note.`;
+  else if (recs.length) say = `Find the note before it stops (${L} seconds). When you can do that ${MP_IN_A_ROW} times in a row, try a shorter note.`;
+  else say = "";
   $("mp-advice").textContent = say;
   $("mp-go").hidden = !btn;
   if (btn === "level1") { $("mp-go").textContent = "Start Level 1"; $("mp-go").dataset.go = "level1"; }
@@ -8187,7 +8088,7 @@ function mpShow(){
   if (!MP.inited) { MP.inited = true; $("mp-len").value = String(APP.settings.mpLen || 10); }
   mpParts();
   if (MP.target === null) mpNew(false);
-  else { LIVE.open(true, MP.found ? "You found it!" : "Press Play the note, then sing it."); LIVE.target(MP.target); }
+  else { LIVE.open(true, MP.found ? "You found it!" : ""); LIVE.target(MP.target); }
   mpAdvice();
   if (AUDIO.listening) mpListen();
 }
@@ -8834,6 +8735,7 @@ TEACH = (function(){
   // note clicked. Bars that change are written out again with rests filling the gaps; the others stay as they were.
   // Finish finds the part's phrases again (songPartSections) unless its notes are the score's.
   let ED = null;
+  let peOpen = false;          // the part and words tools show after Edit parts is pressed (Isaac, 27 October: they pushed the score down)
   const hadParts = {};
   const clone = x => JSON.parse(JSON.stringify(x));
   const r6 = x => Math.round(x * 1e6) / 1e6;
@@ -9033,7 +8935,9 @@ TEACH = (function(){
   function partsUI(){
     const s = SG.song; if (!s || !SG.part) return;
     const on = !!ED;
-    el("pe-tools").hidden = el("pw-tools").hidden = on || !!WD; el("pe-editing").hidden = !on; el("pw-editing").hidden = !WD;
+    el("pe-tools").hidden = el("pw-tools").hidden = on || !!WD || !peOpen; el("pe-editing").hidden = !on; el("pw-editing").hidden = !WD;
+    el("pe-open").hidden = on || !!WD; el("pe-open").setAttribute("aria-pressed", peOpen);
+    if (!peOpen && !form) el("pe-form").hidden = true;
     el("pw-uncopy").hidden = !uncopy || uncopy.song !== s;
     el("act-song").classList.toggle("editing", on); document.body.classList.toggle("editing-parts", on);
     if (on) {
@@ -9557,6 +9461,7 @@ TEACH = (function(){
 
   // ---------- Wiring ----------
   document.addEventListener("click", pick);
+  el("pe-open").addEventListener("click", () => { peOpen = !peOpen; partsUI(); });
   el("pe-edit").addEventListener("click", () => startEdit("edit"));
   el("pe-dup").addEventListener("click", () => startEdit("dup"));
   el("pe-new").addEventListener("click", () => openForm("new"));
@@ -9630,7 +9535,7 @@ function switchTo(act, userAction){
   APP.settings.activity = act; save();
   document.querySelectorAll("#tabs button").forEach(b => { const on = b.dataset.a === act; b.classList.toggle("sel", on); b.setAttribute("aria-selected", on); });
   for (const k of Object.keys(ACTS)) $("act-" + k).hidden = k !== act;
-  RESULTS.hide(); LIVE.close(); INSTR.hold = []; INSTR.refresh();
+  RESULTS.hide(); LIVE.close(); placePanels(); helpersRefresh();
   ACTS[act].show(userAction);
 }
 document.querySelectorAll("#tabs button").forEach(b => b.addEventListener("click", () => { ensureCtx(); switchTo(b.dataset.a, true); }));
@@ -9678,10 +9583,9 @@ document.querySelectorAll("[data-opt]").forEach(inp => {
     if (k === "songTempo") songTempoChanged();
     if (k === "counts" && RH.ex && RH.state === "idle") rhDraw(RH.lastMarks);
     if (k === "counts") { READ.redraw(); PART.redraw(); SONGM.redraw(); }
-    if (k === "tuning") AURALS.forEach(A => { if (A.state !== "listening" && APP.settings.activity === A.id) A.helpers(); });
-    if (k === "keyboard" || k === "guitar" || k === "clickHear" || k === "playChords" || k === "playRhythm") INSTR.refresh();
-    if (k === "tuning") [READ, PART, SOLFA, SONGM].forEach(A => A.syncPractice(true));
-    if (["score", "keyboard", "guitar", "reminder"].includes(k)) AURALS.forEach(A => { if (A.state !== "listening") A.helpers(); });
+    if (k === "playChords") helpersRefresh();
+    if (k === "score") AURALS.forEach(A => { if (A.state !== "listening") A.helpers(); });
+    if (k === "songShowOthers" || k === "songShowAccomp") songShowChanged();
   });
 });
 
@@ -9712,14 +9616,14 @@ function setMode(m){
   audStop(); mpStop(); songStop();
   stopAllSound(); RESULTS.hide(); LIVE.close();
   if (PRACTISING) { PRACTISING = null; AUDIO.onFrame = null; }
-  songPanels(false);                     // the tuning keyboard and marks go back where they were (Practice songs moves them)
   MODE = m;
   document.body.classList.remove("mode-home", "mode-skills", "mode-aud", "mode-start", "mode-songs"); document.body.classList.add("mode-" + m);
-  INSTR.hold = []; INSTR.refresh(); markHelpers();
+  helpersRefresh(); markHelpers();
   if (m === "skills") switchTo(APP.settings.activity || "rhythm", false);
   if (m === "aud") audShow(false);
   if (m === "start") mpShow();
   if (m === "songs") songsShow();
+  placePanels();                         // the tuning keyboard and marks inside this screen's card (06-core.js)
   window.scrollTo(0, 0);
 }
 $("homeBtn").addEventListener("click", () => { if (BUSY) return; setMode("home"); });
@@ -9728,13 +9632,13 @@ $("goAud").addEventListener("click", () => { ensureCtx(); setMode("aud"); });
 $("goStart").addEventListener("click", () => { ensureCtx(); setMode("start"); });
 $("goSongs").addEventListener("click", () => { ensureCtx(); SG.view = "list"; setMode("songs"); });
 $("micOn").addEventListener("click", () => startMic().then(() => { if (PRACTISING) PRACTISING.syncPractice(); }));
-// practising with Show my tuning (07-melody.js)
+// practising note by note (07-melody.js, 09-songs.js)
 $("pStart").addEventListener("click", () => { if (PRACTISING) PRACTISING.syncPractice(true); });
 $("pPrev").addEventListener("click", () => { if (PRACTISING) PRACTISING.move(-1); });
 $("pNext").addEventListener("click", () => { if (PRACTISING) PRACTISING.move(1); });
 
 // ---- Keyboard: two uses only. The space bar taps in Tap the rhythm (as well as clapping or tapping the screen), and
-// the left and right arrows move the practice box while practising with Show my tuning (Isaac, 18 October) ----
+// the left and right arrows move the practice box while practising note by note (Isaac, 18 October) ----
 document.addEventListener("keydown", e => {
   if (e.metaKey || e.ctrlKey || e.altKey) return;
   if (e.code === "Space" && MODE === "songs" && TEACH && SG.tapping) { e.preventDefault(); if (!e.repeat) TEACH.tap(); return; }   // Sync a recording (the teacher page)
@@ -9749,11 +9653,11 @@ document.addEventListener("keydown", e => {
 
 // ---------- Boot ----------
 load();
-if (APP.settings.keyboard) { APP.settings.tuning = true; APP.settings.keyboard = false; save(); }   // Show keyboard is now part of Show keyboard and tuning
+["keyboard", "tuning", "guitar", "clickHear", "reminder", "playRhythm"].forEach(k => delete APP.settings[k]);   // helpers taken out on 27 October
 initAudio();
 if (APP.settings.activity === "aural") APP.settings.activity = APP.settings.auralType === "chord" ? "chords" : "intervals";   // before the split
 if (!LEVEL_INFO[APP.settings.level] || !LEVEL_INFO[APP.settings.level].built) APP.settings.level = 1;
-refreshLevel(); syncOptions(); markHelpers(); INSTR.refresh();
+refreshLevel(); syncOptions(); markHelpers(); markNbn();
 refreshVoice(); setMode("home");
 songLoadEdits();                 // bar times and sections saved from the teacher page (09-songs.js)
 if (!APP.settings.voice) openVoice();
