@@ -8275,17 +8275,28 @@ function scoreMeta(xml){
 const IMPORT_CLOSED = [["SA", /^(women|ladies|upper voices|treble voices)\b|^s\.?\s*[&/+]?\s*a\.?$|\bsop.*\b(alto|contralto)|\b(alto|contralto).*\bsop/],
   ["TB", /^(men|lower voices)\b|^t\.?\s*[&/+]?\s*b\.?$|\bten.*\b(bass|bar)|\b(bass|bar).*\bten/]];
 const IMPORT_HALVES = { SA: [["S", "Soprano"], ["A", "Alto"]], TB: [["T", "Tenor"], ["B", "Bass"]] };
-function importStaveKind(name, bars, clef){
+// ("div": one section's stave that splits anywhere, read as Soprano 1 and Soprano 2; Isaac, 27 October)
+function importStaveKind(name, bars, clef, sungWords = true){
   const low = name.toLowerCase().trim();
   for (const [kind, rx] of IMPORT_CLOSED) if (rx.test(low)) return kind;
-  if (IMPORT_VOICES.some(([, rx]) => rx.test(low))) return "one";
   let sung = 0, two = 0;
   for (const bar of bars) {
     if (!bar.some(e => e.p)) continue;
     sung++;
     if (new Set(bar.filter(e => e.p).map(e => e.voice)).size > 1 || bar.some(e => e.chord && e.p)) two++;
   }
-  return sung && two * 2 >= sung ? (clef === "bass" || clef === "treble8" ? "TB" : "SA") : "one";
+  if (IMPORT_VOICES.some(([, rx]) => rx.test(low))) return two ? "div" : "one";
+  if (!sungWords) return "one";                         // (an instrument with chords isn't a voice part)
+  return sung && two * 2 >= sung ? (clef === "bass" || clef === "treble8" ? "TB" : "SA") : two ? "div" : "one";
+}
+// The two parts a split stave makes (import.py's halves): a divided section is "<name> 1" and "<name> 2" ("<name>a" and
+// "<name>b" when its name ends in a number)
+function importHalves(kind, name, bars, clef, voiceGuess, midiOf){
+  if (IMPORT_HALVES[kind]) return IMPORT_HALVES[kind];
+  let v = voiceGuess;
+  if (!v) { const lo = Math.min(...bars.flat().filter(e => e.p).map(e => midiOf(e.p))); v = clef === "bass" && lo < 48 ? "B" : clef === "treble8" || clef === "bass" ? "T" : lo < 60 ? "A" : "S"; }
+  const base = name || { S: "Soprano", A: "Alto", T: "Tenor", B: "Bass" }[v];
+  return /\d$/.test(base) ? [[v, base + "a"], [v, base + "b"]] : [[v, base + " 1"], [v, base + " 2"]];
 }
 // Rests filling d ticks from t, in written values; and a closed-score stave's bars as two parts (import.py's split_closed)
 function importRests(t, d){
@@ -8446,7 +8457,7 @@ function scoreImport(xml, meta){
     let voiceGuess = null;
     const low = name.toLowerCase();
     for (const [v, rx] of IMPORT_VOICES) if (rx.test(low)) { voiceGuess = v; break; }
-    const kind = (meta.staves && meta.staves[pid]) || (staves === 1 ? importStaveKind(name, bars, clef) : "one");
+    const kind = (meta.staves && meta.staves[pid]) || (staves === 1 ? importStaveKind(name, bars, clef, hasLyrics) : "one");
     const isVocal = staves === 1 && (hasLyrics || voiceGuess !== null || kind !== "one");
     if (isVocal) staveInfo.push({ id: pid, name: name || pid, kind });
     if (barLabels === null) barLabels = labels;
@@ -8454,15 +8465,15 @@ function scoreImport(xml, meta){
     if (barTs === null || (pid && staves > 1)) barTs = tss;
     if (barKeys === null) barKeys = kss;
     const strip = e => { const x = {}; for (const k in e) if (k !== "voice" && k !== "staff" && k !== "chord" && k !== "hid") x[k] = e[k]; return x; };
-    if (isVocal && IMPORT_HALVES[kind]) {
+    if (isVocal && kind !== "one") {
       const label = name || pid, r = importSplitClosed(bars, label, barLabels, warn, midiOf), taken = new Set(partsOut.map(p => p.name));
-      IMPORT_HALVES[kind].forEach(([v, nm], i) => {
+      importHalves(kind, name, bars, clef, voiceGuess, midiOf).forEach(([v, nm], i) => {
         const out = { id: `${pid}-${i ? "low" : "up"}`, name: taken.has(nm) ? `${nm} (${label})` : nm, voice: v, clef: clef || "treble", stave: pid, bars: i ? r.lo : r.up };
         if ((i ? r.lom : r.upm).some(b => b.length)) out.more = i ? r.lom : r.upm;
         partsOut.push(out);
       });
       const [a, b] = partsOut.slice(-2).map(p => p.name);
-      warn.push(`${label}: read as ${a} and ${b} on one stave: both voices written in ${r.two} bars, one voice shared out in ${r.shared}` + (r.divisi.length ? `, a split in bar${r.divisi.length > 1 ? "s" : ""} ${r.divisi.join(", ")}` : ""));
+      warn.push(`${label}: read as ${a} and ${b} on one stave: both voices written in ${r.two} bar${r.two === 1 ? "" : "s"}, one voice shared out in ${r.shared} bar${r.shared === 1 ? "" : "s"}` + (r.divisi.length ? `, a split in bar${r.divisi.length > 1 ? "s" : ""} ${r.divisi.join(", ")}` : ""));
     } else if (isVocal) {
       const outBars = [], moreBars = [];
       bars.forEach((bar, bi) => {
@@ -9414,7 +9425,7 @@ TEACH = (function(){
     const r = draft.r = scoreImport(draft.xml, { id, title, composer: el("as-composer").value.trim(), words: el("as-words").value.trim(), file: `${id}.xml`, staves: draft.staves });
     // each voice stave: one part, or two on one stave (closed score), guessed from its name and notes (Isaac, 23 October)
     if (r.staves && !el("as-staves").children.length) el("as-staves").innerHTML = r.staves.map(st => `<div class="row"><label class="fld">The stave “${escHTML(st.name)}” is
-      <select data-pid="${escHTML(st.id)}">${[["one", "one part"], ["SA", "sopranos and altos (closed score)"], ["TB", "tenors and basses (closed score)"]].map(([v, t]) =>
+      <select data-pid="${escHTML(st.id)}">${[["one", "one part"], ["div", "one section in two parts (1 and 2)"], ["SA", "sopranos and altos (closed score)"], ["TB", "tenors and basses (closed score)"]].map(([v, t]) =>
       `<option value="${v}"${v === st.kind ? " selected" : ""}>${t}</option>`).join("")}</select></label></div>`).join("");
     const li = (t, bad) => `<li${bad ? ' class="bad"' : ""}>${escHTML(t)}</li>`;
     let h = (r.problems || []).map(p => li(p, true)).join("");
