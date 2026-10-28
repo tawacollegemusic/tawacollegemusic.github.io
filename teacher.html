@@ -137,6 +137,7 @@ svg.score .tupb { fill: none; stroke: currentColor; stroke-width: 1; }
 .tunekb .tk.b { fill: #2B2B2B; }
 .tunekb .tk.target { stroke: var(--banner); stroke-width: 3.5; }
 .tunekb .tk.w.target { fill: var(--brand-soft); }
+.tunekb.hidetgt .tk.target { stroke: #B9B9C6; stroke-width: 1; } .tunekb.hidetgt .tk.w.target { fill: #FFFFFF; } .tunekb.hidetgt .tk.b.target { stroke: none; }   /* Intervals and Chord notes: no outline */
 /* the colour of the key you're singing always shows, even on the note to sing (its blue outline stays) */
 .tunekb .tk.ok, .tunekb .tk.w.target.ok { fill: #1E7A44; } .tunekb .tk.near, .tunekb .tk.w.target.near { fill: #C98A1B; } .tunekb .tk.off, .tunekb .tk.w.target.off { fill: #D8001D; }
 .tunekb .tklbl { font-family: var(--body); font-size: 11px; fill: #6E6E6E; text-anchor: middle; pointer-events: none; }
@@ -184,6 +185,18 @@ svg.score .tupb { fill: none; stroke: currentColor; stroke-width: 1; }
 .tabs button.sel { color: var(--brand-ink); border-bottom-color: var(--brand); }
 .tabs button .n { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: var(--banner); color: #FFFFFF; font-size: 0.75rem; margin-right: 7px; }
 .act[hidden] { display: none; }
+/* Tap the beat (09-beat.js) */
+.btpieces { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0 4px; }
+.btpieces button { padding: 7px 12px; border-radius: 10px; font-size: 0.95rem; }
+.btpieces button.sel { border-color: var(--brand); background: var(--brand-tint); color: var(--brand-ink); }
+.btpieces button.done { color: var(--ok); }
+.btmeter { height: 16px; border-radius: 8px; background: var(--line); overflow: hidden; margin-top: 16px; }
+.btfill { height: 100%; width: 0; background: var(--brand); transition: width 120ms; }
+.btfill.full { background: var(--ok); }
+.btsecs { margin: 6px 0 0; font-size: 0.9rem; color: var(--muted); min-height: 1.3em; }
+.btsay { font-family: var(--display); font-size: 1.35rem; font-weight: 600; min-height: 1.6em; margin: 8px 0; }
+.btsay.ok { color: var(--ok); } .btsay.near { color: var(--warn); }
+.btcheckbox { margin-top: 18px; } .btcheck h4 { margin: 16px 0 6px; font-size: 0.95rem; }
 .hp { font-size: 0.9rem; padding: 9px 12px; border-radius: 0 8px 8px 0; background: var(--gold-tint); border-left: 3px solid var(--bronze); margin-top: 12px; }   /* "good to know" panel */
 .partlabel { font-family: var(--display); font-size: 0.8rem; font-weight: 600; color: var(--muted); margin: 10px 0 -18px 4px; position: relative; z-index: 1; width: max-content; background: var(--card); padding: 0 4px; border-radius: 4px; }
 .prompt { font-family: var(--display); font-size: 1.15rem; font-weight: 600; margin-top: 12px; min-height: 1.6em; max-width: 60ch; }
@@ -339,6 +352,7 @@ body.mode-home #homeBtn { display: none; }
 .mpt.ok { background: var(--ok-soft); color: var(--ok); } .mpt.miss { background: var(--paper); color: var(--miss); border: 1px solid var(--line); }
 body.mode-start #status { font-size: 1.35rem; }
 .home button { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; text-align: left; padding: 16px 18px; border-radius: 14px; background: var(--card); }
+.home button[hidden] { display: none; }
 .home button .ht { font-size: 1.3rem; font-weight: 700; color: var(--brand-ink); }
 .home button .hs { font-family: var(--body); font-weight: 400; font-size: 0.95rem; color: var(--muted); }
 .home button.go { border-color: var(--brand); }
@@ -392,13 +406,19 @@ body.mode-start .sung:empty { display: none; }
 
   <!-- Home (Isaac, 20 October): shown every time the app opens -->
   <section class="home home-only" id="home" aria-label="Choose what to practise">
-    <button type="button" class="go" id="goStart"><span class="ht">Getting started</span><span class="hs">Start here: matching pitch</span></button>
+    <button type="button" class="go" id="goStart"><span class="ht">Getting started</span><span class="hs">Start here: matching pitch and tapping the beat</span></button>
     <button type="button" class="go" id="goAud"><span class="ht">Practice audition</span><span class="hs">The sight-singing part of the Blue Notes audition</span></button>
     <button type="button" class="go" id="goSkills"><span class="ht">Practice skills</span><span class="hs">Levels 1 to 5</span></button>
     <button type="button" class="go" id="goSongs"><span class="ht">Practice songs</span><span class="hs">Sing your part in our choir songs</span></button>
   </section>
 
-  <!-- Getting started (09-start.js): Matching pitch for now; explanations of the exercises come next -->
+  <!-- Getting started: Matching pitch (09-start.js) and Tap the beat (09-beat.js, 28 October) -->
+  <nav class="nav start-only" aria-label="Getting started">
+    <div class="tabs" role="tablist" id="startTabs">
+      <button type="button" role="tab" data-t="match">Matching pitch</button>
+      <button type="button" role="tab" data-t="beat">Tap the beat</button>
+    </div>
+  </nav>
   <section class="card act start-only" id="act-match">
     <div class="setrow"><span class="lab">Your voice part</span>
       <div class="parts" id="mp-parts">
@@ -418,6 +438,26 @@ body.mode-start .sung:empty { display: none; }
     <div class="mptimes" id="mp-times" hidden></div>
     <p class="mpadvice" id="mp-advice"></p>
     <div class="actions"><button type="button" class="primary" id="mp-go" hidden></button></div>
+  </section>
+  <section class="card act start-only" id="act-beat" hidden>
+    <p class="prompt">Tap the beat: press Start, and tap along to the beat of the music until the bar fills.</p>
+    <div class="btpieces" id="bt-pieces" role="group" aria-label="Music"></div>
+    <p class="muted" id="bt-info"></p>
+    <div class="actions">
+      <button type="button" class="primary" id="bt-start">Start</button>
+      <button type="button" id="bt-next">Next piece</button>
+    </div>
+    <button type="button" class="tap" id="bt-pad" hidden>Tap here</button>
+    <div class="btmeter" id="bt-meter" role="progressbar" aria-label="Seconds in time" aria-valuemin="0" aria-valuemax="10" aria-valuenow="0"><div class="btfill" id="bt-fill"></div></div>
+    <p class="btsecs" id="bt-secs"></p>
+    <p class="btsay" id="bt-say" aria-live="polite"></p>
+    <p class="muted">Hit space or tap the screen. If you clap, use headphones.</p>
+
+    <details class="btcheckbox"><summary>Check the music (teacher page only)</summary>
+      <p class="muted">Each piece as the app plays it (it goes round from the first full bar). These were written out from memory: check the notes against the scores before students use them.</p>
+      <div id="bt-check"></div>
+    </details>
+
   </section>
 
   <!-- Practice audition (09-audition.js): four sections in order, with tabs to skip forward and back, then Results -->
@@ -896,7 +936,7 @@ function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
 // chord (Intervals' Show score and Chord notes): every note of a chord, drawn stacked as semibreves at one x; ev.note is the note
 // to sing, drawn in blue (class "tgt") and used for the marks.
 // ticks: semiquaver = 1, quaver = 2, crotchet = 4, minim = 8, semibreve = 16 (dotted values 3, 6, 12)
-const SP = 12, GK = SP / 360;
+let SP = 12, GK = SP / 360;      // (smaller while an ossia stave is drawn: opts.scale)
 const SVGNS = "http://www.w3.org/2000/svg";
 function sel(tag, attrs, parent){ const e = document.createElementNS(SVGNS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; }
 function glyph(name, x, y, parent, scale=1){
@@ -906,7 +946,14 @@ function glyph(name, x, y, parent, scale=1){
 function glyphW(name, scale=1){ const g = GLYPHS[name]; return (g.x1 - g.x0) * GK * scale; }
 function bottomDiaFor(clef){ return clef === "bass" ? 18 : 30; }
 
+// opts.scale (Practice songs' other parts, Isaac 28 October: "smaller than the others - like ossia staves"): the stave,
+// notes and stems drawn smaller, at the same places across as the full-size staves, so they still line up
 function renderScore(svg, score, opts={}){
+  if (!opts.scale) return drawScore(svg, score, opts);
+  SP = 12 * opts.scale; GK = SP / 360;
+  try { return drawScore(svg, score, opts); } finally { SP = 12; GK = SP / 360; }
+}
+function drawScore(svg, score, opts){
   // Practice songs (09-songs.js) adds, all off unless asked for:
   // - opts.colW(g, ticks) and opts.colPad(g): every stave of a score shares one set of columns, so they line up (the
   //   width of an event, and room before its notehead for accidentals and clef changes);
@@ -921,6 +968,7 @@ function renderScore(svg, score, opts={}){
   //   changes, with naturals for the old key's sharps or flats it drops; accidentals follow each bar's own);
   // - ev.shown: the written value of a note in a triplet (a triplet crotchet is 8/3 ticks long but drawn as a crotchet,
   //   ev.tup 3); triplets not under one beam get a bracket with its 3.
+  // - opts.crop: the stave's height is cut to what's drawn on it (with opts.scale: the other parts, so they take less room)
   const ov = opts.overlay || null;
   if (!ov) svg.innerHTML = "";
   const perc = score.clef === "perc";
@@ -932,12 +980,18 @@ function renderScore(svg, score, opts={}){
   const yForDia = d => bot - (d - bDia) * SP/2;
   // words (ev.lyric) sit in a row of their own under the stave; everything below them moves down to make room
   // (opts.lyrics false: a copy in another clef keeps the words' spacing, so the two staves line up, without the words)
-  const lyrH = !perc && opts.lyrics !== false && score.bars.some(b => b.some(e => e.lyric)) ? 24 : 0, lyrY = bot + 38;
-  const labelY = (perc ? 118 : bot + 58) + lyrH;
+  const lyrH = !perc && opts.lyrics !== false && score.bars.some(b => b.some(e => e.lyric)) ? 24 : 0, lyrY = bot + (opts.scale ? 28 : 38);
+  // a rhythm line can have its stems down (opts.stemsDown, Tap the rhythm half the time; Isaac, 28 October), so its
+  // marks row moves down below the beams
+  const percDown = perc && !!opts.stemsDown, downH = percDown ? 18 : 0;
+  // opts.snug (the singer's part in Practice songs, 28 October: too much room below it): with words and no labels, the
+  // marks row sits just under the words
+  const snug = !!opts.snug && !perc && !showLabels && !!lyrH;
+  const labelY = snug ? lyrY + 22 : (perc ? 118 + downH : bot + 58) + lyrH;
   const hands = showLabels && !perc && score.bars.some(b => b.some(e => e.hand && HAND_ART.svg[e.hand]));
   const handH = hands ? HAND_H + 6 : 0;
   const beatH = 0;
-  const height = opts.tight ? bot + 46 + lyrH : (perc ? (showLabels ? 160 : 140) : (showLabels ? 208 : 186)) + handH + lyrH;
+  const height = snug ? labelY + 12 : opts.tight ? bot + 46 + lyrH : (perc ? (showLabels ? 160 : 140) + downH : (showLabels ? 208 : 186)) + handH + lyrH;
   const minGap = opts.minGap || 0;
 
   const bg = ov ? ov.bg : sel("g", { class: "bg" }, svg);
@@ -975,7 +1029,7 @@ function renderScore(svg, score, opts={}){
   const numW = n => String(n).split("").reduce((w, d) => w + glyphW("timeSig" + d), 0);
   const num = (n, x, y) => String(n).split("").forEach(d => { glyph("timeSig" + d, x, y, hdr); x += glyphW("timeSig" + d); });
   const drawTs = ([tn, td], x) => {
-    const w = Math.max(numW(tn), numW(td));
+    const w = Math.max(numW(tn), numW(td)) / (opts.scale || 1);       // (an ossia's takes the room a full-size one does)
     const yTop = perc ? mid - SP : top + SP, yBot = perc ? mid + SP : top + 3*SP;
     num(tn, x + (w - numW(tn))/2 - 1, yTop);
     num(td, x + (w - numW(td))/2 - 1, yBot);
@@ -1066,11 +1120,11 @@ function renderScore(svg, score, opts={}){
   const headName = e => vt(e.ev) >= 16 ? "noteheadWhole" : vt(e.ev) >= 8 ? "noteheadHalf" : "noteheadBlack";
   // how far a note (or a chord's middle) sits above the stave's middle line, in steps
   const relMid = e => (e.ev.chord && e.ev.pchord ? e.ev.chord.reduce((s, c) => s + c.dia, 0) / e.ev.chord.length : e.ev.note.dia) - (e.bd + 4);
-  const stemUpFor = e => perc ? true : e.ev.stem ? e.ev.stem === "up" : relMid(e) < 0;
+  const stemUpFor = e => perc ? !percDown : e.ev.stem ? e.ev.stem === "up" : relMid(e) < 0;
   for (const gr of groups) if (gr.items.length >= 2) {
     const avg = perc ? 0 : gr.items.reduce((s, e) => s + relMid(e), 0) / gr.items.length;
     const forced = gr.items.find(e => e.ev.stem);
-    gr.up = perc ? true : forced ? forced.ev.stem === "up" : avg < 0;
+    gr.up = perc ? !percDown : forced ? forced.ev.stem === "up" : avg < 0;
     gr.beamY = gr.up ? Math.min(...gr.items.map(e => e.yTop)) - 3.5*SP : Math.max(...gr.items.map(e => e.yBot)) + 3.5*SP;
   }
 
@@ -1149,7 +1203,9 @@ function renderScore(svg, score, opts={}){
     }
     if ([3,6,12].includes(vt(ev))) (ev.pchord ? ev.chord : [n]).forEach(cn => {
       const onLine = perc || ((cn.dia - bDia) % 2 === 0);
-      sel("circle", { cx: e.x + hw + 4 + (ev.pchord ? offOf(cn.dia) : 0), cy: yForDia(cn.dia) - (onLine ? SP/2 : 0), r: 1.8, class: "dot" }, grp);
+      // on a rhythm line the note sits on the line itself, so its dot goes in the space just above it, by the notehead
+      // (Isaac, 28 October: it was drawn up by the beam)
+      sel("circle", { cx: e.x + hw + 4 + (ev.pchord ? offOf(cn.dia) : 0), cy: (perc ? mid : yForDia(cn.dia)) - (onLine ? SP/2 : 0), r: 1.8, class: "dot" }, grp);
     });
     if (vt(ev) < 16) {
       const up = e.group ? e.group.up : stemUpFor(e);
@@ -1239,7 +1295,15 @@ function renderScore(svg, score, opts={}){
   evs.forEach(e => { e.subEl = sel("text", { x: e.cx, y: labelY + (showLabels ? 17 : 0) + handH + beatH, class: "res" }, fg); if (e.ev.sub) setSub(e, e.ev.sub, e.ev.subCls); });
 
   if (ov) return { svg, evs, width: ov.width, height: ov.height, barXs, overlay: true };
-  svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+  let vy = 0, vh = height;
+  if (opts.crop && svg.isConnected) {
+    // what's drawn, without the empty marks row: its words and notes, the stave and the bar numbers
+    const empty = [...fg.querySelectorAll("text")].filter(t => !t.textContent);
+    empty.forEach(t => t.setAttribute("display", "none"));
+    try { const a = fg.getBBox(), b = lines.getBBox(); vy = Math.min(a.y, b.y) - 6; vh = Math.max(a.y + a.height, b.y + b.height) + 6 - vy; } catch (err) {}
+    empty.forEach(t => t.removeAttribute("display"));
+  }
+  svg.setAttribute("viewBox", vy || vh !== height ? `0 ${vy.toFixed(1)} ${width} ${vh.toFixed(1)}` : `0 0 ${width} ${height}`);
   svg.style.width = width + "px";
   svg.style.maxWidth = "none";
   const totalTicks = g;
@@ -1269,7 +1333,7 @@ function renderScore(svg, score, opts={}){
   });
   const hl = sel("rect", { x: -100, y: 6, width: 40, height: height - 12, rx: 9, class: "hl" }, bg);
   const head = sel("line", { x1: -10, x2: -10, y1: sTop - 22, y2: sBot + 22, class: "playhead" }, svg);
-  const L = { svg, evs, width, height, top, bot, mid, perc, yForDia, tickX, totalTicks, hl, head, labelY, barXs, bg,
+  const L = { svg, evs, width, height: vh, y0: vy, top, bot, mid, perc, yForDia, tickX, totalTicks, hl, head, labelY, barXs, bg,
     tr: perc ? 0 : (opts.tr !== undefined ? opts.tr : voiceInfo().tr) };   // written to sounding, for Click to hear
   svg.__L = L;
   return L;
@@ -2232,16 +2296,18 @@ function genThirdTask(key, tonic){
 //   fits the singer in that key (fitL3), as at Level 2. Low So can't fit every voice in every key (for example
 //   Sopranos in E flat, Altos in C), so each voice gets the keys where low So fits twice as often (pickKeyL3).
 // - Moves: everything Level 2 allows, plus Do and low So (a 4th), Re and Ti, low So and Ti, and Fa and Re (V7), each
-//   way (l3MoveOK). Every melody of 6 or more notes has one of those leaps, low So, or starts on Mi or So (l3Flavour).
-// - No minor until Level 4 (Isaac, 18 October): every melody ends on Do. About 1 in 4 starts on Mi or So (low So, Mi
-//   or So, whichever fit) instead of Do; the key chord is then followed by that note. The harmony starts on I.
+//   way (l3MoveOK). Every melody of 6 or more notes has one of those leaps or low So (l3Flavour).
+// - No minor until Level 4 (Isaac, 18 October): every melody ends on Do. Every melody starts on Do too (28 October;
+//   until then about 1 in 4 started on low So, Mi or So). The harmony starts on I.
 // - Rhythm: Level 2's, plus 3 to 5 quaver pairs (any beat, more than one in a bar) and one dotted idea per melody
 //   (pickFeatureL3: a dotted quaver-semiquaver in about a third, a dotted crotchet-quaver in about a third, none in the
 //   rest; 19 October). A single quaver only follows a dotted crotchet. The semiquaver always steps from the dotted
 //   quaver. Hold your part: 2 pairs, no dotted notes.
 // - Hold your part: the other part is a bass line, roots with some first inversions so it can step (l3Bass).
 // - Intervals add the perfect 5th (no 4ths until Level 4; Isaac, 19 October); Chord notes add the minor chord vi.
-const L3 = { keys: ["C", "F", "G", "A", "Eb"], lo: -3, hi: 5, otherStart: 0.25 };
+// otherStart: how often a melody starts on low So, Mi or So instead of Do. 0 since 28 October (Isaac: "Level 3: all
+// sight singing / solfege should start and end on the tonic", Hold your part too); Level 4 keeps its own (L4.otherStart).
+const L3 = { keys: ["C", "F", "G", "A", "Eb"], lo: -3, hi: 5, otherStart: 0 };
 
 // The octave of Do, and the stretch of low So to La around it that fits the singer (strictly inside the range)
 function fitL3(key){
@@ -4657,7 +4723,7 @@ const APP = {
 function load(){ try { const r = JSON.parse(localStorage.getItem(STORE_KEY) || "null"); if (r) { Object.assign(APP.settings, r.settings || {}); APP.stats = r.stats || {}; } } catch (e) {} }
 function save(){ try { localStorage.setItem(STORE_KEY, JSON.stringify({ settings: APP.settings, stats: APP.stats })); } catch (e) {} }
 function stat(act){ const k = "L" + APP.settings.level + ":" + act; return APP.stats[k] || (APP.stats[k] = { attempts: 0, items: 0, best: 0 }); }
-function showAlert(msg){ const a = $("alert"); a.textContent = msg; a.hidden = !msg; }
+function showAlert(msg){ if (msg && AUDIO.quietAlert) return; const a = $("alert"); a.textContent = msg; a.hidden = !msg; }
 const TOL = 50;          // in tune within 50 cents; close (orange) from 50 to 100 (Isaac, 18 October)
 const capital = s => s.charAt(0).toUpperCase() + s.slice(1);
 function centsText(c){ const r = Math.round(c); return (r > 0 ? "+" : r < 0 ? "−" : "") + Math.abs(r) + "¢"; }
@@ -4926,12 +4992,14 @@ const LIVE = {
   open(showTuning, status){
     $("livePanel").hidden = false;
     $("tuneWrap").hidden = !showTuning;
-    $("pnav").hidden = true;
+    $("pnav").hidden = true; LIVE.hideTarget(false);
     if (showTuning && TUNEKB.voice !== voiceInfo().id + voiceInfo().lo) buildTuneKb();
     LIVE.target(null); LIVE.needle(null);
     LIVE.status(status || ""); LIVE.sung("");
   },
   close(){ $("livePanel").hidden = true; },
+  // Intervals and Chord notes (28 October): the keys still fill green, amber or red, but the note to sing isn't outlined
+  hideTarget(on){ $("tuneKb").classList.toggle("hidetgt", !!on); },
   // practising with Show my tuning: the buttons to move the box, and Start practising while the microphone is off
   practice(micOn, noNav){ $("pnav").hidden = false; $("pStart").hidden = !!micOn; $("pPrev").hidden = $("pNext").hidden = !!noNav; },
   // the practice audition's chords (Isaac, 20 October: "Keyboard, no target"): the key nearest the singer fills blue
@@ -4981,8 +5049,8 @@ const LIVE = {
 // What to say while practising note by note (Practice skills and songs, the same words)
 function practiceSay(){
   const coarse = window.matchMedia && matchMedia("(pointer: coarse)").matches;
-  return coarse ? "Sing the note in the box. Tap a note to hear it. Use the buttons to move on."
-    : "Sing the note in the box. Click a note to hear it. Use the arrow keys or the buttons to move on.";
+  return coarse ? "Sing the note in the box and hold it in tune to move on. Tap a note to hear it."
+    : "Sing the note in the box and hold it in tune to move on. Click a note to hear it.";
 }
 // The tuning keyboard and the marks sit inside the card on every screen (Isaac, 22 October for Practice songs,
 // 27 October everywhere): the keyboard right above the music, so a singer sees both at once, and the marks under the
@@ -5296,6 +5364,34 @@ function steadyListen(targets, cb){
   S.smoother = smoother;           // the live display clears it once the singer settles on a new note (makeSettle)
   return S;
 }
+// Note by note moves on by itself (Isaac, 28 October: "the way Note By Note works in Solfege - let's make that the
+// default"), everywhere there's a practice box: Solfège, Hold your part, Sight sing, the audition and Practice songs.
+// It is Solfège's rule: the clock for the boxed note starts when the singer's voice is first heard on it; held in tune
+// for 0.5 s it's found, "ok" within 2 s (green) or "near" (orange, with the seconds), the same results steadyListen
+// gives. There is no "Not found": it's practice, so it waits as long as they like. A note is found once until the box
+// moves. needBreak(): the box is about to move on to a note of the same pitch, so the singer has to stop or move off
+// before it counts (otherwise one long note would run through a row of repeated notes).
+function makeFinder(){
+  let key, start = null, streak = null, cs = [], fresh = true, found = false, brk = false;
+  return {
+    needBreak(){ brk = true; },
+    // k: the boxed note; cents: from that note (null when nothing is heard, or while the app's piano sounds)
+    step(k, t, cents){
+      if (k !== key) { key = k; start = null; streak = null; cs = []; found = false; fresh = !brk; brk = false; }
+      if (found) return null;
+      if (cents === null || cents === undefined) { streak = null; fresh = true; return null; }
+      if (!fresh) { if (Math.abs(cents) > TOL) fresh = true; return null; }
+      if (start === null) start = t;
+      if (Math.abs(cents) > TOL) { streak = null; return null; }
+      if (streak === null) { streak = t; cs = []; }
+      cs.push(cents);
+      if (t - streak < STEADY.HOLD) return null;
+      found = true;
+      const took = Math.max(0, streak - start);
+      return { state: took <= STEADY.QUICK ? "ok" : "near", took, cents: median(cs) };
+    }
+  };
+}
 // Marks under each note after an untimed attempt
 function steadySub(r){ return r.state === "ok" ? "✓" : r.state === "near" ? `${r.took.toFixed(1)} s` : r.state === "wrong" ? "✗" : "–"; }
 const STEADY_LEGEND = ["Found quickly", "Found slowly", "Not found", "Not heard"];
@@ -5334,7 +5430,8 @@ function steadyComment(key, notes, results, opts = {}){
 // the Note by note button (NBN, shared by the three activities) practises one note at a time between attempts.
 // Level 2 brings 3/4 and 2/4 and crotchet rests: ex.bars holds rests ({ ticks, rest: true }) as well as notes, while
 // ex.notes and ex.degs hold notes only. A.nIdx maps note i to its event on the stave.
-let NBN = false;      // Note by note is on (Practice skills; Practice songs has its own, SG.nbn)
+let NBN = false;
+const MIN_COL = 30;      // the least room a note or rest gets when notes are spaced by duration (28 October)      // Note by note is on (Practice skills; Practice songs has its own, SG.nbn)
 function markNbn(){ document.querySelectorAll(".nbn").forEach(b => { b.setAttribute("aria-pressed", NBN); }); }
 function makeMelodyActivity(cfg){
   const A = { id: cfg.id, ex: null, L: null, L2: null, LL: null, ring: null, ring2: null, state: "idle", run: null, lastResults: null };
@@ -5357,7 +5454,7 @@ function makeMelodyActivity(cfg){
     const ex = takeNext() || freshItem(() => genNow(), A.ex);
     if (!cfg.untimed) newTempo("tempo");            // from Level 3, a new starting tempo
     ex.attempts = 0; ex.best = -1; ex.bestAttempt = 0; ex.lastOk = null;
-    A.ex = ex; A.pi = 0;
+    A.ex = ex; A.pi = 0; A.pm = [];
     if (typeof syncOptions === "function") syncOptions();   // the tempo marking follows the time signature (a quaver in 6/8)
     // a melody that starts on Mi or So gets the key chord, then that note (Level 3)
     el("ref").innerHTML = `Key chord and <span class="sol">${solfege(ex.key, ex.notes[0])}</span>`;   // Level 3 can start on Mi or So
@@ -5375,7 +5472,7 @@ function makeMelodyActivity(cfg){
     A.stop(true);
     stopAllSound();
     ex.attempts = ex.attempts || 0; ex.best = ex.best ?? -1; ex.bestAttempt = 0; ex.lastOk = null;
-    A.ex = ex; A.pi = 0;
+    A.ex = ex; A.pi = 0; A.pm = [];
     if (typeof syncOptions === "function") syncOptions();
     el("ref").innerHTML = `Key chord and <span class="sol">${solfege(ex.key, ex.notes[0])}</span>`;
     RESULTS.hide(); LIVE.close();
@@ -5425,17 +5522,18 @@ function makeMelodyActivity(cfg){
     }
     const showLbl = !cfg.aud && !!(APP.settings.names || APP.settings.solf);
     const opts = { labels: showLbl, minGap: labelGap() };
-    // even spacing when beats show. With letter names or solfège showing, short notes (quavers, and the Level 3
-    // semiquaver) still get room for their labels, except in Hold your part, whose two staves must line up.
-    if (cfg.lower || V.alt || beatsSpacing) { opts.prop = Math.max(11, labelGap() / 4); if (cfg.lower || !showLbl) delete opts.minGap; }
-    // Hold your part with labels: both staves share column widths, each at least wide enough for a label and hand sign,
-    // so quavers' solfège never collides and the two parts still line up (Isaac, 18 October)
-    if (cfg.lower && showLbl) {
+    // spaced by duration where beat numbers are offered (and for tenors' two staves), but every note and rest gets at
+    // least MIN_COL, or room for its label and hand sign, so quavers and semiquavers never crowd (Isaac, 28 October:
+    // "Sometimes notation is cramped", a quaver rest pressed against the quavers after it)
+    if (cfg.lower || V.alt || beatsSpacing) { opts.prop = Math.max(11, labelGap() / 4); opts.minGap = showLbl ? labelGap() : MIN_COL; }
+    // Hold your part: both staves share column widths, each at least that wide, so the two parts still line up
+    // (Isaac, 18 October)
+    if (cfg.lower) {
       const on = new Set(); let t = 0;
       ex.bars.flat().forEach(e => { on.add(t); t += e.ticks; }); const end = t; t = 0;
       ex.lower.flat().forEach(e => { on.add(t); t += e.ticks; });
       const pts = [...on].sort((a, b) => a - b), seg = {};
-      pts.forEach((p, i) => { seg[p] = Math.max(opts.prop * ((pts[i + 1] ?? end) - p), labelGap()); });
+      pts.forEach((p, i) => { seg[p] = Math.max(opts.prop * ((pts[i + 1] ?? end) - p), opts.minGap); });
       opts.span = (g, ticks) => pts.reduce((w, p) => p >= g && p < g + ticks ? w + seg[p] : w, 0);
     }
     const altSvg = altStave(el("staff"), !!V.alt, [cfg.lower ? "Your part" : "", "Same notes in bass clef"]);
@@ -5475,6 +5573,7 @@ function makeMelodyActivity(cfg){
       if (extras.after) markExtra(L, L.width - 8);
     }
     A.ring = makeRing(A.L);
+    (A.pm || []).forEach((r, i) => { if (r) markFound(i, r); });          // notes found note by note
     el("box").scrollLeft = 0;
     [A.L, A.L2].forEach(L => { if (L) makeBox(L); });
     A.placeBox("ahead");
@@ -5563,6 +5662,7 @@ function makeMelodyActivity(cfg){
   function startListening(){
     if (practising()) PRACTISING = null;       // listening takes over the tuning keyboard; practice comes back after
     A.state = "listening"; BUSY = A;
+    A.pm = [];                                 // an attempt starts the marks afresh
     A.draw(null);
     RESULTS.hide();
     const lb = el("listen"); lb.firstChild.textContent = "I'm finished"; lb.classList.add("on");
@@ -5774,8 +5874,11 @@ function makeMelodyActivity(cfg){
   // With Note by note on, the tuning keyboard stays up whenever the app isn't listening, so the singer can work on
   // any note at their own pace. A box on the stave marks the note they're practising, and the keyboard outlines the
   // same note. They move the box on with the arrow keys, by dragging it, by clicking or tapping a note, or with the
-  // Previous note and Next note buttons (for phones). Nothing is marked or counted. After an attempt the box goes to the
-  // first note that wasn't in tune. Intervals and Chord notes aren't included.
+  // Previous note and Next note buttons (for phones). Since 28 October the box also moves on by itself, as Solfège's I'm
+  // ready does (makeFinder, 06-steady.js): hold the boxed note in tune for half a second and it's marked as Solfège
+  // marks it (green, or orange with the seconds) and the box goes to the next note; at the last note it stays. These
+  // marks are for the student's own eyes: nothing is counted or kept. After an attempt the box goes to the first note
+  // that wasn't in tune. Intervals and Chord notes aren't included.
   A.pi = 0;
   const practising = () => PRACTISING === A;
   const wantPractice = () => cfg.wantPractice ? !!A.ex && A.state !== "listening" && cfg.wantPractice()
@@ -5791,21 +5894,40 @@ function makeMelodyActivity(cfg){
     LIVE.target(A.ex.notes[A.pi].midi);
     if (!AUDIO.listening) { LIVE.status("Press Start practising to use your microphone, then sing the note in the box."); return; }
     LIVE.status(practiceSay());
-    const sm = makeSmoother(), settle = makeSettle();
+    const sm = makeSmoother(), settle = makeSettle(), finder = makeFinder();
     AUDIO.onFrame = f => {
       if (!practising()) return;
       const ex = A.ex, i = A.pi, nt = ex.notes[i];
       if (!nt) return;
-      if (A.state !== "idle" || f.ignored) { showPitch(i, null); LIVE.sung(""); return; }   // the app is playing
+      if (A.state !== "idle" || f.ignored) { finder.step(i, f.t, null); showPitch(i, null); LIVE.sung(""); return; }   // the app is playing
       const tgt = sounding(nt), p = sm.push(f);
       // moving to a new note: the display holds still until the singer gets there (makeSettle)
       const h = settle.step(i, nt.midi, f.t, f.raw, tgt);
       if (h === "release") sm.reset();
       else if (h) LIVE.target(nt.midi);
-      else if (p !== null) { let d = p - tgt; if (APP.settings.anyOct) d -= 12 * Math.round(d / 12); showPitch(i, p, d * 100); }
-      else { showPitch(i, null); LIVE.sung(""); }
+      else if (p !== null) {
+        let d = p - tgt; if (APP.settings.anyOct) d -= 12 * Math.round(d / 12);
+        showPitch(i, p, d * 100);
+        const r = finder.step(i, f.t, d * 100);
+        if (r) found(i, r, finder);
+      }
+      else { finder.step(i, f.t, null); showPitch(i, null); LIVE.sung(""); }
     };
   };
+  // A note found note by note: marked as Solfège marks it, then the box moves on (or, at the last note, stays)
+  function markFound(i, r){
+    const e = evOf(i); if (e < 0 || e === undefined) return;
+    [A.L, A.L2].forEach(L => { if (!L) return; setEvState(L, e, r.state);
+      for (let j = e + 1; L.evs[j] && L.evs[j].ev.tiedIn; j++) setEvState(L, j, r.state); });       // a tied note's second half
+    const M = A.L2 || A.L; if (M.evs[e]) setSub(M.evs[e], steadySub(r), r.state);
+  }
+  function found(i, r, finder){
+    A.pm[i] = r; markFound(i, r);
+    const ex = A.ex;
+    if (i >= ex.notes.length - 1) { LIVE.status("That was the last note. Use the arrow keys or the buttons to go back, or press I'm ready."); return; }
+    if (ex.notes[i + 1].midi === ex.notes[i].midi) finder.needBreak();
+    A.goTo(i + 1, "ahead");
+  }
   function endPractice(){
     PRACTISING = null;
     if (A.state !== "listening") AUDIO.onFrame = null;
@@ -5839,6 +5961,7 @@ function makeMelodyActivity(cfg){
     if (i === A.pi) return;
     A.pi = i; A.placeBox(how);
     LIVE.target(A.ex.notes[i].midi); LIVE.sung(`Note ${i + 1} of ${A.ex.notes.length}`);
+    if (AUDIO.listening) LIVE.status(practiceSay());
     if (A.ring) A.ring.hide(); if (A.ring2) A.ring2.hide();
   };
   A.move = d => A.goTo(A.pi + d, "ahead");
@@ -5901,6 +6024,7 @@ function genRhythmItem(){
 function rhNew(){
   rhStop();
   RH.ex = freshItem(genRhythmItem, RH.ex);
+  RH.ex.down = Math.random() < 0.5;                 // half the rhythms have their stems down, at every level (Isaac, 28 October)
   newTempo("rtempo");                               // from Level 3, a new starting tempo
   if (typeof syncOptions === "function") syncOptions();         // a quaver tempo marking in 6/8
   RH.attempts = 0; RH.best = -1; RH.lastMarks = null;
@@ -5921,7 +6045,7 @@ function rhDraw(marks, extraTaps){
     if (inTie) { if (marks) e.state = marks[k - 1].state; return e; }       // the second half of a tied note: no clap of its own
     if (marks) { const m = marks[k]; e.state = m.state; e.sub = m.text; e.subCls = m.state; }
     k++; return e; }));
-  RH.L = renderScore($("rh-staff"), { clef: "perc", key: null, ts: RH.ex.ts, bars }, { labels: false, beats: !!APP.settings.counts, prop: 11, minGap: 22 });   // spaced as if the beat numbers showed, on or off (Isaac, 27 October); minGap: room for Level 5 triplets and semiquavers
+  RH.L = renderScore($("rh-staff"), { clef: "perc", key: null, ts: RH.ex.ts, bars }, { labels: false, beats: !!APP.settings.counts, prop: 11, minGap: 26, stemsDown: !!RH.ex.down });   // spaced as if the beat numbers showed, on or off (Isaac, 27 October); minGap: room for Level 5 triplets and semiquavers
   // extra claps (Isaac, 18 October): a red cross under the line where each one fell
   if (marks && RH.lastExtra.length && RH.run) RH.lastExtra.forEach(tp => {
     const L = RH.L, t = tp / RH.run.tick;
@@ -6468,8 +6592,12 @@ function audVoiceChanged(){ audReset(); audShow(false); }
 //   and plays its opening from the note given.
 // - Chord notes: the chord is played and always shown on a stave (Isaac, 19 October: "show the score by default"), with
 //   the note to sing in blue; sing that note.
-// While they sing, the tuning keyboard shows where they are with no note outlined (Isaac, 27 October), so it never
-// gives the answer away.
+// The tuning keyboard is always there (Isaac, 28 October: "Make the tuning keyboard always visible and get it to turn
+// the key green when sung correctly to match the behaviour of other exercises"). While they sing, the key they're on
+// fills green, amber or red against the note to sing, as everywhere else, but the note to sing isn't outlined
+// (LIVE.hideTarget), so the keyboard never gives the answer away.
+// Intervals don't depend on a key (Isaac, 28 October): their staves have no key signature (accidentals instead) and
+// the answer is labelled with letter names, not solfège. Chord notes keeps its key at Levels 1 to 3.
 
 // Reminder tunes, by semitones, going up and going down. Public-domain tunes play their opening (n: semitones from the
 // first note, d: beats). For tunes still in copyright only the two notes of the interval are played; the name is shown.
@@ -6493,6 +6621,9 @@ function reminderFor(ex){
   return r ? r[ex.up ? "up" : "down"] : null;
 }
 // The interval's name, as the prompt says it (Level 1's 2nds have no interval field)
+// The key a task's staves are drawn in: an interval has none (C major's empty signature, so its notes carry their own
+// accidentals); Chord notes keeps the task's key (Levels 4 and 5 are keyless already)
+const keyOf = ex => ex.type === "interval" ? KEY_BY_NAME.C : ex.key;
 const ivName = ex => ex.octave ? "octave" : ex.interval === "tritone" ? "tritone" : `${ex.size} ${ex.interval || "2nd"}`;
 
 function makeAuralActivity(cfg){
@@ -6516,7 +6647,7 @@ function makeAuralActivity(cfg){
   A.helpers = function(){
     const ex = A.ex;
     if (!ex || APP.settings.activity !== cfg.id) return;
-    if (A.state !== "listening") LIVE.close();
+    if (A.state !== "listening") { LIVE.open(true, ""); LIVE.hideTarget(true); }
     if (el("remplay")) el("remplay").hidden = !reminderFor(ex);
     const show = (cfg.type === "chord" || helperOn("score", cfg.id)) && el("answer").hidden;
     el("preview").hidden = !show;
@@ -6526,8 +6657,8 @@ function makeAuralActivity(cfg){
     const bars = shift => [ex.type === "chord"
       ? [{ ticks: 16, note: down(ex.answer[0], shift), chord: ex.chord.map(n => down(n, shift)) }]
       : ex.answer.map(n => ({ ticks: 16, note: down(n, shift) }))];
-    renderScore(svg, { clef: V.clef, key: ex.key, ts: null, bars: bars(0) }, { labels: false, prop: 14 });
-    if (V.alt) renderScore(altSvg, { clef: V.alt, key: ex.key, ts: null, bars: bars(V.altShift) }, { labels: false, prop: 14, tr: V.tr - V.altShift });
+    renderScore(svg, { clef: V.clef, key: keyOf(ex), ts: null, bars: bars(0) }, { labels: false, prop: 14 });
+    if (V.alt) renderScore(altSvg, { clef: V.alt, key: keyOf(ex), ts: null, bars: bars(V.altShift) }, { labels: false, prop: 14, tr: V.tr - V.altShift });
   };
   A.play = function(){
     if (A.state === "listening") return;
@@ -6558,11 +6689,18 @@ function makeAuralActivity(cfg){
     RESULTS.hide(); el("answer").hidden = true; A.helpers();
     const lb = el("listen"); lb.firstChild.textContent = "I'm finished"; lb.classList.add("on");
     el("play").disabled = true; el("next").disabled = true; if (el("remplay")) el("remplay").disabled = true;
-    LIVE.open(true, say(ex, 0)); liveInView(el("listen"));
-    LIVE.free(null);
-    const tg = ex.answer.map(n => sounding(n));
+    LIVE.open(true, say(ex, 0)); LIVE.hideTarget(true); liveInView(el("listen"));
+    const tg = ex.answer.map(n => sounding(n)), settle = makeSettle();
     A.run = { S: steadyListen(tg, {
-      onLive(idx, cents, p){ LIVE.free(p === null ? null : p - voiceInfo().tr); },      // where they are, no note outlined
+      // the key they're on fills green, amber or red against the note to sing (not outlined)
+      onLive(idx, cents, p, f){
+        const w = ex.answer[idx] ? ex.answer[idx].midi : null;
+        const h = settle.step(idx, w, f.t, f.raw, ex.answer[idx] ? sounding(ex.answer[idx]) : null);   // hold still while moving to the second note
+        if (h === "release") A.run.S.smoother.reset();
+        else if (h) LIVE.target(w);
+        else if (cents === null) { LIVE.needle(null, null, w); LIVE.sung(""); }
+        else { const cls = tuningClass(cents); LIVE.needle(cents, cls, w, p - voiceInfo().tr); LIVE.sung(tuningWords(cents)); }
+      },
       onNext(idx){ LIVE.status(say(ex, idx)); },
       onDone(results){ A.finish(results); }
     }) };
@@ -6578,24 +6716,25 @@ function makeAuralActivity(cfg){
     AUDIO.onFrame = null;
     const ex = A.ex;
     results = results || A.run.S.results;
-    A.stop(); LIVE.close();
+    A.stop();
     const res = ex.answer.map((n, i) => results[i] || { state: "missed", took: null, sung: null });
     A.attempts++;
     // the answer on a stave, coloured
     const V = voiceInfo();
-    const mk = (n, i) => ({ ticks: 16, note: n, label: ex.keyless ? noteName(n, false) : solfege(ex.key, n), state: res[i].state, sub: steadySub(res[i]), subCls: res[i].state });
+    const names = ex.keyless || ex.type === "interval";
+    const mk = (n, i) => ({ ticks: 16, note: n, label: names ? noteName(n, false) : solfege(ex.key, n), state: res[i].state, sub: steadySub(res[i]), subCls: res[i].state });
     // in Chord notes the whole chord is shown, with the note to sing coloured by how it went and the others in black, so
     // students can click each chord note (Click notes to hear) to see where they went (Isaac, 19 October)
     const bars = [ex.answer.map((n, i) => ({ ...mk(n, i), chord: ex.type === "chord" ? ex.chord : undefined }))];
     const shiftChord = shiftBars;
     const altSvg = altStave(el("staff"), !!V.alt, ["", "Same notes in bass clef"]);
     if (V.alt) {
-      renderScore(el("staff"), { clef: V.clef, key: ex.key, ts: null, bars: bars.map(b => b.map(e => ({ ...e, label: "", sub: "" }))) }, { labels: false, prop: 14 });
-      renderScore(altSvg, { clef: V.alt, key: ex.key, ts: null, bars: shiftChord(bars, V.altShift) }, { labels: true, prop: 14, tr: V.tr - V.altShift });
-    } else renderScore(el("staff"), { clef: V.clef, key: ex.key, ts: null, bars }, { labels: true, minGap: 50 });
+      renderScore(el("staff"), { clef: V.clef, key: keyOf(ex), ts: null, bars: bars.map(b => b.map(e => ({ ...e, label: "", sub: "" }))) }, { labels: false, prop: 14 });
+      renderScore(altSvg, { clef: V.alt, key: keyOf(ex), ts: null, bars: shiftChord(bars, V.altShift) }, { labels: true, prop: 14, tr: V.tr - V.altShift });
+    } else renderScore(el("staff"), { clef: V.clef, key: keyOf(ex), ts: null, bars }, { labels: true, minGap: 50 });
     el("answer").hidden = false; A.helpers();
     const st = stat(cfg.id); st.attempts++; save();
-    const c = steadyComment(ex.key, ex.answer, res, { letters: !!ex.keyless });
+    const c = steadyComment(ex.key, ex.answer, res, { letters: names });
     const last = res[res.length - 1];
     if (last.state === "wrong" && ex.type === "chord") c.paras.push(ex.place === "bottom" ? "Listen for the lowest note of the chord and hum down to it." : ex.place === "top" ? "Listen for the highest note of the chord, the one that sits on top."
       : ex.place === "second" ? "Find the lowest note of the chord, then hum up to the next note above it." : ex.place === "third" ? "Find the highest note of the chord, then hum down to the next note below it."
@@ -6623,6 +6762,224 @@ const IV = makeAuralActivity({ id: "intervals", type: "interval", p: "iv" });
 const CH = makeAuralActivity({ id: "chords", type: "chord", p: "ch" });
 const AURALS = [IV, CH];
 
+// ==== FILE: 09-beat.js ====
+// ================= Getting started: Tap the beat (Isaac, 28 October) =================
+// "All they need to do is tap along a beat to a variety of music, time signatures, tempos." The music just starts (no
+// count-in) and goes round until they've tapped in time for about 10 seconds; each tap counts if it's within 90 ms of a
+// beat (the margin Tap the rhythm uses). In compound time either beat counts: the dotted crotchet or the quaver (Isaac).
+// The music (Isaac: "Not cliched pieces. Other classical pieces like Mozart sonatas, some folk songs with proper broken
+// chord accompaniments"): openings of classical pieces as written, and folk songs with a broken-chord accompaniment
+// written for the app. They were written out from memory, so Isaac checks them against the scores on the teacher page
+// (Check the music, below the activity) before students rely on them.
+// A piece: ts, tempo (beats a minute: dotted crotchets in compound time), key (for Check the music), the right hand and
+// left hand as text, bar by bar ("|"): a note is its name and octave, then ":" and its length in ticks (a semiquaver is
+// 1, a crotchet 4), "r" a rest. up: a pickup played once at the start (rh, lh). The bars go round; the last bar ends with
+// the pickup again where there is one.
+const BEAT_PIECES = [
+  { id: "k545", title: "Piano Sonata in C, K. 545 (first movement)", by: "Mozart", ts: [4, 4], tempo: 120, key: [0, "maj"],
+    rh: "C5:8 E5:4 G5:4 | B4:6 C5:1 D5:1 C5:8 | A5:8 G5:4 C6:4 | G5:4 F5:2 E5:1 F5:1 E5:8",
+    lh: "C3:2 G3:2 E3:2 G3:2 C3:2 G3:2 E3:2 G3:2 | D3:2 G3:2 F3:2 G3:2 C3:2 G3:2 E3:2 G3:2 | C3:2 A3:2 F3:2 A3:2 C3:2 G3:2 E3:2 G3:2 | B2:2 G3:2 D3:2 G3:2 C3:2 G3:2 E3:2 G3:2" },
+  { id: "surprise", title: "Symphony No. 94, \"Surprise\" (second movement)", by: "Haydn", ts: [2, 4], tempo: 100, key: [0, "maj"],
+    rh: "C5:2 C5:2 E5:2 E5:2 | G5:2 G5:2 E5:4 | F5:2 F5:2 D5:2 D5:2 | B4:2 B4:2 G4:4",
+    lh: "C3:2 G3:2 E3:2 G3:2 | C3:2 G3:2 E3:2 G3:2 | B2:2 G3:2 F3:2 G3:2 | G2:2 D3:2 G3:2 D3:2" },
+  { id: "greensleeves", title: "Greensleeves", by: "English folk song", ts: [6, 8], tempo: 54, key: [0, "min"],
+    up: { rh: "A4:2", lh: "r:2" },
+    rh: "C5:4 D5:2 E5:3 F5:1 E5:2 | D5:4 B4:2 G4:3 A4:1 B4:2 | C5:4 A4:2 A4:3 G#4:1 A4:2 | B4:4 G#4:2 E4:4 A4:2 | C5:4 D5:2 E5:3 F5:1 E5:2 | D5:4 B4:2 G4:3 A4:1 B4:2 | C5:3 B4:1 A4:2 G#4:3 F#4:1 G#4:2 | A4:4 A4:2 A4:4 A4:2",
+    lh: "A2:2 E3:2 A3:2 C4:2 A3:2 E3:2 | G2:2 D3:2 G3:2 B3:2 G3:2 D3:2 | A2:2 E3:2 A3:2 C4:2 A3:2 E3:2 | E2:2 B2:2 E3:2 G#3:2 E3:2 B2:2 | A2:2 E3:2 A3:2 C4:2 A3:2 E3:2 | G2:2 D3:2 G3:2 B3:2 G3:2 D3:2 | A2:2 E3:2 C4:2 E2:2 B2:2 G#3:2 | A2:2 E3:2 A3:2 C4:2 A3:2 E3:2" },
+  { id: "amazing", title: "Amazing Grace", by: "American folk hymn", ts: [3, 4], tempo: 80, key: [1, "maj"],
+    up: { rh: "D4:4", lh: "r:4" },
+    rh: "G4:8 B4:2 G4:2 | B4:8 A4:4 | G4:8 E4:4 | D4:8 D4:4 | G4:8 B4:2 G4:2 | B4:8 A4:4 | D5:12 | D5:8 D4:4",
+    lh: "G2:2 D3:2 G3:2 B3:2 G3:2 D3:2 | G2:2 D3:2 F3:2 B3:2 F3:2 D3:2 | C3:2 G3:2 C4:2 E4:2 C4:2 G3:2 | G2:2 D3:2 G3:2 B3:2 G3:2 D3:2 | G2:2 D3:2 G3:2 B3:2 G3:2 D3:2 | E2:2 B2:2 E3:2 G3:2 E3:2 B2:2 | D3:2 A3:2 D4:2 F#4:2 D4:2 A3:2 | D3:2 A3:2 C4:2 F#4:2 C4:2 A3:2" },
+  { id: "sailor", title: "Drunken Sailor", by: "Sea shanty", ts: [4, 4], tempo: 116, key: [0, "maj"],
+    rh: "A4:2 A4:1 A4:1 A4:2 A4:1 A4:1 A4:2 D4:2 F4:2 A4:2 | G4:2 G4:1 G4:1 G4:2 G4:1 G4:1 G4:2 C4:2 E4:2 G4:2 | A4:2 A4:1 A4:1 A4:2 A4:1 A4:1 A4:2 B4:2 C5:2 D5:2 | C5:2 A4:2 G4:2 E4:2 D4:4 D4:4",
+    lh: "D3:2 A3:2 F3:2 A3:2 D3:2 A3:2 F3:2 A3:2 | C3:2 G3:2 E3:2 G3:2 C3:2 G3:2 E3:2 G3:2 | D3:2 A3:2 F3:2 A3:2 D3:2 A3:2 F3:2 A3:2 | C3:2 G3:2 A2:2 E3:2 D3:2 A3:2 F3:2 A3:2" },
+  { id: "washerwoman", title: "The Irish Washerwoman", by: "Irish jig", ts: [6, 8], tempo: 92, key: [1, "maj"],
+    up: { rh: "G4:1 A4:1", lh: "r:2" },
+    rh: "B4:2 G4:2 G4:2 D4:2 G4:2 G4:2 | B4:2 G4:2 B4:2 D5:2 C5:2 B4:2 | C5:2 A4:2 A4:2 E4:2 A4:2 A4:2 | C5:2 A4:2 C5:2 E5:2 D5:2 C5:2 | B4:2 G4:2 G4:2 D4:2 G4:2 G4:2 | B4:2 G4:2 B4:2 D5:2 C5:2 B4:2 | C5:2 B4:2 C5:2 A4:2 D5:2 C5:2 | B4:2 G4:2 G4:2 G4:4 G4:1 A4:1",
+    lh: "G2:2 B2:2 D3:2 G3:2 D3:2 B2:2 | G2:2 B2:2 D3:2 G3:2 D3:2 B2:2 | A2:2 C3:2 E3:2 A3:2 E3:2 C3:2 | D3:2 F#3:2 A3:2 C4:2 A3:2 F#3:2 | G2:2 B2:2 D3:2 G3:2 D3:2 B2:2 | G2:2 B2:2 D3:2 G3:2 D3:2 B2:2 | C3:2 E3:2 G3:2 D3:2 F#3:2 A3:2 | G2:2 B2:2 D3:2 G3:2 D3:2 B2:2" }
+];
+const BEAT_TOL = 0.09, BEAT_GOAL = 10;
+const BT = { tab: "match", piece: 0, state: "idle", run: null, done: {} };
+
+// A hand's text as bars of notes: [[{ t, d, n }...]...] (n: a note, or null for a rest; t from the start of its bar)
+function beatBars(text){
+  return text.split("|").map(bar => {
+    let t = 0;
+    return bar.trim().split(/\s+/).filter(Boolean).map(tok => {
+      const [p, d] = tok.split(":"), x = { t, d: +d, n: p === "r" ? null : parseNote(p) };
+      t += x.d; return x;
+    });
+  });
+}
+const beatBarTicks = ts => ts[0] * 16 / ts[1];
+const beatCompound = ts => ts[1] === 8 && ts[0] % 3 === 0;
+const beatUnit = ts => beatCompound(ts) ? 6 : 16 / ts[1];          // ticks in a beat
+// Every note of a piece with its time in ticks from the first full bar (the pickup's are before 0), and the loop's length
+function beatNotes(pc){
+  const out = [], up = pc.up ? { rh: beatBars(pc.up.rh)[0], lh: beatBars(pc.up.lh)[0] } : null;
+  const upLen = up ? up.rh.reduce((a, x) => a + x.d, 0) : 0, bt = beatBarTicks(pc.ts);
+  [["rh", 0.26], ["lh", 0.14]].forEach(([h, vol]) => {
+    if (up) up[h].forEach(x => { if (x.n) out.push({ t: x.t - upLen, d: x.d, m: x.n.midi, vol, up: true }); });
+    beatBars(pc[h]).forEach((bar, bi) => bar.forEach(x => { if (x.n) out.push({ t: bi * bt + x.t, d: x.d, m: x.n.midi, vol }); }));
+  });
+  return { notes: out.sort((a, b) => a.t - b.t), upLen, loop: beatBars(pc.rh).length * bt };
+}
+
+// ---- Playing and tapping ----
+async function btStart(){
+  if (BT.state === "running") return btStop(true);
+  const ctx = ensureCtx();
+  if (waitForPiano(() => btStart())) { btSay("Getting the piano ready…"); return; }
+  const pc = BEAT_PIECES[BT.piece], { notes, upLen, loop } = beatNotes(pc);
+  const tick = 60 / pc.tempo / beatUnit(pc.ts), t0 = ctx.currentTime + 0.15, start = t0 + upLen * tick;
+  const run = BT.run = { pc, tick, start, loopSec: loop * tick, unit: beatUnit(pc.ts), compound: beatCompound(pc.ts), streak: null, prev: null, keys: 0, taps: [], best: 0 };
+  BT.state = "running"; BUSY = BT;
+  btButtons(); btSay("Tap along to the beat."); btMeter(0);
+  // the notes go to the audio a couple of seconds ahead, round and round until it stops
+  let k = 0, i = 0;
+  const pump = () => {
+    if (BT.run !== run || BT.state !== "running") return;
+    const horizon = ctx.currentTime + 2.5;
+    for (;;) {
+      if (i >= notes.length) { i = 0; k++; }
+      const x = notes[i];
+      if (x.up && k > 0) { i++; continue; }                        // the pickup only plays at the very start
+      const at = start + (k * loop + x.t) * tick;
+      if (at > horizon) break;
+      tone(x.m, at, x.d * tick * 0.95, { vol: x.vol, noIgnore: true, acc: true });
+      i++;
+    }
+    setTimeout(pump, 250);
+  };
+  pump();
+  // claps: the microphone, when it's on and they aren't tapping (the sound of a tap isn't counted twice)
+  if (AUDIO.listening) run.stopOnsets = startOnsets(t => { if (BT.run === run && !run.keys) btTap(t - latencyGuess(), false); });
+  if (document.activeElement && document.activeElement.blur) document.activeElement.blur();     // so space doesn't press a button
+  const loopFn = () => {
+    if (BT.run !== run || BT.state !== "running") return;
+    // a stop in the tapping (more than a beat and a half) starts the count again
+    const now = ctx.currentTime - btOut(), s = run.streak;
+    if (s && now - s.last > 1.5 * s.u * run.tick) { run.streak = null; btMeter(0); btSay("Keep tapping. Tap along to the beat."); }
+    requestAnimationFrame(loopFn);
+  };
+  requestAnimationFrame(loopFn);
+}
+// The delay from a sound being played to it being heard (taps on the keyboard or screen are on time otherwise)
+function btOut(){ const c = AUDIO.ctx; return c ? clamp((c.outputLatency || 0) + (c.baseLatency || 0), 0, 0.4) : 0; }
+function btKey(){ if (BT.state !== "running") return; BT.run.keys++; btTap(AUDIO.ctx.currentTime - btOut(), true); flash($("bt-pad")); }
+// One tap, at time t (when the beat it's aimed at would have been heard): within 90 ms of a beat, and the next beat after
+// the last tap, it carries the run on; otherwise a new run starts (or none, if it isn't near a beat)
+function btTap(t, key){
+  const r = BT.run; if (!r || t < r.start - 0.2) return;
+  const units = r.compound ? [r.unit, 2] : [r.unit], hits = {};
+  let best = null, near = null;
+  units.forEach(u => {
+    const b = u * r.tick, k = Math.round((t - r.start) / b), err = t - (r.start + k * b);
+    if (!near || Math.abs(err) < Math.abs(near.err)) near = { err };
+    if (Math.abs(err) > BEAT_TOL) return;
+    hits[u] = k;
+    const cont = !!r.streak && r.streak.u === u && k === r.streak.k + 1;
+    if (!best || (cont && !best.cont) || (cont === best.cont && Math.abs(err) < Math.abs(best.err))) best = { u, k, err, cont };
+  });
+  r.taps.push({ t, err: near.err, ok: !!best, key });
+  if (best && best.cont) { r.streak.k = best.k; r.streak.last = t; }
+  else if (best) {
+    r.streak = { u: best.u, k: best.k, first: t, last: t };
+    if (r.prev && r.prev.hits[best.u] === best.k - 1) r.streak.first = r.prev.t;        // the tap before was the beat before
+  } else r.streak = null;
+  r.prev = { t, hits };
+  const secs = r.streak ? r.streak.last - r.streak.first : 0;
+  r.best = Math.max(r.best, secs);
+  btMeter(secs);
+  if (secs >= BEAT_GOAL) return btDone();
+  btSay(best ? "In time. Keep going." : near.err < 0 ? "A little early." : "A little late.", best ? "ok" : "near");
+}
+function btDone(){
+  const r = BT.run, pc = r.pc;
+  BT.done[pc.id] = true;
+  btStop(false);
+  btMeter(BEAT_GOAL);
+  btSay(`You kept the beat for ${BEAT_GOAL} seconds.` + (BT.piece < BEAT_PIECES.length - 1 ? " Try the next piece." : ""), "ok");
+  btPieces();
+}
+// stop: the music fades; cancel (Stop pressed): the bar empties
+function btStop(cancel){
+  const r = BT.run;
+  if (r && r.stopOnsets) { r.stopOnsets(); r.stopOnsets = null; }
+  if (BT.state === "running") { BT.state = "idle"; if (BUSY === BT) BUSY = null; stopAllSound(); }
+  BT.run = null;
+  if (cancel) { btMeter(0); btSay(""); }
+  btButtons();
+}
+function btButtons(){
+  const on = BT.state === "running";
+  $("bt-start").textContent = on ? "Stop" : "Start"; $("bt-start").classList.toggle("on", on);
+  $("bt-pad").hidden = !on;
+  document.querySelectorAll("#bt-pieces button").forEach(b => b.disabled = on);
+}
+function btMeter(secs){
+  const f = clamp(secs / BEAT_GOAL, 0, 1);
+  $("bt-fill").style.width = (f * 100).toFixed(1) + "%";
+  $("bt-fill").classList.toggle("full", f >= 1);
+  $("bt-meter").setAttribute("aria-valuenow", Math.round(secs));
+  $("bt-secs").textContent = f >= 1 ? `${BEAT_GOAL} seconds in time` : secs > 0 ? `${secs.toFixed(1)} of ${BEAT_GOAL} seconds in time` : "";
+}
+function btSay(t, cls){ const e = $("bt-say"); e.textContent = t || ""; e.className = "btsay " + (cls || ""); }
+function btPieces(){
+  $("bt-pieces").innerHTML = BEAT_PIECES.map((p, i) => `<button type="button" data-i="${i}" class="${i === BT.piece ? "sel" : ""}${BT.done[p.id] ? " done" : ""}">`
+    + `${BT.done[p.id] ? "✓ " : ""}${escHTML(p.title.replace(/ \(.*\)$/, ""))}</button>`).join("");
+  $("bt-pieces").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { if (BT.state === "running") return; BT.piece = +b.dataset.i; btShowPiece(); }));
+  const pc = BEAT_PIECES[BT.piece];
+  $("bt-info").textContent = `${pc.title} · ${pc.by} · ${pc.ts[0]}/${pc.ts[1]}`;
+}
+function btShowPiece(){ btStop(true); btPieces(); }
+
+// ---- The tabs: Matching pitch and Tap the beat ----
+function startShow(){
+  const beat = BT.tab === "beat";
+  $("act-match").hidden = beat; $("act-beat").hidden = !beat;
+  document.querySelectorAll("#startTabs button").forEach(b => { const on = b.dataset.t === BT.tab; b.classList.toggle("sel", on); b.setAttribute("aria-selected", on); });
+  if (beat) { mpStop(); LIVE.close(); btPieces(); btButtons(); if (BT.check) BT.check(); }
+  else { btStop(true); mpShow(); }
+  placePanels();
+}
+(function(){
+  document.querySelectorAll("#startTabs button").forEach(b => b.addEventListener("click", () => {
+    if (BT.tab === b.dataset.t) return;
+    BT.tab = b.dataset.t; APP.settings.startTab = BT.tab; save(); startShow();
+  }));
+  $("bt-start").addEventListener("click", async () => {
+    ensureCtx();
+    if (BT.state !== "running" && !AUDIO.listening && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      try { AUDIO.quietAlert = true; await startMic(); } catch (e) {} finally { AUDIO.quietAlert = false; }     // for clapping; tapping works without it
+    }
+    btStart();
+  });
+  $("bt-next").addEventListener("click", () => { if (BT.state === "running") return; BT.piece = (BT.piece + 1) % BEAT_PIECES.length; btShowPiece(); });
+  $("bt-pad").addEventListener("pointerdown", e => { e.preventDefault(); btKey(); });
+})();
+
+// ---- Check the music (the teacher page only): each piece's right and left hands on staves, to check against the score ----
+BT.check = !document.getElementById("bt-check") ? null : function(){
+  const box = $("bt-check"); if (box.dataset.drawn) return; box.dataset.drawn = "1";
+  BEAT_PIECES.forEach((pc, i) => {
+    const sec = document.createElement("div"); sec.className = "btcheck";
+    sec.innerHTML = `<h4>${escHTML(pc.title)} · ${escHTML(pc.by)} · ${pc.ts[0]}/${pc.ts[1]}, ${pc.tempo} a minute</h4><button type="button">Play</button><div class="staff-scroll"></div>`;
+    box.appendChild(sec);
+    const key = makeKey(pc.key[0], pc.key[1]), scroll = sec.querySelector(".staff-scroll");
+    const bars = h => (pc.up ? [beatBars(pc.up[h])[0]] : []).concat(beatBars(pc[h])).map(b => b.map(x => x.n ? { ticks: x.d, note: x.n } : { ticks: x.d, rest: true }));
+    [["rh", "treble"], ["lh", "bass"]].forEach(([h, clef]) => {
+      const svg = sel("svg", { class: "score" }, scroll);
+      renderScore(svg, { clef, key, ts: pc.ts, bars: bars(h) }, { labels: false, tr: 0 });
+    });
+    sec.querySelector("button").addEventListener("click", () => {
+      ensureCtx(); stopAllSound();
+      const { notes } = beatNotes(pc), tick = 60 / pc.tempo / beatUnit(pc.ts), t0 = AUDIO.ctx.currentTime + 0.15 - Math.min(0, ...notes.map(x => x.t)) * tick;
+      notes.forEach(x => tone(x.m, t0 + x.t * tick, x.d * tick * 0.95, { vol: x.vol, noIgnore: true }));
+    });
+  });
+};
+
 // ==== FILE: 09-songs.js ====
 // ================= Practice songs: sing your part in one of the choir's songs (Isaac, 20 to 22 October) =================
 // The songs come from Isaac's scores (MusicXML), turned into SONGS by songs/import.py and build.py, note for note as
@@ -6631,9 +6988,12 @@ const AURALS = [IV, CH];
 // that tab"). The student picks their part and a phrase (or the whole song), and:
 // - plays it (the play bar): the recording (a YouTube video or a file, with bar times Isaac tapped) or the piano, the
 //   score following; a phrase plays from the bar before it.
-// - 1 Learn it (a phrase): the recording with the piano doubling their part; then on their own to a click at the
-//   recording's speed; then with the recording. The marks show the go with the recording.
-// - 2 Note by note: the box on a note, the tuning keyboard, arrows and Previous and Next; click a note to hear it.
+// - 1 Learn it (a phrase; with the whole song showing it opens the phrase list): "Listen to it" (the recording with the
+//   piano doubling their part), "Sing it back" (on their own to a click at the recording's speed), "Sing it with the
+//   other parts" (with the recording). The marks show the last go.
+// - 2 Note by note: the box on a note, the tuning keyboard, arrows and Previous and Next; held in tune, it moves on.
+// Click a note (theirs or another part's) to hear it; it's also where play starts and Stop comes back to. The space bar
+// plays and pauses. Other parts show as small staves; the accompaniment shows on the teacher page only.
 // - 3 Sing it: the phrase or the whole song with the recording, from the bar before (counted in over it), then marks.
 // The tuning keyboard sits above the score while they sing. With no recording (or it can't play here) the piano does the
 // recording's job: Learn it plays their part, then the click, then the accompaniment; Sing it counts in on the click.
@@ -6752,7 +7112,8 @@ function songPlan(a, z){
   if (TEACH && TEACH.editing()) staves.push(...TEACH.staves());     // the teacher page's part editor: the part, then every part as it was
   else {
     s.parts.forEach(pt => { if (pt === SG.part) staves.push({ kind: "own", pt, name: pt.name }); else if (APP.settings.songShowOthers) staves.push({ kind: "part", pt, name: pt.name }); });
-    if (APP.settings.songShowAccomp) s.accomp.forEach(ac => { for (let n = 1; n <= ac.staves; n++) staves.push({ kind: "acc", ac, staff: String(n), name: n === 1 ? (ac.name || "Accompaniment") : "" }); });
+    // the accompaniment shows on the teacher page only (Isaac, 28 October: for students "the score looks too messy")
+    if (TEACH && APP.settings.songShowAccomp) s.accomp.forEach(ac => { for (let n = 1; n <= ac.staves; n++) staves.push({ kind: "acc", ac, staff: String(n), name: n === 1 ? (ac.name || "Accompaniment") : "" }); });
   }
   const has = (st, bi) => st.kind === "acc" ? st.ac.voices.some(v => v.staff === st.staff && v.bars[bi].some(e => e.p))
     : st.pt.bars[bi].some(e => e.p) || !!(st.src && st.pt.more && st.pt.more[bi] && st.pt.more[bi].some(e => e.p));
@@ -6906,7 +7267,7 @@ function songColumns(passes, plan, beats){
   list.forEach((k, i) => {
     if (ends.has(k)) barEnd = ends.get(k);
     const next = i + 1 < list.length && list[i + 1] < barEnd ? list[i + 1] : barEnd, len = Math.max(0, next - k);
-    W.set(k, Math.max(16, (beats ? Math.max(11, labelGap() / 4) * len : 12 + 10 * Math.sqrt(len)) + (pad.get(k) || 0)));
+    W.set(k, Math.max(beats ? MIN_COL : 16, (beats ? Math.max(11, labelGap() / 4) * len : 12 + 10 * Math.sqrt(len)) + (pad.get(k) || 0)));   // MIN_COL: never cramped (28 October)
   });
   // (a column within 0.002 of a place is that place: triplets' thirds round differently by where they're added up)
   const span = (g, ticks) => { let w = 0; for (const k of list) { if (k >= key(g + ticks) - 0.002) break; if (k >= key(g) - 0.002) w += W.get(k); } return w; };
@@ -6941,8 +7302,9 @@ function songDraw(){
     }
   });
   // a note in a triplet (8/3 ticks: a triplet crotchet) is drawn as the value it's written as, with its 3
-  const std = [1, 2, 3, 4, 6, 8, 12, 16], isStd = v => std.some(x => Math.abs(x - v) < 1e-3);
-  passes.forEach(p => p.bars.forEach(b => b.forEach(ev => { if (!ev.hidden && !ev.multi && !ev.wholeBar && !isStd(ev.ticks) && isStd(ev.ticks * 1.5)) { ev.shown = Math.round(ev.ticks * 1.5); ev.tup = 3; } })));
+  // (within a rounding: a song added before 28 October may have Sibelius's 170 or 171 of 256 for a triplet crotchet)
+  const std = [1, 2, 3, 4, 6, 8, 12, 16], isStd = (v, tol = 1e-3) => std.some(x => Math.abs(x - v) < tol);
+  passes.forEach(p => p.bars.forEach(b => b.forEach(ev => { if (!ev.hidden && !ev.multi && !ev.wholeBar && !isStd(ev.ticks) && isStd(ev.ticks * 1.5, 0.02)) { ev.shown = Math.round(ev.ticks * 1.5); ev.tup = 3; } })));
   const cols = songColumns(passes, plan, true);        // spaced as if the beat numbers showed, on or off (Isaac, 27 October)
   box.innerHTML = "";
   const printedAcc = !!s.printedAcc, barNums = plan.map(p => s.barLabels[p.a]), Ls = [];
@@ -6951,10 +7313,12 @@ function songDraw(){
   const key = songKeyAt(s, a), keyAt = s.keyChanges ? plan.map(p => songKeyAt(s, p.a)) : null;      // and the key
   let first = true;
   SG.L = null; SG.L2 = null;
+  // the other parts are smaller, like ossia staves, and cut to what's on them, so they take less room (Isaac, 28 October)
+  const ossia = !(TEACH && TEACH.editing()), small = ossia ? { scale: 0.72, crop: true } : {};
   staves.forEach(st => {
     if (st.name && staves.length > 1 || (st.kind === "own" && V.alt)) {
       const cap = document.createElement("div");
-      cap.className = "partlabel" + (st.kind === "own" ? " mine" : "");
+      cap.className = "partlabel" + (st.kind === "own" ? " mine" : ossia && st.kind === "part" ? " ossia" : "");
       cap.textContent = st.label || (st.kind === "own" ? `${st.name} (your part)` : st.name);
       box.appendChild(cap);
     }
@@ -6962,18 +7326,18 @@ function songDraw(){
     svg.__st = st;
     const common = { ...cols, printedAcc, barNums: first ? barNums : null, final: true };
     if (st.kind === "acc") {
-      const L = renderScore(svg, { clef: st.clef, key, ts, tsAt, keyAt, bars: st.passes[0] }, { ...common, tight: true, tr: 0 });
+      const L = renderScore(svg, { clef: st.clef, key, ts, tsAt, keyAt, bars: st.passes[0] }, { ...common, tight: true, tr: 0, crop: true });
       st.passes.slice(1).forEach(bars => renderScore(svg, { clef: st.clef, key, ts, tsAt, keyAt, bars }, { ...cols, printedAcc, overlay: L }));
       Ls.push(L);
     } else if (st.kind === "part") {
-      const L = renderScore(svg, { clef: st.clef, key, ts, tsAt, keyAt, bars: st.bars }, { ...common, tight: true, tr: 0 });
-      if (st.more) L.overlays = [renderScore(svg, { clef: st.clef, key, ts, tsAt, keyAt, bars: st.more }, { ...cols, printedAcc, overlay: L })];
+      const L = renderScore(svg, { clef: st.clef, key, ts, tsAt, keyAt, bars: st.bars }, { ...common, tight: true, tr: 0, ...small });
+      if (st.more) L.overlays = [renderScore(svg, { clef: st.clef, key, ts, tsAt, keyAt, bars: st.more }, { ...cols, printedAcc, overlay: L, ...small })];
       Ls.push(L);
     } else {
       // the singer's part: labels, beat numbers and marks (a tenor's go on the bass clef copy beneath)
       const lab = !!(APP.settings.names || APP.settings.solf);
       const plain = V.alt ? st.bars.map(b => b.map(e => ({ ...e, label: "", hand: null }))) : st.bars;
-      SG.L = renderScore(svg, { clef: V.clef, key, ts, tsAt, keyAt, bars: plain }, { ...common, labels: lab && !V.alt, beats });
+      SG.L = renderScore(svg, { clef: V.clef, key, ts, tsAt, keyAt, bars: plain }, { ...common, labels: lab && !V.alt, beats, snug: true });
       Ls.push(SG.L);
       if (V.alt && !(TEACH && TEACH.editing())) {         // (not while the teacher page edits the part)
         const c2 = document.createElement("div"); c2.className = "partlabel"; c2.textContent = "Same notes in bass clef"; box.appendChild(c2);
@@ -7002,8 +7366,16 @@ function songMarksDraw(){
   [SG.L, SG.L2].forEach(L => { if (!L) return; L.svg.querySelectorAll(".xmark").forEach(x => x.remove());
     L.evs.forEach((e, i) => { if (e.ev.rest || e.ev.noteIdx !== undefined) setEvState(L, i, e.ev.base || ""); }); });
   mk.evs.forEach(e => { if (e.subEl && (e.ev.rest || e.ev.noteIdx !== undefined)) setSub(e, "", ""); });
+  // notes found note by note (SG.pm, for this song, part and phrase): marked as Solfège marks them
+  const P = SG.pm && SG.pm.key === songPmKey() ? SG.pm.res : [];
+  P.forEach((r, i) => {
+    const n = SG.notes[i]; if (!r || !n || n.ev === undefined) return;
+    [SG.L, SG.L2].forEach(L => { if (!L) return; setEvState(L, n.ev, r.state); L.evs.forEach((e, j) => { if (e.ev.tiedIn && e.ev.noteIdx === i) setEvState(L, j, r.state); }); });
+    setSub(mk.evs[n.ev], steadySub(r), r.state);
+  });
   if (!M || M.key !== SG.drawnFor) return;
   M.res.forEach((r, i) => {
+    if (P[i]) return;                         // found note by note since this go
     const n = SG.notes[i]; if (!n || n.ev === undefined) return;
     const sub = M.steady ? steadySub(r) : r.extra ? "extra" : r.state === "missed" ? "–" : r.state === "wrong" ? "✗" : centsText(r.cents);
     [SG.L, SG.L2].forEach(L => { if (!L) return; setEvState(L, n.ev, r.state); L.evs.forEach((e, j) => { if (e.ev.tiedIn && e.ev.noteIdx === i) setEvState(L, j, r.state); }); });
@@ -7013,7 +7385,8 @@ function songMarksDraw(){
   if (M.before) markExtra(mk, mk.evs[M.first].x - 16);
   if (M.after) markExtra(mk, mk.evs[M.last].x + mk.evs[M.last].w);
 }
-function songClearMarks(){ SG.marks = null; songMarksDraw(); RESULTS.hide(); }
+function songClearMarks(){ SG.marks = null; SG.pm = null; songMarksDraw(); RESULTS.hide(); }
+const songPmKey = () => (SG.song && SG.song.id) + "|" + (SG.part && SG.part.id) + "|" + SG.drawnFor;
 
 // ================= Playing =================
 // The piano's notes from `from` to `to` (song ticks), with the switches that are on: each part at its own volume, and the
@@ -7071,7 +7444,7 @@ function songPlay(from, to, evs, o = {}){
     const cur = rec ? recTick(rec.time()) : run.from + Math.max(0, AUDIO.ctx.currentTime - run.t0) / run.tick;
     // a recording plays on to its end after the last bar (the last chord and the room)
     const done = rec ? rec.ended() || (run.to < songTotal() - 1e-6 && cur >= run.to - 1e-6) : cur >= run.to - 1e-6;
-    if (done) { songHalt(); SG.pos = songFrom(); songHead(SG.pos); songScrub(); return; }
+    if (done) { songHalt(); SG.pos = songCue(); songHead(SG.pos); songScrub(); return; }
     SG.pos = cur; songHead(cur); songScrub();
     requestAnimationFrame(loop);
   };
@@ -7469,7 +7842,7 @@ function songPass(tg, at, from){
 // 1 Learn it and 3 Sing it. With the recording (when it's chosen and can play) the recording leads; otherwise the piano.
 async function songGo(kind){
   if (SG.state === "listening") return songFinish();
-  if (kind === "learn" && !songSec()) return;
+  if (kind === "learn" && !songSec()) return songPickPhrase();
   const tg = songTargets();
   if (!tg.length) return;
   songHalt();
@@ -7490,6 +7863,15 @@ async function songGo(kind){
   songShowMode();
   if (rec) songRecRun(); else if (kind === "learn") songLearnPiano(); else songSingPiano();
   songShowLive();
+}
+// Learn it with the whole song showing opens the phrase list, and the phrase chosen starts Learn it (Isaac, 28 October:
+// it wasn't clear that a phrase had to be chosen first)
+function songPickPhrase(){
+  const sel = $("song-sec");
+  SG.learnPick = performance.now();
+  songMsg("Choose the phrase to learn.");
+  sel.focus();
+  try { sel.showPicker(); } catch (e) {}            // (where a list can't be opened from a button, it has the focus)
 }
 // The live display while singing to the click or the recording: holds still between notes until the singer gets there
 // (makeSettle). Each go's windows are in run.windows, in audio time.
@@ -7513,10 +7895,12 @@ function songRecRun(){
   const run = SG.run, sc = singSec(), st = SG.timeline.starts;
   run.sc = sc; run.S0 = st[sc.a]; run.lead = st[Math.max(0, sc.a - 1)]; run.tail = sc.whole ? 2 : 0.3;
   const learn = run.kind === "learn", stages = [];
-  if (learn) stages.push({ kind: "rec", own: true, say: "Listen. The piano plays your part with the choir." });
-  if (learn) stages.push({ kind: "solo", sing: true, count: "Get ready to sing on your own.", say: "Your turn. Sing it on your own." });
-  stages.push({ kind: "rec", sing: true, own: !!APP.settings.songRecOwn, count: "Listen to the bar before, then come in.",
-    say: learn ? "Now sing it with the choir." : "Sing!", marked: true });
+  // Learn it's three goes, in Isaac's words (28 October): "Listen to it", then "Sing it back", then "Sing it with the
+  // other parts"
+  if (learn) stages.push({ kind: "rec", own: true, say: "Listen to it. The piano plays your part with the choir." });
+  if (learn) stages.push({ kind: "solo", sing: true, count: "Get ready to sing it back.", say: "Sing it back." });
+  stages.push({ kind: "rec", sing: true, own: !!APP.settings.songRecOwn, count: learn ? "Get ready to sing it with the other parts. Listen to the bar before, then come in." : "Listen to the bar before, then come in.",
+    say: learn ? "Sing it with the other parts." : "Sing!", marked: true });
   if (learn) stages[1].marked = false;
   run.stages = stages; run.si = -1;
   LIVE.open(true, "");
@@ -7609,7 +7993,7 @@ function songLearnPiano(){
   const s = SG.song, run = SG.run, tg = run.tg, sc = singSec(), st = SG.timeline.starts;
   const S0 = st[sc.a], L = st[sc.z + 1] - S0, ts = songTsAt(s, sc.a), tick = tickSecOf(ts, songTempo()), cT = clickTicksOf(ts), beat = cT * tick;
   const cl = countLabels(ts), bar = cl.length * beat, labels = cl.concat(upbeatCount(tg, S0)), ctx = AUDIO.ctx;
-  LIVE.open(true, "Listen.");
+  LIVE.open(true, "Listen to it.");
   const sec = L * tick, s1 = ctx.currentTime + 0.3, c1 = s1 + sec, s2 = c1 + bar, c2 = s2 + sec, s3 = c2 + bar;
   tg.forEach(n => tone(sound(n), s1 + (n.t - S0) * tick, n.d * tick * 0.95, { vol: 0.26 }));
   const bs = songBeats(S0, S0 + L);                 // each bar's own beats (the time signature can change)
@@ -7620,11 +8004,13 @@ function songLearnPiano(){
   const wins = start => tg.map(n => ({ start: start + (n.t - S0) * tick, end: start + (n.t - S0 + n.d) * tick }));
   run.windows = wins(s2).concat(wins(s3)); run.targets = tg.map(sound).concat(tg.map(sound));
   run.S0 = S0; run.len = sec; run.tick = tick;
-  run.sections = [{ t: s1, say: "Listen.", from: s1 }, { t: c1, say: "Get ready to sing on your own." }, { t: s2, say: "Your turn. Sing it on your own.", from: s2 },
-    { t: c2, say: "Get ready to sing with the accompaniment." }, { t: s3, say: "Now sing it with the accompaniment.", from: s3 }];
+  // (the third go: with the other parts when they're switched on, as Isaac put it; else with the accompaniment)
+  const with3 = s.parts.length > 1 && APP.settings.songOthers !== false ? "the other parts" : "the accompaniment";
+  run.sections = [{ t: s1, say: "Listen to it.", from: s1 }, { t: c1, say: "Get ready to sing it back." }, { t: s2, say: "Sing it back.", from: s2 },
+    { t: c2, say: `Get ready to sing it with ${with3}.` }, { t: s3, say: `Sing it with ${with3}.`, from: s3 }];
   run.pass = songPass(tg, t => s3 + (t - S0) * tick, c2);
   run.end = s3 + (sc.e - S0) * tick + 1.0;
-  showCountIn($("song-box"), c1, beat, [{ t: s1, text: "Listen" }].concat(countCues(c2, beat, labels)), labels);
+  showCountIn($("song-box"), c1, beat, [{ t: s1, text: "Listen to it" }].concat(countCues(c2, beat, labels)), labels);
   window.__timed = { musicStart: s2, windows: run.windows, notes: run.targets };
   AUDIO.onFrame = songLive(run, true);
 }
@@ -7717,6 +8103,7 @@ function songBoxTo(i, scroll){
   SG.pi = i; songPlaceBox(scroll);
   const tg = songTargets(), k = tg.findIndex(n => n.i === i);
   LIVE.target(SG.notes[i].note.midi); LIVE.sung(k >= 0 ? `Note ${k + 1} of ${tg.length}` : "");
+  if (AUDIO.listening) LIVE.status(practiceSay());
   SG.ring.hide(); if (SG.ring2) SG.ring2.hide();
 }
 const songNoteNow = () => SG.notes[SG.pi];
@@ -7758,47 +8145,79 @@ async function songSync(gesture){
   LIVE.target(songNoteNow().note.midi);
   const k = tg.findIndex(n => n.i === SG.pi); LIVE.sung(`Note ${k + 1} of ${tg.length}`);
   if (!AUDIO.listening) { LIVE.status("Press Start practising to use your microphone, then sing the note in the box."); return; }
-  const coarse = window.matchMedia && matchMedia("(pointer: coarse)").matches;
-  LIVE.status(`Sing the note in the box. ${coarse ? "Tap a note to hear it. Use the buttons to move on." : "Click a note to hear it. Use the arrow keys or the buttons to move on."}`);
-  const sm = makeSmoother(), settle = makeSettle();
+  LIVE.status(practiceSay());
+  const sm = makeSmoother(), settle = makeSettle(), finder = makeFinder();
   AUDIO.onFrame = f => {
     if (PRACTISING !== SONGM) return;
     const n = songNoteNow(); if (!n) return;
-    if (SG.state !== "idle" || f.ignored) { songShowPitch(n, null); return; }     // the app is playing
+    if (SG.state !== "idle" || f.ignored) { finder.step(SG.pi, f.t, null); songShowPitch(n, null); return; }     // the app is playing
     const tgt = sound(n), p = sm.push(f);
     const h = settle.step(SG.pi, n.note.midi, f.t, f.raw, tgt);
     if (h === "release") sm.reset();
     else if (h) LIVE.target(n.note.midi);
-    else if (p !== null) { let d = p - tgt; if (APP.settings.anyOct) d -= 12 * Math.round(d / 12); songShowPitch(n, p, d * 100); }
-    else songShowPitch(n, null);
+    else if (p !== null) {
+      let d = p - tgt; if (APP.settings.anyOct) d -= 12 * Math.round(d / 12);
+      songShowPitch(n, p, d * 100);
+      const r = finder.step(SG.pi, f.t, d * 100);
+      if (r) songFound(SG.pi, r, finder);
+    }
+    else { finder.step(SG.pi, f.t, null); songShowPitch(n, null); }
   };
 }
-// Click or tap a note of their part to hear it; with Note by note on, the box moves there
+// Note by note moves on by itself, as in Solfège (Isaac, 28 October; makeFinder in 06-steady.js): the note is marked
+// green, or orange with the seconds, and the box goes to the next note of the phrase; at the last note it stays
+function songFound(i, r, finder){
+  if (!SG.pm || SG.pm.key !== songPmKey()) SG.pm = { key: songPmKey(), res: [] };
+  SG.pm.res[i] = r; songMarksDraw(); songPlaceBox(false);
+  const tg = songTargets(), k = tg.findIndex(n => n.i === i);
+  if (k < 0 || k >= tg.length - 1) { LIVE.status("That was the last note. Use the arrow keys or the buttons to go back, or press Sing it."); return; }
+  if (tg[k + 1].note.midi === SG.notes[i].note.midi) finder.needBreak();
+  songBoxTo(tg[k + 1].i, true);
+}
+// Click or tap a note to hear it: their part, and the other parts when they show (Isaac, 28 October). With Note by note
+// on, the box moves to a note of their part. The note is also where play starts from (the cue): the playhead goes
+// there, play or the space bar plays from it, and Stop comes back to it (Isaac, 28 October). While the music plays, a
+// click moves the music there and it carries on (the note isn't sounded on its own).
 document.addEventListener("click", e => {
-  if (MODE !== "songs" || SG.view !== "song" || SG.state === "listening") return;
+  if (MODE !== "songs" || SG.view !== "song" || SG.state === "listening" || SG.tapping || (TEACH && TEACH.editing())) return;
   const svg = e.target.closest && e.target.closest("#song-box svg.score");
-  if (!svg || !(svg === (SG.L && SG.L.svg) || svg === (SG.L2 && SG.L2.svg))) return;
-  const L = svg.__L, r = svg.getBoundingClientRect(), x = (e.clientX - r.left) * (L.width / r.width);
+  const L = svg && svg.__L, st = svg && svg.__st;
+  const own = !!L && (svg === (SG.L && SG.L.svg) || svg === (SG.L2 && SG.L2.svg));
+  if (!L || (!own && (!st || st.kind !== "part"))) return;
+  const r = svg.getBoundingClientRect(), x = (e.clientX - r.left) * (L.width / r.width);
   let best = null, bd = 1e9;
-  SG.notes.forEach(n => { if (n.ev === undefined) return; const d = Math.abs(L.evs[n.ev].cx - x); if (d < bd) { bd = d; best = n; } });
+  if (own) SG.notes.forEach(n => { if (n.ev === undefined) return; const d = Math.abs(L.evs[n.ev].cx - x); if (d < bd) { bd = d; best = { n, ev: n.ev, t: n.t }; } });
+  else L.evs.forEach((q, i) => { if (q.ev.rest || q.ev.tiedIn || !q.ev.src || q.ev.songT === undefined) return; const d = Math.abs(q.cx - x); if (d < bd) { bd = d; best = { ev: i, t: q.ev.songT, src: q.ev.src }; } });
   if (!best || bd > 30) return;
   ensureCtx();
-  tone(sound(best), AUDIO.ctx.currentTime + 0.02, 0.9, { vol: 0.26, noIgnore: PRACTISING !== SONGM });
-  markHeard([SG.L, SG.L2].map(M => M && M.evs[best.ev].el));        // blue until the next click (Isaac, 27 October)
-  if (PRACTISING === SONGM && songTargets().some(n => n.i === best.i)) songBoxTo(best.i, false);
+  const was = SG.state === "playing";
+  if (was) songHalt();
+  // the note sounds (an other part's at its own pitch, as written in the song)
+  if (!was) {
+    const m = best.n ? sound(best.n) : midiOfP(SG.song.parts.find(p => p.id === best.src.pt).bars[best.src.bi][best.src.k].p);
+    tone(m, AUDIO.ctx.currentTime + 0.02, 0.9, { vol: 0.26, noIgnore: PRACTISING !== SONGM });
+  }
+  markHeard(own ? [SG.L, SG.L2].map(M => M && M.evs[best.ev].el) : [L.evs[best.ev].el]);        // blue until the next click (Isaac, 27 October)
+  if (best.n && PRACTISING === SONGM && songTargets().some(n => n.i === best.n.i)) songBoxTo(best.n.i, false);
+  // the cue: where play starts and Stop comes back to (within the phrase showing)
+  if (best.t >= songFrom() - 1e-6 && best.t < songTo() - 1e-6) {
+    SG.cue = best.t; SG.pos = best.t; songHead(SG.pos); songScrub();
+    if (was) songListenPlay();
+  }
 });
+// Where Stop goes back to: the note last clicked, or the start of the phrase or song
+const songCue = () => SG.cue != null && SG.cue >= songFrom() - 1e-6 && SG.cue < songTo() - 1e-6 ? SG.cue : songFrom();
 
 // ================= The screen =================
 function songButtons(){
-  const busy = SG.state === "listening", playing = SG.state === "playing", run = SG.run, phrase = !!songSec();
+  const busy = SG.state === "listening", playing = SG.state === "playing", run = SG.run;
   const pb = $("song-play"); pb.classList.toggle("on", playing); pb.setAttribute("aria-label", playing ? "Pause" : "Play"); pb.title = playing ? "Pause" : "Play";
   [["song-learn", "learn", "Learn it"], ["song-sing", "sing", "Sing it"]].forEach(([id, k, label]) => {
     const b = $(id), mine = busy && run && run.kind === k;
     b.querySelector(".t").textContent = mine ? "I'm finished" : label;
     b.classList.toggle("on", mine);
-    b.disabled = (busy && !mine) || (k === "learn" && !phrase);
+    b.disabled = busy && !mine;
   });
-  $("song-learn").title = phrase ? "" : "Choose a phrase to learn it";
   const nb = $("song-nbn"); nb.disabled = busy; nb.setAttribute("aria-pressed", SG.nbn); nb.classList.toggle("sel", SG.nbn);
   ["song-prev", "song-next", "song-sec", "song-play", "song-stop", "song-restart", "song-scrub"].forEach(id => $(id).disabled = busy);
   $("song-mix").querySelectorAll('[data-opt="songShowOthers"], [data-opt="songShowAccomp"]').forEach(i => { i.disabled = busy; });
@@ -7859,7 +8278,7 @@ function songOpen(s, fresh){
   songStop(); stopAllSound(); RESULTS.hide(); LIVE.close();
   if (fresh || SG.song !== s) {
     SG.song = s; SG.timeline = songTimeline(s); SG.part = songDefaultPart(s); SG.marks = null; SG.phrase = -1; SG.nbn = false;
-    APP.settings.songTempo = Math.round(s.tempo); SG.pos = 0; SG.pi = 0;
+    APP.settings.songTempo = Math.round(s.tempo); SG.pos = 0; SG.pi = 0; SG.cue = null;
     SG.rec = songRecording(s); SG.useRec = !!SG.rec;
     recSelect();
     if (TEACH) TEACH.open(s);
@@ -7873,6 +8292,8 @@ function songOpen(s, fresh){
   songPartButtons(s);
   // Show and Hear for other parts and the accompaniment, only where the song has them
   [["others", s.parts.length < 2], ["accomp", !s.accomp.length]].forEach(([k, none]) => $("song-mix").querySelectorAll(`[data-row="${k}"]`).forEach(e => e.classList.toggle("gone", none)));
+  // students hear the accompaniment but don't see it (Isaac, 28 October: "the score looks too messy"); the teacher page does
+  $("song-mix").querySelector('[data-opt="songShowAccomp"]').parentElement.hidden = !TEACH;
   syncOptions();
   songSet();
   // a YouTube recording already found not to play here (opening the song again): the piano, and say why
@@ -7886,7 +8307,7 @@ function songPartButtons(s){
   $("song-parts").innerHTML = s.parts.map(p => `<button type="button" data-p="${p.id}">${escHTML(p.name)}</button>`).join("");
   $("song-parts").querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
     if (SG.state === "listening" || (TEACH && TEACH.busy())) return;
-    SG.part = s.parts.find(p => p.id === b.dataset.p); SG.marks = null; SG.phrase = -1; SG.pos = 0;
+    SG.part = s.parts.find(p => p.id === b.dataset.p); SG.marks = null; SG.phrase = -1; SG.pos = 0; SG.cue = null;
     ensureCtx(); songSet();
   }));
   $("song-parts").querySelectorAll("button").forEach(b => b.classList.toggle("sel", SG.part && b.dataset.p === SG.part.id));
@@ -7908,7 +8329,7 @@ function songSet(){
 function songSecTo(k){
   if (SG.state === "listening") return;
   SG.phrase = clamp(k, -1, phrases().length - 1);
-  SG.marks = null; SG.pi = 0; SG.pos = songFrom();
+  SG.marks = null; SG.pi = 0; SG.pos = songFrom(); SG.cue = null; SG.learnPick = 0;
   songSet();
 }
 
@@ -7916,12 +8337,21 @@ function songSecTo(k){
 (function(){
   SG.audio = new Audio();
   $("song-back").addEventListener("click", () => { if (SG.state === "listening") return; songStop(); stopAllSound(); RESULTS.hide(); LIVE.close(); SG.view = "list"; songsShow(); window.scrollTo(0, 0); });
-  $("song-sec").addEventListener("change", () => songSecTo(+$("song-sec").value));
+  $("song-sec").addEventListener("change", () => {
+    const go = SG.learnPick && performance.now() - SG.learnPick < 60000; SG.learnPick = 0;
+    songSecTo(+$("song-sec").value);
+    if (go && songSec()) songGo("learn");
+  });
   $("song-prev").addEventListener("click", () => songSecTo(SG.phrase - 1));
   $("song-next").addEventListener("click", () => songSecTo(SG.phrase + 1));
   $("song-play").addEventListener("click", () => songListenPlay());
-  $("song-stop").addEventListener("click", () => { songHalt(); SG.pos = songFrom(); songHead(SG.pos); songScrub(); if (SG.L) scrollIntoViewX(SG.L, 0); });
-  $("song-restart").addEventListener("click", () => { const was = SG.state === "playing"; songHalt(); SG.pos = songFrom(); songHead(SG.pos); songScrub(); if (was) songListenPlay(); else if (SG.L) scrollIntoViewX(SG.L, 0); });
+  // Stop: back to the note last clicked (the cue), or the start; Pause (the play button) stops where it is
+  $("song-stop").addEventListener("click", () => {
+    songHalt(); SG.pos = songCue(); songHead(SG.pos); songScrub();
+    if (SG.L) scrollIntoViewX(SG.L, SG.pos > songFrom() + 1e-6 ? SG.L.tickX(SG.pos - SG.timeline.starts[SG.sc.a]) : 0);
+  });
+  // Back to the start forgets the cue
+  $("song-restart").addEventListener("click", () => { const was = SG.state === "playing"; songHalt(); SG.cue = null; SG.pos = songFrom(); songHead(SG.pos); songScrub(); if (was) songListenPlay(); else if (SG.L) scrollIntoViewX(SG.L, 0); });
   // scrubbing: the music follows the slider; if it was playing it carries on from where the slider is let go
   const sc = $("song-scrub");
   sc.addEventListener("input", () => { if (SG.state === "playing") { SG.resume = true; songHalt(); } SG.pos = +sc.value; songHead(SG.pos); });
@@ -7951,7 +8381,7 @@ function songShowChanged(){
 function songPlaybackChanged(){ if (SG.state === "playing" && !SG.useRec) { songHalt(); songListenPlay(); } }
 function songTempoChanged(){ if (SG.state === "playing" && !SG.useRec) { songHalt(); songListenPlay(); } }
 // The voice part changed in Settings: the matching part of the song
-function songVoiceChanged(){ if (SG.song && SG.view === "song") { SG.part = songDefaultPart(SG.song); SG.marks = null; SG.phrase = -1; SG.pos = 0; songSet(); } }
+function songVoiceChanged(){ if (SG.song && SG.view === "song") { SG.part = songDefaultPart(SG.song); SG.marks = null; SG.phrase = -1; SG.pos = 0; SG.cue = null; songSet(); } }
 
 // ==== FILE: 09-start.js ====
 // ================= Getting started: Matching pitch (Isaac, 20 October) =================
@@ -8286,6 +8716,15 @@ function scoreImport(xml, meta){
   const midiOf = p => 12 * (p[2] + 1) + STEP[p[0]] + p[1];
   const tick = (dur, div) => r6(dur * 4 / div);
   const barT = t => t ? t[0] * (16 / t[1]) : null;
+  // a note in a tuplet: as long as its written value says (import.py's tuplet_len: Sibelius writes a triplet crotchet as
+  // 170 or 171 of 256 to a crotchet)
+  const TYPE_TICKS = { breve: 32, whole: 16, half: 8, quarter: 4, eighth: 2, "16th": 1, "32nd": 0.5 };
+  const tupletLen = (el, d) => {
+    const tm = kid(el, "time-modification"), ty = TYPE_TICKS[text(el, "type") || ""];
+    if (!tm || ty === undefined || !text(tm, "actual-notes") || !text(tm, "normal-notes")) return d;
+    const v = ty * (2 - 0.5 ** kids(el, "dot").length) * parseInt(text(tm, "normal-notes"), 10) / parseInt(text(tm, "actual-notes"), 10);
+    return Math.abs(v - d) < 0.05 ? r6(v) : d;
+  };
   const names = {};
   [...root.getElementsByTagName("score-part")].forEach(sp => { names[sp.getAttribute("id")] = (text(sp, "part-name") || "").trim(); });
   const warn = [], problems = [], partsOut = [], accompOut = [], allDisplay = [], staveInfo = [];
@@ -8325,7 +8764,7 @@ function scoreImport(xml, meta){
         else if (tag === "forward") pos += tick(parseInt(text(el, "duration"), 10), div);
         else if (tag === "note") {
           if (kid(el, "grace") || kid(el, "cue")) { warn.push(`${name || pid} bar ${m.getAttribute("number")}: a grace or cue note was left out`); continue; }
-          const d = tick(parseInt(text(el, "duration") || "0", 10), div);
+          const d = tupletLen(el, tick(parseInt(text(el, "duration") || "0", 10), div));
           const isChord = !!kid(el, "chord"), start = isChord ? lastStart : pos;
           const voice = text(el, "voice") || "1", staff = text(el, "staff") || "1";
           const ties = kids(el, "tie").map(x => x.getAttribute("type"));
@@ -9601,7 +10040,7 @@ $("btnVoiceDone").addEventListener("click", () => {
   READ.ex = null; PART.ex = null; SOLFA.ex = null; IV.ex = null; CH.ex = null;      // regenerate in the new range
   if (MODE === "aud") audVoiceChanged();
   if (MODE === "songs") songVoiceChanged();
-  if (MODE === "start") { MP.target = null; MP.last = null; mpShow(); }
+  if (MODE === "start") { MP.target = null; MP.last = null; startShow(); }
   else if (AUD.items) AUD.items = null;                                           // the audition starts again next time
   if (MODE !== "skills") return;
   switchTo(APP.settings.activity, true);
@@ -9613,7 +10052,7 @@ $("settingsBtn").addEventListener("click", () => { if (!BUSY) openVoice(); });
 // skills or Practice songs ----
 function setMode(m){
   for (const k of Object.keys(ACTS)) ACTS[k].stop();
-  audStop(); mpStop(); songStop();
+  audStop(); mpStop(); btStop(true); songStop();
   stopAllSound(); RESULTS.hide(); LIVE.close();
   if (PRACTISING) { PRACTISING = null; AUDIO.onFrame = null; }
   MODE = m;
@@ -9621,7 +10060,7 @@ function setMode(m){
   helpersRefresh(); markHelpers();
   if (m === "skills") switchTo(APP.settings.activity || "rhythm", false);
   if (m === "aud") audShow(false);
-  if (m === "start") mpShow();
+  if (m === "start") startShow();
   if (m === "songs") songsShow();
   placePanels();                         // the tuning keyboard and marks inside this screen's card (06-core.js)
   window.scrollTo(0, 0);
@@ -9629,6 +10068,8 @@ function setMode(m){
 $("homeBtn").addEventListener("click", () => { if (BUSY) return; setMode("home"); });
 $("goSkills").addEventListener("click", () => { ensureCtx(); setMode("skills"); });
 $("goAud").addEventListener("click", () => { ensureCtx(); setMode("aud"); });
+// the Practice audition is on the teacher page only for now (Isaac, 28 October: "It needs a bit more work")
+$("goAud").hidden = !TEACH;
 $("goStart").addEventListener("click", () => { ensureCtx(); setMode("start"); });
 $("goSongs").addEventListener("click", () => { ensureCtx(); SG.view = "list"; setMode("songs"); });
 $("micOn").addEventListener("click", () => startMic().then(() => { if (PRACTISING) PRACTISING.syncPractice(); }));
@@ -9637,11 +10078,18 @@ $("pStart").addEventListener("click", () => { if (PRACTISING) PRACTISING.syncPra
 $("pPrev").addEventListener("click", () => { if (PRACTISING) PRACTISING.move(-1); });
 $("pNext").addEventListener("click", () => { if (PRACTISING) PRACTISING.move(1); });
 
-// ---- Keyboard: two uses only. The space bar taps in Tap the rhythm (as well as clapping or tapping the screen), and
-// the left and right arrows move the practice box while practising note by note (Isaac, 18 October) ----
+// ---- Keyboard: the space bar taps in Tap the rhythm (as well as clapping or tapping the screen) and plays or pauses a
+// song in Practice songs (Isaac, 28 October), and the left and right arrows move the practice box while practising
+// note by note (Isaac, 18 October) ----
 document.addEventListener("keydown", e => {
   if (e.metaKey || e.ctrlKey || e.altKey) return;
   if (e.code === "Space" && MODE === "songs" && TEACH && SG.tapping) { e.preventDefault(); if (!e.repeat) TEACH.tap(); return; }   // Sync a recording (the teacher page)
+  if (e.code === "Space" && MODE === "songs" && SG.view === "song" && $("voiceDlg").hidden && !(TEACH && TEACH.editing())) {
+    const t = e.target, tag = t && t.tagName;
+    if (tag === "TEXTAREA" || tag === "SELECT" || (tag === "INPUT" && !["checkbox", "range", "radio", "button"].includes(t.type)) || (t && t.isContentEditable)) return;
+    e.preventDefault(); if (!e.repeat && SG.state !== "listening") songListenPlay(); return;
+  }
+  if (e.code === "Space" && MODE === "start" && BT.state === "running") { e.preventDefault(); if (!e.repeat) btKey(); return; }   // Tap the beat (09-beat.js)
   if (e.code === "Space") { if (MODE === "skills" && APP.settings.activity === "rhythm" && RH.tapFn) { e.preventDefault(); if (!e.repeat) RH.tapFn(); } return; }
   if ((e.key === "ArrowLeft" || e.key === "ArrowRight") && PRACTISING && $("voiceDlg").hidden) {
     const t = e.target, tag = t && t.tagName;
@@ -9653,6 +10101,7 @@ document.addEventListener("keydown", e => {
 
 // ---------- Boot ----------
 load();
+BT.tab = APP.settings.startTab === "beat" ? "beat" : "match";
 ["keyboard", "tuning", "guitar", "clickHear", "reminder", "playRhythm"].forEach(k => delete APP.settings[k]);   // helpers taken out on 27 October
 initAudio();
 if (APP.settings.activity === "aural") APP.settings.activity = APP.settings.auralType === "chord" ? "chords" : "intervals";   // before the split
