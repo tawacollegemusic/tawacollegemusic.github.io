@@ -266,8 +266,13 @@ body:not(.mode-skills) .skills-only, body:not(.mode-aud) .aud-only, body:not(.mo
 .songhead { margin: -6px 0 4px -6px; }
 .songrow { margin-top: 12px; }
 .songrow .seg { flex-wrap: wrap; align-self: flex-start; }
-.songmix { display: flex; flex-wrap: wrap; gap: 10px 22px; align-items: center; margin-top: 14px; padding: 12px 14px; border-radius: 10px; background: var(--paper); }
-.songmix .switch[hidden] { display: none; }
+.songmix { display: flex; flex-direction: column; align-items: stretch; gap: 8px; margin-top: 14px; padding: 12px 14px; border-radius: 10px; background: var(--paper); }
+.songmix .mixrow { display: flex; align-items: center; gap: 12px; max-width: 460px; }
+.songmix .mixrow[hidden], .songmix .switch[hidden] { display: none; }
+.songmix .mixname { flex: 0 0 8.2em; }
+.songmix .mixrow input { flex: 1; min-width: 80px; accent-color: var(--brand); }
+.songmix .mixval { flex: 0 0 3em; text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
+.songmix .switch { margin-top: 4px; align-self: flex-start; }
 .songrow { display: flex; flex-direction: column; gap: 6px; }
 .songrow .row { gap: 8px; }
 button.toggle[aria-pressed="true"] { background: var(--brand-tint); border-color: var(--brand); color: var(--brand-ink); }
@@ -538,11 +543,13 @@ body.mode-start .sung:empty { display: none; }
     </div>
     <div class="hp" id="song-hp">Use headphones.</div>
     <div class="helpers" data-act="song" hidden></div>
-    <!-- what the piano plays and what the score shows: three switches (Isaac, 29 October; the accompaniment goes with the
-         other parts) -->
-    <div class="songmix" id="song-mix" role="group" aria-label="What plays and what shows">
-      <label class="switch"><input type="checkbox" data-opt="songOwn"> My part plays along</label>
-      <label class="switch" id="song-othersplay"><input type="checkbox" data-opt="songOthers"> Other parts play along</label>
+    <!-- how loud each part plays (Isaac, 29 October: volume sliders), and whether the other parts show -->
+    <div class="songmix" id="song-mix" role="group" aria-label="Volume">
+      <span class="lab">Volume</span>
+      <label class="mixrow" data-mix="own"><span class="mixname">My part</span><input type="range" min="0" max="100" step="5" data-mix="own" aria-label="My part volume"><span class="mixval"></span></label>
+      <label class="mixrow" data-mix="others"><span class="mixname">Other parts</span><input type="range" min="0" max="100" step="5" data-mix="others" aria-label="Other parts volume"><span class="mixval"></span></label>
+      <label class="mixrow" data-mix="rec"><span class="mixname">Recording</span><input type="range" min="0" max="100" step="5" data-mix="rec" aria-label="Recording volume"><span class="mixval"></span></label>
+      <label class="mixrow" data-mix="accomp"><span class="mixname">Accompaniment</span><input type="range" min="0" max="100" step="5" data-mix="accomp" aria-label="Accompaniment volume"><span class="mixval"></span></label>
       <label class="switch" id="song-othersshow"><input type="checkbox" data-opt="songShowOthers"> Show me the other parts</label>
     </div>
     <p class="hpmsg" id="song-msg" aria-live="polite"></p>
@@ -7133,7 +7140,19 @@ BT.check = !document.getElementById("bt-check") ? null : function(){
 // Phrases are the part's long sections (songs/import.py finds them at the phrase ends, Isaac checks them on the teacher
 // page). A phrase's score shows the bar before it too, with notes outside the phrase in grey. Marks are on the music;
 // nothing is scored or kept.
-const SONG_VOL = { own: 0.3, other: 0.1, accomp: 0.075 };
+// Volume sliders (Isaac, 29 October: "the balance between parts is sometimes wrong so we'd like the student to be able to
+// customise it"): My part, Other parts, Recording and Accompaniment, 0 to 100%. Two sets, kept in Settings: one for when
+// the recording plays (My part 100%, Recording 50%, the others 0%) and one for the piano (My part 100%, Other parts and
+// Accompaniment 50%). The piano's loudness goes with the square of the slider, so 50% is a quarter of 100%'s loudness
+// (the balance the app had before: their part 0.3, the others about 0.08).
+const SONG_MIX_DEF = { rec: { own: 100, others: 0, rec: 50, accomp: 0 }, piano: { own: 100, others: 50, accomp: 50 } };
+const SONG_FULL = 0.3;
+const songMixSet = () => SG.useRec && SG.rec ? "rec" : "piano";
+function songMix(k, set = songMixSet()){
+  const m = APP.settings.songMix && APP.settings.songMix[set], v = m && Number.isFinite(m[k]) ? m[k] : SONG_MIX_DEF[set][k];
+  return clamp(v || 0, 0, 100);
+}
+const songGain = pct => SONG_FULL * (pct / 100) ** 2;
 // The teacher page's tools (09-teacher.js, in teacher.html only): null in the students' app
 let TEACH = null;
 const SG = { view: "list", song: null, part: null, phrase: -1, nbn: false, sc: null, notes: [],
@@ -7522,17 +7541,18 @@ function songClearMarks(){ SG.marks = null; SG.pm = null; songMarksDraw(); RESUL
 const songPmKey = () => (SG.song && SG.song.id) + "|" + (SG.part && SG.part.id) + "|" + SG.drawnFor;
 
 // ================= Playing =================
-// The piano's notes from `from` to `to` (song ticks), with the switches that are on: each part at its own volume, and the
-// singer's own part only within [ownFrom, ownTo) when given. A note already sounding at `from` plays from there. The
-// accompaniment plays with the other parts (Other parts play along; Isaac, 29 October), unless o.songAccomp says.
+// The piano's notes from `from` to `to` (song ticks), each part at its slider's volume (o.own, o.others and o.accomp, 0
+// to 100, override the sliders), and the singer's own part only within [ownFrom, ownTo) when given. A note already
+// sounding at `from` plays from there.
 function songEvents(from, to, o = {}){
-  const s = SG.song, T = SG.timeline, on = k => o[k] ?? (APP.settings[k] !== false), out = [];
+  const s = SG.song, T = SG.timeline, pc = k => o[k] ?? songMix(k), out = [];
+  const own = pc("own"), oth = pc("others"), acc = pc("accomp");
   s.parts.forEach(pt => {
-    const mine = pt === SG.part;
-    if (mine ? !on("songOwn") : !on("songOthers")) return;
-    T.parts[pt.id].forEach(x => { if (!mine || o.ownFrom === undefined || (x.t >= o.ownFrom - 1e-6 && x.t < o.ownTo - 1e-6)) out.push({ ...x, v: mine ? SONG_VOL.own : SONG_VOL.other, own: mine }); });
+    const mine = pt === SG.part, p = mine ? own : oth;
+    if (!p) return;
+    T.parts[pt.id].forEach(x => { if (!mine || o.ownFrom === undefined || (x.t >= o.ownFrom - 1e-6 && x.t < o.ownTo - 1e-6)) out.push({ ...x, v: songGain(p), own: mine }); });
   });
-  if (o.songAccomp ?? on("songOthers")) T.accomp.forEach(x => out.push({ ...x, v: SONG_VOL.accomp }));
+  if (acc) T.accomp.forEach(x => out.push({ ...x, v: songGain(acc) }));
   return out.filter(x => x.t + x.d > from + 1e-6 && x.t < to - 1e-6).map(x => { const t = Math.max(x.t, from); return { ...x, t, d: Math.min(x.t + x.d, to) - t }; })
     .sort((a, b) => a.t - b.t);
 }
@@ -7545,7 +7565,7 @@ function songStream(evs, start, from, tick, opt){
     const horizon = AUDIO.ctx.currentTime + 2.5;
     while (i < evs.length && start + (evs[i].t - from) * tick < horizon) {
       const x = evs[i++];
-      tone(x.m, start + (x.t - from) * tick, x.d * tick * 0.95, { vol: x.v, noIgnore: opt.noIgnore, acc: opt.acc || !x.own });
+      tone(x.m, start + (x.t - from) * tick, x.d * tick * 0.95, { vol: x.v, noIgnore: opt.noIgnore, acc: opt.acc || !x.own, own: !!x.own });
     }
     if (i < evs.length) setTimeout(pump, 250);
   };
@@ -7569,12 +7589,12 @@ function songPlay(from, to, evs, o = {}){
   }
   const tick = tickSecOf(SG.song.ts, songTempo()), run = { from, to, tick, t0: AUDIO.ctx.currentTime + 0.12 };
   SG.state = "playing"; SG.play = run; SG.stream = {};
-  if (rec) { run.rec = rec; if (!o.noSeek) rec.seek(recTime(from)); else run.started = true; rec.play(); }
+  if (rec) { run.rec = rec; songRecVolume(); if (!o.noSeek) rec.seek(recTime(from)); else run.started = true; rec.play(); }
   else songStream(evs, run.t0, from, tick, {});
   songButtons();
   const loop = () => {
     if (SG.play !== run || SG.state !== "playing") return;
-    if (rec && APP.settings.songOwn !== false) recOwnStep(run, rec, run.to);
+    if (rec) recPianoStep(run, rec, run.to);
     const cur = rec ? recTick(rec.time()) : run.from + Math.max(0, AUDIO.ctx.currentTime - run.t0) / run.tick;
     // a recording plays on to its end after the last bar (the last chord and the room)
     const done = rec ? rec.ended() || (run.to < songTotal() - 1e-6 && cur >= run.to - 1e-6) : cur >= run.to - 1e-6;
@@ -7644,18 +7664,32 @@ function recTime(tick){
   let i = a.length - 1; while (i > 0 && a[i].k > tick + 1e-6) i--;
   return Math.max(0, a[i].t + (tick - a[i].k) / recRate(a, i));
 }
-// The singer's part on the piano with the recording (Isaac, 21 October: "for the bass voice it plays both the piano bass
-// voice and the youtube link at the same time"). Each frame, the notes due in the next 0.3 s of the recording are handed
-// to the piano at the recording's time for them (from the bar times), so the piano follows the recording's own speed,
-// and stops with it when it pauses, stalls to load or jumps. A note that started up to 0.15 s ago (the note it starts
-// on) plays straight away; one further back is left out.
+// The piano with the recording (Isaac, 21 October: "for the bass voice it plays both the piano bass voice and the youtube
+// link at the same time"; since 29 October any part at its slider's volume, usually just their own). Each frame, the
+// notes due in the next 0.3 s of the recording are handed to the piano at the recording's time for them (from the bar
+// times), so the piano follows the recording's own speed, and stops with it when it pauses, stalls to load or jumps. A
+// note that started up to 0.15 s ago (the note it starts on) plays straight away; one further back is left out. Each
+// note's volume is the slider's when it's handed over, so moving a slider takes effect straight away.
 // The recording's reported time is what's being heard, but the piano's notes still have to get through the speakers or
 // headphones (Isaac, 21 October: "about a quarter of a second late", on Bluetooth that delay is 0.2 s or more), so each
 // note starts that much earlier: the delay the browser reports for its sound output (recOwnLatency).
 const REC_OWN_AHEAD = 0.3, REC_OWN_LATE = 0.15;
 function recOwnLatency(){ const c = AUDIO.ctx; return clamp((c.outputLatency || 0) + (c.baseLatency || 0), 0, 0.6); }
-function recOwnStep(run, rec, to = Infinity){
-  const notes = SG.timeline.parts[SG.part.id], now = AUDIO.ctx.currentTime, rt = rec.time();
+// every piano note of the song, each marked as the singer's part (own), another part's or the accompaniment's, in time
+// order (kept until the part or the song changes)
+function songAllEvents(){
+  const T = SG.timeline;
+  if (T.all && T.allFor === SG.part) return T.all;
+  const out = [];
+  SG.song.parts.forEach(pt => { const k = pt === SG.part ? "own" : "others"; T.parts[pt.id].forEach(x => out.push({ ...x, k })); });
+  T.accomp.forEach(x => out.push({ ...x, k: "accomp" }));
+  out.sort((a, b) => a.t - b.t);
+  T.all = out; T.allFor = SG.part;
+  return out;
+}
+// mix: a slider's percentage to use instead (Learn it's first go always has their part)
+function recPianoStep(run, rec, to = Infinity, mix = {}){
+  const notes = songAllEvents(), now = AUDIO.ctx.currentTime, rt = rec.time();
   const heard = rt + recOwnLatency();                     // the recording's time when a note started now is heard
   if (!rec.playing()) { run.ownAt = null; return; }
   if (run.ownAt == null || rt < run.ownAt - 0.4 || rt > run.ownAt + 1) {           // starting, or the recording jumped (small corrections from YouTube's reports aren't jumps)
@@ -7667,8 +7701,15 @@ function recOwnStep(run, rec, to = Infinity){
     if (st > heard + REC_OWN_AHEAD || x.t >= to - 1e-6) break;
     run.ownI++;
     if (st < rt - REC_OWN_LATE) continue;                                            // already gone by
-    tone(x.m, now + Math.max(0, st - heard), Math.max(0.1, (recTime(x.t + x.d) - st) * 0.95), { vol: SONG_VOL.own, noIgnore: true });
+    const pct = mix[x.k] ?? songMix(x.k, "rec"); if (!pct) continue;
+    tone(x.m, now + Math.max(0, st - heard), Math.max(0.1, (recTime(x.t + x.d) - st) * 0.95), { vol: songGain(pct), noIgnore: true, acc: x.k !== "own", own: x.k === "own" });
   }
+}
+// The Recording slider: YouTube's own volume (0 to 100), or the file's
+function songRecVolume(){
+  const v = songMix("rec", "rec");
+  if (SG.yt && SG.yt.ready) SG.yt.send("setVolume", [v]);
+  if (SG.audio) SG.audio.volume = v / 100;
 }
 // ================= The recording =================
 // A song's recording is either a file built into the app (build.py embeds songs/<id>.mp3 or .m4a) or a YouTube video,
@@ -7887,7 +7928,7 @@ function ytMessage(e){
   P.heard = true;
   const i = d.info;
   if (d.event === "onError") return ytFail(P, i);
-  if (!P.ready && /^(onReady|initialDelivery|infoDelivery)$/.test(d.event)) { P.ready = true; P.waits.splice(0).forEach(fn => fn()); }
+  if (!P.ready && /^(onReady|initialDelivery|infoDelivery)$/.test(d.event)) { P.ready = true; songRecVolume(); P.waits.splice(0).forEach(fn => fn()); }
   if (i && typeof i === "object") {
     const ct = typeof i.currentTime === "number" ? i.currentTime : i.progressState && typeof i.progressState.current === "number" ? i.progressState.current : null;
     if (ct !== null && !(P.seekTo && performance.now() < P.seekTo.until && Math.abs(ct - P.seekTo.t) > 1.5)) { P.t = ct; P.at = performance.now(); }
@@ -8031,9 +8072,9 @@ function songRecRun(){
   const learn = run.kind === "learn", stages = [];
   // Learn it's three goes, in Isaac's words (28 October): "Listen to it", then "Sing it back", then "Sing it with the
   // other parts"
-  if (learn) stages.push({ kind: "rec", own: true, say: "Listen to it. The piano plays your part with the choir." });
+  if (learn) stages.push({ kind: "rec", mix: { own: songMix("own", "rec") || 100 }, say: "Listen to it. The piano plays your part with the choir." });
   if (learn) stages.push({ kind: "solo", sing: true, count: "Get ready to sing it back.", say: "Sing it back." });
-  stages.push({ kind: "rec", sing: true, own: APP.settings.songOwn !== false, count: learn ? "Get ready to sing it with the other parts. Listen to the bar before, then come in." : "Listen to the bar before, then come in.",
+  stages.push({ kind: "rec", sing: true, count: learn ? "Get ready to sing it with the other parts. Listen to the bar before, then come in." : "Listen to the bar before, then come in.",
     say: learn ? "Sing it with the other parts." : "Sing!", marked: true });
   if (learn) stages[1].marked = false;
   run.stages = stages; run.si = -1;
@@ -8054,7 +8095,7 @@ function songStageNext(run, now){
   if (!g) { songFinish(); return true; }
   g.t0 = now;
   LIVE.status(g.count || g.say);
-  if (g.kind === "rec") { g.started = false; g.paused = false; g.giveUp = now + 15; run.rec.seek(recTime(run.lead)); run.rec.play(); }
+  if (g.kind === "rec") { g.started = false; g.paused = false; g.giveUp = now + 15; songRecVolume(); run.rec.seek(recTime(run.lead)); run.rec.play(); }
   else songSoloStart(run, g, now);
   return false;
 }
@@ -8090,7 +8131,7 @@ function songRecStage(run, g, now){
       const d = est - g.anchor; g.anchor = est; g.goAt += d;
       if (g.sing) for (let k = g.w0; k < g.w0 + n; k++) if (run.windows[k].start > now) { run.windows[k].start += d; run.windows[k].end += d; }
     }
-    if (g.own) recOwnStep(g, r, run.sc.e);
+    recPianoStep(g, r, run.sc.e, g.mix);
   }
   if (g.count && now >= g.goAt - 0.05 && !g.went) { g.went = true; LIVE.status(g.say); }
   if (!g.paused) { SG.pos = clamp(recTick(rt), run.lead, songTotal()); songHead(SG.pos); }
@@ -8129,17 +8170,17 @@ function songLearnPiano(){
   const cl = countLabels(ts), bar = cl.length * beat, labels = cl.concat(upbeatCount(tg, S0)), ctx = AUDIO.ctx;
   LIVE.open(true, "Listen to it.");
   const sec = L * tick, s1 = ctx.currentTime + 0.3, c1 = s1 + sec, s2 = c1 + bar, c2 = s2 + sec, s3 = c2 + bar;
-  tg.forEach(n => tone(sound(n), s1 + (n.t - S0) * tick, n.d * tick * 0.95, { vol: 0.26 }));
+  tg.forEach(n => tone(sound(n), s1 + (n.t - S0) * tick, n.d * tick * 0.95, { vol: songGain(songMix("own") || 100) }));
   const bs = songBeats(S0, S0 + L);                 // each bar's own beats (the time signature can change)
   [s1, s2, s3].forEach(t => songClicks(t, tick, S0, bs));
   countInClicks(c1, beat, ts); countInClicks(c2, beat, ts);
   SG.stream = {};
-  songStream(songEvents(S0, S0 + L, { songOwn: false, songAccomp: true }), s3, S0, tick, { noIgnore: true, acc: true });
+  const w3 = learnWith();
+  songStream(songEvents(S0, S0 + L, w3), s3, S0, tick, { noIgnore: true, acc: true });
   const wins = start => tg.map(n => ({ start: start + (n.t - S0) * tick, end: start + (n.t - S0 + n.d) * tick }));
   run.windows = wins(s2).concat(wins(s3)); run.targets = tg.map(sound).concat(tg.map(sound));
   run.S0 = S0; run.len = sec; run.tick = tick;
-  // (the third go: with the other parts when they're switched on, as Isaac put it; else with the accompaniment)
-  const with3 = s.parts.length > 1 && APP.settings.songOthers !== false ? "the other parts" : "the accompaniment";
+  const with3 = w3.say;
   run.sections = [{ t: s1, say: "Listen to it.", from: s1 }, { t: c1, say: "Get ready to sing it back." }, { t: s2, say: "Sing it back.", from: s2 },
     { t: c2, say: `Get ready to sing it with ${with3}.` }, { t: s3, say: `Sing it with ${with3}.`, from: s3 }];
   run.pass = songPass(tg, t => s3 + (t - S0) * tick, c2);
@@ -8147,6 +8188,13 @@ function songLearnPiano(){
   showCountIn($("song-box"), c1, beat, [{ t: s1, text: "Listen to it" }].concat(countCues(c2, beat, labels)), labels);
   window.__timed = { musicStart: s2, windows: run.windows, notes: run.targets };
   AUDIO.onFrame = songLive(run, true);
+}
+// Learn it's third go on the piano: with the other parts as Isaac put it, at their sliders' volumes, or with the
+// accompaniment if the other parts are at 0%; if both are at 0% (or the song has neither), whichever it has at 50%
+function learnWith(){
+  const s = SG.song, oth = s.parts.length > 1 ? songMix("others") : 0, acc = s.accomp.length ? songMix("accomp") : 0;
+  if (oth || acc) return { own: 0, others: oth, accomp: acc, say: oth ? "the other parts" : "the accompaniment" };
+  return s.accomp.length ? { own: 0, others: 0, accomp: 50, say: "the accompaniment" } : { own: 0, others: 50, accomp: 0, say: "the other parts" };
 }
 // Sing it (as Sight sing): a count-in, the bar before on the piano, then the phrase (or the whole part) to the click with
 // what's switched on
@@ -8357,7 +8405,7 @@ function songButtons(){
   });
   const nb = $("song-nbn"); nb.disabled = busy; nb.setAttribute("aria-pressed", SG.nbn); nb.classList.toggle("sel", SG.nbn);
   ["song-prev", "song-next", "song-sec", "song-play", "song-stop", "song-restart", "song-scrub"].forEach(id => $(id).disabled = busy);
-  $("song-mix").querySelector('[data-opt="songShowOthers"]').disabled = busy;
+  $("song-othersshow").querySelector("input").disabled = busy;
   document.querySelectorAll("#song-parts button, #song-recrow button").forEach(b => b.disabled = busy);
   const list = phrases();
   $("song-prev").disabled = busy || SG.phrase < 0; $("song-next").disabled = busy || SG.phrase >= list.length - 1;
@@ -8375,8 +8423,7 @@ function songShowMode(){
   document.querySelectorAll("#song-recrow button").forEach(b => b.classList.toggle("sel", (b.dataset.r === "rec") === !!SG.useRec));
   document.querySelector('#song-recrow button[data-r="rec"]').textContent = SG.rec && SG.rec.kind === "yt" ? "YouTube" : "Recording";
   $("song-tempo").hidden = !!SG.useRec;
-  // with the recording, the recording has the other parts: the piano can only add the singer's own part
-  $("song-othersplay").hidden = !!(SG.useRec && SG.rec) || !songHasOthers(SG.song, false);
+  songMixShow();
   if (TEACH) TEACH.mode();
   const tSrc = TEACH ? TEACH.ytSrc() : null;
   const ytSrc = tSrc && tSrc.kind === "yt" ? tSrc : SG.useRec && SG.rec && SG.rec.kind === "yt" ? SG.rec : null;
@@ -8409,6 +8456,17 @@ function songList(){
 }
 // Whether a song has other music to play or show besides the singer's part (partsOnly: not counting the accompaniment)
 function songHasOthers(s, partsOnly){ return !!s && (s.parts.length > 1 || (!partsOnly && s.accomp.length > 0)); }
+// The volume sliders for what's playing now (the recording's set or the piano's): a song shows only the rows it has
+// (Recording with the recording; Other parts with more than one part; Accompaniment with an accompaniment)
+function songMixShow(){
+  const s = SG.song; if (!s) return;
+  const set = songMixSet(), has = { own: true, others: s.parts.length > 1, rec: set === "rec", accomp: s.accomp.length > 0 };
+  document.querySelectorAll("#song-mix .mixrow").forEach(row => {
+    const k = row.dataset.mix, inp = row.querySelector("input"), v = songMix(k, set);
+    row.hidden = !has[k];
+    inp.value = v; row.querySelector(".mixval").textContent = v + "%";
+  });
+}
 // The part that matches the voice part in Settings: one named for it first (Till There Was You's Solo sits in the alto
 // range, and an alto should get the Alto part), then one in its range, then the first part
 const VOICE_NAMES = { S: "Soprano", A: "Alto", T: "Tenor", B: "Bass" };
@@ -8509,7 +8567,17 @@ function songSecTo(k){
   $("song-sing").addEventListener("click", () => songGo("sing"));
   $("song-nbn").addEventListener("click", () => { ensureCtx(); songHalt(); songNbn(!SG.nbn, true); });
   window.addEventListener("message", ytMessage);
-  ["songOthers", "songOwn"].forEach(k => { if (APP.settings[k] === undefined) APP.settings[k] = true; });
+  // the volume sliders: a slider moved while the piano plays carries on with it from where it is (a moment after it
+  // stops moving); with the recording the piano's next notes and the recording's volume follow straight away
+  let mixWait = 0;
+  document.querySelectorAll("#song-mix input[data-mix]").forEach(inp => inp.addEventListener("input", () => {
+    const set = songMixSet(), k = inp.dataset.mix;
+    APP.settings.songMix = APP.settings.songMix || {};
+    APP.settings.songMix[set] = { ...SONG_MIX_DEF[set], ...(APP.settings.songMix[set] || {}), [k]: +inp.value };
+    save(); songMixShow();
+    if (k === "rec") return songRecVolume();
+    clearTimeout(mixWait); mixWait = setTimeout(songPlaybackChanged, 200);
+  }));
 })();
 // Show me the other parts changed: the score is drawn again, and music playing carries on
 function songShowChanged(){
@@ -8518,7 +8586,7 @@ function songShowChanged(){
   songDraw(); if (was) songListenPlay();
   songSync();
 }
-// A playback switch or the tempo changed: music playing on the piano carries on with it from where it is
+// A volume slider or the tempo changed: music playing on the piano carries on with it from where it is
 function songPlaybackChanged(){ if (SG.state === "playing" && !SG.useRec) { songHalt(); songListenPlay(); } }
 function songTempoChanged(){ if (SG.state === "playing" && !SG.useRec) { songHalt(); songListenPlay(); } }
 // The voice part changed in Settings: the matching part of the song
@@ -8753,7 +8821,6 @@ document.querySelectorAll("[data-opt]").forEach(inp => {
     save(); syncOptions();
     if (k === "audTempo") { const it = audCur(); if (it) it.tempo = APP.settings.audTempo; }
     if (k === "solf" || k === "names") { READ.redraw(); PART.redraw(); SOLFA.redraw(); SONGM.redraw(); }
-    if (k === "songOthers" || k === "songOwn") songPlaybackChanged();
     if (k === "songTempo") songTempoChanged();
     if (k === "counts" && RH.ex && RH.state === "idle") rhDraw(RH.lastMarks);
     if (k === "counts") { READ.redraw(); PART.redraw(); SONGM.redraw(); }
@@ -8839,7 +8906,7 @@ document.addEventListener("keydown", e => {
 load();
 BT.tab = APP.settings.startTab === "beat" ? "beat" : "match";
 ["keyboard", "tuning", "guitar", "clickHear", "reminder", "playRhythm"].forEach(k => delete APP.settings[k]);   // helpers taken out on 27 October
-["songAccomp", "songShowAccomp", "songRecOwn"].forEach(k => delete APP.settings[k]);   // Practice songs switches merged on 29 October
+["songAccomp", "songShowAccomp", "songRecOwn", "songOwn", "songOthers"].forEach(k => delete APP.settings[k]);   // Practice songs' old switches (volume sliders since 29 October)
 initAudio();
 if (APP.settings.activity === "aural") APP.settings.activity = APP.settings.auralType === "chord" ? "chords" : "intervals";   // before the split
 if (!LEVEL_INFO[APP.settings.level] || !LEVEL_INFO[APP.settings.level].built) APP.settings.level = 1;
