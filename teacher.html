@@ -6986,8 +6986,9 @@ const AURALS = [IV, CH];
 // ==== FILE: 09-beat.js ====
 // ================= Getting started: Tap the beat (Isaac, 28 October) =================
 // "All they need to do is tap along a beat to a variety of music, time signatures, tempos." The music just starts (no
-// count-in) and goes round until they've tapped in time for about 10 seconds; each tap counts if it's within 90 ms of a
-// beat (the margin Tap the rhythm uses).
+// count-in) and goes round until they've tapped in time for 20 seconds. It was too sensitive (Isaac, 29 October: "either
+// needs to be 10 seconds or 20 seconds with less sensitivity"; he chose 20 seconds, gentler): a tap counts within 150 ms of
+// a beat (BEAT_TOL), and one stray tap or one missed beat doesn't start the count again; only two in a row do.
 // The music (Isaac, 29 October: "I'd like to use the complete Mozart piano sonatas"; he chose Mozart only, in place of the
 // six pieces written out from memory): all 54 movements of the 18 sonatas, from the DCML edition (beat/mozart.py makes
 // beat/mozart.json, which build.py embeds as MOZART; CC BY-NC-SA 4.0, credited in Settings). Each movement plays from
@@ -7001,7 +7002,7 @@ const AURALS = [IV, CH];
 // beat counts), as long as it comes at a speed people tap at (BEAT_RATE), so students tap whichever they feel. Beats are
 // worked out bar by bar, so pickups, bars split by repeats and changes of time signature all line up.
 const BEAT_PIECES = MOZART.movements;
-const BEAT_TOL = 0.09, BEAT_GOAL = 20, BEAT_RATE = [40, 170];
+const BEAT_TOL = 0.15, BEAT_GOAL = 20, BEAT_RATE = [40, 170];
 const BT = { tab: "match", piece: -1, state: "idle", run: null, done: {}, heard: [], bpm: {}, cache: {}, log: [] };
 // A movement at random: not the last eight heard, and one not done yet while there are any
 function btRandom(){
@@ -7100,9 +7101,9 @@ async function btStart(from = 0){
   if (document.activeElement && document.activeElement.blur) document.activeElement.blur();     // so space doesn't press a button
   const loopFn = () => {
     if (BT.run !== run || BT.state !== "running") return;
-    // a stop in the tapping (more than a beat and a half) starts the count again
+    // a stop in the tapping starts the count again: two beats missed (one is let go), or a beat missed after a stray tap
     const now = ctx.currentTime - btOut(), s = run.streak;
-    if (s && !run.done && now - s.last > 1.5 * s.u * run.spq) { run.streak = null; btMeter(0); btSay("Keep tapping. Tap along to the beat."); }
+    if (s && !run.done && now - s.last > (s.miss ? 1.5 : 2.5) * s.u * run.spq) { run.streak = null; btMeter(0); btSay("Keep tapping. Tap along to the beat."); }
     requestAnimationFrame(loopFn);
   };
   requestAnimationFrame(loopFn);
@@ -7123,8 +7124,9 @@ function btNearest(r, un, q){
   });
   return best;
 }
-// One tap, at time t (when the beat it's aimed at would have been heard): within 90 ms of a beat, and the next beat after
-// the last tap, it carries the run on; otherwise a new run starts (or none, if it isn't near a beat)
+// One tap, at time t (when the beat it's aimed at would have been heard): within 150 ms of a beat, and the next beat after
+// the last tap (or the one after that, a beat missed), it carries the run on. One slip is let go (a stray tap, or a missed
+// beat: `miss`), until the next clean beat; a second slip before then starts a new run (or none, if it isn't near a beat).
 function btTap(t, key){
   const r = BT.run; if (!r || r.done || t < r.start - 0.2) return;
   const q = (t - r.start) / r.spq, hits = {};
@@ -7135,14 +7137,17 @@ function btTap(t, key){
     if (!near || Math.abs(err) < Math.abs(near.err)) near = { err };
     if (Math.abs(err) > BEAT_TOL) return;
     hits[u] = k;
-    const cont = !!r.streak && r.streak.u === u && k === r.streak.k + 1;
-    if (!best || (cont && !best.cont) || (cont === best.cont && Math.abs(err) < Math.abs(best.err))) best = { u, k, err, cont };
+    const gap = r.streak && r.streak.u === u ? k - r.streak.k - 1 : -1;               // beats missed since the last tap
+    const cont = gap >= 0 && gap + r.streak.miss <= 1;
+    if (!best || (cont && !best.cont) || (cont === best.cont && Math.abs(err) < Math.abs(best.err))) best = { u, k, err, cont, gap };
   });
   if (!near) return;
   r.taps.push({ t, err: near.err, ok: !!best, key });
-  if (best && best.cont) { r.streak.k = best.k; r.streak.last = t; }
+  let stray = false;
+  if (best && best.cont) { r.streak.k = best.k; r.streak.last = t; r.streak.miss = best.gap; }
+  else if (r.streak && !r.streak.miss) { r.streak.miss = 1; stray = true; }               // one stray tap is let go
   else if (best) {
-    r.streak = { u: best.u, k: best.k, first: t, last: t };
+    r.streak = { u: best.u, k: best.k, first: t, last: t, miss: 0 };
     if (r.prev && r.prev.hits[best.u] === best.k - 1) r.streak.first = r.prev.t;        // the tap before was the beat before
   } else r.streak = null;
   r.prev = { t, hits };
@@ -7150,7 +7155,7 @@ function btTap(t, key){
   r.best = Math.max(r.best, secs);
   btMeter(secs);
   if (secs >= BEAT_GOAL) return btDone();
-  btSay(best ? "In time. Keep going." : near.err < 0 ? "A little early." : "A little late.", best ? "ok" : "near");
+  btSay(best && !stray ? "In time. Keep going." : !best ? (near.err < 0 ? "A little early." : "A little late.") : "Keep to the beat.", best && !stray ? "ok" : "near");
 }
 const btShort = pc => `Mozart ${pc.sonata.replace(/^.*, (K\. \d+)$/, "$1")}/${pc.mvt}`;      // "Mozart K. 545/1"
 // 20 seconds in time: well done, and the music carries on (Isaac: "they can keep going, but the app will say 'well
