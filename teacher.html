@@ -165,6 +165,15 @@ svg.score .tupb { fill: none; stroke: currentColor; stroke-width: 1; }
 .privacy { font-size: 0.85rem; color: var(--muted); margin-top: 8px; }
 .overlay { position: fixed; inset: 0; background: rgba(10, 25, 26, 0.55); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 10; }
 .overlay[hidden] { display: none; }
+/* Send feedback: a small button always in the bottom corner, with room left under the page so it never covers anything */
+.fixbtns { position: fixed; right: 14px; bottom: 14px; z-index: 9; display: flex; gap: 8px; }
+.fbbtn { padding: 8px 14px; border-radius: 999px; font-size: 0.9rem; background: var(--card); border: 1.5px solid var(--brand); color: var(--brand-ink); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); }
+body { padding-bottom: 64px; }
+.fbtext { width: 100%; box-sizing: border-box; font: inherit; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--card); color: var(--ink); resize: vertical; margin-bottom: 12px; }
+.fbtext::placeholder { color: var(--muted); }
+#fbDone p { margin: 0 0 10px; }
+.pglist { margin: 0; padding-left: 20px; max-height: 50vh; overflow-y: auto; } .pglist li { margin: 0 0 6px; }
+#pgDlg .card > p { margin: 0; }
 .overlay .card { max-width: 520px; width: 100%; display: flex; flex-direction: column; gap: 14px; }
 .parts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
 @media (max-width: 520px) { .parts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
@@ -768,6 +777,34 @@ body.mode-start .sung:empty { display: none; }
 </div>
 
 <div class="dim" id="dim" hidden></div>
+<!-- Send feedback (06-feedback.js; Isaac, 29 October): always on screen; opens the student's email with the message ready -->
+<!-- and Send my progress (06-progress.js; Isaac, 29 October): this session's report, into Isaac's Google Form -->
+<div class="fixbtns"><button type="button" class="fbbtn" id="pgBtn">Send my progress</button><button type="button" class="fbbtn" id="fbBtn">Send feedback</button></div>
+<div class="overlay" id="pgDlg" hidden role="dialog" aria-modal="true" aria-labelledby="pgTitle">
+  <div class="card">
+    <h2 id="pgTitle">Send my progress</h2>
+    <p id="pgTime"></p>
+    <ul class="pglist" id="pgList"></ul>
+    <p class="muted" id="pgEmpty" hidden>Nothing to send yet. Have a go at something first.</p>
+    <div class="row"><button type="button" class="primary" id="pgSend">Send to my teacher</button><button type="button" id="pgCancel">Close</button></div>
+    <p class="muted" id="pgMsg" aria-live="polite"></p>
+  </div>
+</div>
+<div class="overlay" id="fbDlg" hidden role="dialog" aria-modal="true" aria-labelledby="fbTitle">
+  <div class="card">
+    <h2 id="fbTitle">Send feedback</h2>
+    <div id="fbForm">
+      <textarea id="fbText" class="fbtext" rows="6" aria-label="Your feedback" placeholder="Report any errors, suggest usability improvements, or anything else here"></textarea>
+      <div class="row"><button type="button" class="primary" id="fbSend" disabled>Send feedback</button><button type="button" id="fbCancel">Cancel</button></div>
+    </div>
+    <div id="fbDone" hidden>
+      <p>Your email should open with your message ready. Press Send there.</p>
+      <p class="muted">If it didn't open, copy your message and email it to istone@tawacollege.school.nz.</p>
+      <div class="row"><button type="button" id="fbCopy">Copy my message</button><button type="button" class="primary" id="fbClose">Close</button></div>
+      <p class="muted" id="fbCopied" aria-live="polite"></p>
+    </div>
+  </div>
+</div>
 <div class="overlay" id="voiceDlg" hidden>
   <div class="card">
     <h2>Settings</h2>
@@ -4924,12 +4961,32 @@ function playKeyChordAndDo(key, tonic, withDo = true, first = null){
 // outline moves to each note to sing (it used to redraw around every note, so it kept shifting). The key the singer is
 // nearest fills green, amber or red, as the marks do, and a thin line shows exactly where they are, moving smoothly
 // between keys. The singer's octave is folded onto the note to sing (marking is octave-insensitive).
+// Chord notes (Isaac, 29 October: a chord that didn't fit was lit an octave down, so the keys no longer matched the
+// stave) moves it for each chord: the same number of white keys, starting where the chord's notes sit in the middle,
+// every note at its own pitch (`fit`: the chord's written midis; wider if the chord needs it).
 const TUNEKB = { voice: null, target: null, lo: 0, hi: 0, keys: {}, x: null, line: null, W: 30, BW: 18, H: 74, BH: 46 };
-function buildTuneKb(){
-  const V = voiceInfo(), svg = $("tuneKb"); svg.innerHTML = "";
-  TUNEKB.voice = V.id + V.lo; TUNEKB.target = null; TUNEKB.keys = {}; TUNEKB.x = {};
+function tuneKbRange(fit){
+  const V = voiceInfo();
   let lo = V.lo - 2, hi = V.hi + 2;                 // written range (tenors read treble 8, an octave above sounding)
   while (isBlack(lo)) lo--; while (isBlack(hi)) hi++;
+  if (!fit || !fit.length) return [lo, hi];
+  const whites = (a, b) => { let n = 0; for (let m = a; m <= b; m++) if (!isBlack(m)) n++; return n; };
+  const a = Math.min(...fit), b = Math.max(...fit), mid = (a + b) / 2;
+  const n = Math.max(whites(lo, hi), whites(a, b) + 2);           // the same size, or wider for a wide chord
+  let best = null;
+  for (let s = a - 1 - 24; s <= a - 1; s++) {                     // a white key at each end, a key's room either side
+    if (isBlack(s)) continue;
+    let e = s, k = 1; while (k < n) { e++; if (!isBlack(e)) k++; }
+    if (e < b + 1) continue;
+    const off = Math.abs((s + e) / 2 - mid);
+    if (!best || off < best.off) best = { s, e, off };
+  }
+  return best ? [best.s, best.e] : [lo, hi];
+}
+function buildTuneKb(fit){
+  const svg = $("tuneKb"); svg.innerHTML = "";
+  const [lo, hi] = tuneKbRange(fit);
+  TUNEKB.voice = tuneKbSig(fit); TUNEKB.target = null; TUNEKB.keys = {}; TUNEKB.x = {};
   TUNEKB.lo = lo; TUNEKB.hi = hi;
   const { W, BW, H, BH } = TUNEKB;
   let x = 0; const blacks = [];
@@ -4945,6 +5002,7 @@ function buildTuneKb(){
   svg.setAttribute("viewBox", `-2 -6 ${x + 4} ${H + 12}`);
   svg.style.maxWidth = Math.round((x + 4) * 1.6) + "px";      // drawn larger than the keys' units; fills a phone
 }
+function tuneKbSig(fit){ const V = voiceInfo(); return V.id + V.lo + "|" + tuneKbRange(fit).join("-"); }
 // x for a fractional midi: between the centres of the two keys either side
 function tuneKbX(m){
   const a = Math.floor(m), f = m - a, xs = TUNEKB.x;
@@ -4989,11 +5047,12 @@ function makeSettle(){
 }
 
 const LIVE = {
-  open(showTuning, status){
+  // fit: the notes the keyboard must show at their own pitch (Chord notes' chord), or nothing for the voice's range
+  open(showTuning, status, fit){
     $("livePanel").hidden = false;
     $("tuneWrap").hidden = !showTuning;
     $("pnav").hidden = true; LIVE.hideTarget(false);
-    if (showTuning && TUNEKB.voice !== voiceInfo().id + voiceInfo().lo) buildTuneKb();
+    if (showTuning && TUNEKB.voice !== tuneKbSig(fit)) buildTuneKb(fit);
     LIVE.target(null); LIVE.needle(null);
     LIVE.status(status || ""); LIVE.sung("");
   },
@@ -5216,6 +5275,67 @@ function markOctaveLeaps(results, targets){
   });
 }
 
+// ==== FILE: 06-feedback.js ====
+// ================= Send feedback (Isaac, 29 October) =================
+// A button always on screen opens a box: the student types, presses Send feedback, and their own email app opens with
+// the message ready to send to Isaac (he chose this over a script or a form; no screenshot). A few lines about where
+// they were in the app go under their message, so an error can be found again. If no email app opens (a school laptop
+// may have none set up), the box says so and offers to copy the message, with the address to send it to.
+const FEEDBACK_TO = "istone@tawacollege.school.nz";
+const FB_NAMES = { rhythm: "Tap the rhythm", solfa: "Solfège", intervals: "Intervals", chords: "Chord notes", part: "Hold your part", read: "Sight sing" };
+// Where the student is, in a few words
+function fbWhere(){
+  const V = voiceInfo(), lines = [];
+  if (MODE === "home") lines.push("Screen: Home");
+  else if (MODE === "start") lines.push("Screen: Getting started, " + (BT.tab === "beat" ? "Tap the beat (" + BEAT_PIECES[BT.piece].title + ")" : "Matching pitch"));
+  else if (MODE === "aud") lines.push("Screen: Practice audition");
+  else if (MODE === "skills") lines.push(`Screen: Practice skills, Level ${APP.settings.level}, ${FB_NAMES[APP.settings.activity] || APP.settings.activity}`);
+  else if (MODE === "songs") lines.push("Screen: Practice songs" + (SG.view === "song" && SG.song ? `, ${SG.song.title}, ${SG.part ? SG.part.name : ""}, ${songSec() ? "phrase " + (SG.phrase + 1) : "whole song"}` : ""));
+  lines.push("Voice part: " + ({ S: "Soprano", A: "Alto", T: "Tenor", B: "Bass" }[APP.settings.voice] || "not chosen") + (V && V.name && MODE === "songs" && SG.part && !SG.part.name.startsWith(V.name) ? ` (singing ${V.name})` : ""));
+  lines.push("Browser: " + fbBrowser() + (window.innerWidth < 600 ? ", phone-sized screen" : ""));
+  lines.push("Page: " + (location.pathname.split("/").pop() || "sight-singer.html") + ", " + new Date().toLocaleString("en-NZ"));
+  return lines.join("\n");
+}
+function fbBrowser(){
+  const u = navigator.userAgent;
+  const m = [["Edge", /Edg\/(\d+)/], ["Chrome", /Chrome\/(\d+)/], ["Firefox", /Firefox\/(\d+)/], ["Safari", /Version\/(\d+).*Safari/]]
+    .map(([n, r]) => { const x = r.exec(u); return x ? n + " " + x[1] : null; }).find(Boolean);
+  const b = m || "another browser";
+  const os = /CrOS/.test(u) ? "a Chromebook" : /iPhone|iPad/.test(u) ? "an iPhone or iPad" : /Android/.test(u) ? "Android" : /Mac OS X/.test(u) ? "a Mac" : /Windows/.test(u) ? "Windows" : /Linux/.test(u) ? "Linux" : "another system";
+  return `${b} on ${os}`;
+}
+function fbMessage(){
+  return $("fbText").value.trim() + "\n\n----------\nAbout this report (added by Sight Singer):\n" + fbWhere();
+}
+function fbOpen(){
+  $("fbDlg").hidden = false; $("fbDone").hidden = true; $("fbForm").hidden = false;
+  fbCheck();
+  setTimeout(() => $("fbText").focus(), 0);
+}
+function fbClose(){ $("fbDlg").hidden = true; $("fbBtn").focus(); }
+function fbCheck(){ $("fbSend").disabled = !$("fbText").value.trim(); }
+function fbSend(){
+  if (!$("fbText").value.trim()) return;
+  const a = document.createElement("a");
+  a.href = `mailto:${FEEDBACK_TO}?subject=${encodeURIComponent("Sight Singer feedback")}&body=${encodeURIComponent(fbMessage())}`;
+  a.click();
+  $("fbForm").hidden = true; $("fbDone").hidden = false; $("fbCopied").textContent = "";
+}
+(function(){
+  $("fbBtn").addEventListener("click", fbOpen);
+  $("fbText").addEventListener("input", fbCheck);
+  $("fbSend").addEventListener("click", fbSend);
+  $("fbCancel").addEventListener("click", fbClose);
+  $("fbClose").addEventListener("click", () => { $("fbText").value = ""; fbClose(); });
+  $("fbCopy").addEventListener("click", async () => {
+    const t = `To: ${FEEDBACK_TO}\nSubject: Sight Singer feedback\n\n` + fbMessage();
+    try { await navigator.clipboard.writeText(t); $("fbCopied").textContent = "Copied. Paste it into an email to " + FEEDBACK_TO + "."; }
+    catch (e) { $("fbCopied").textContent = "It couldn't be copied here. Email " + FEEDBACK_TO + " with your message."; }
+  });
+  $("fbDlg").addEventListener("keydown", e => { if (e.key === "Escape") { e.preventDefault(); fbClose(); } });
+  $("fbDlg").addEventListener("click", e => { if (e.target === $("fbDlg")) fbClose(); });
+})();
+
 // ==== FILE: 06-helpers.js ====
 // ================= Helpers: hand signs, Click notes to hear, beat numbers, letter names, solfège, Play chords =================
 // Curwen hand signs from uTheory (singer's view), drawn unmodified; HAND_ART.box is each drawing's area in the file
@@ -5311,6 +5431,102 @@ function markHelpers(){
   document.querySelectorAll(".helpers").forEach(p => p.hidden = !APP.settings.helpersOpen);
 }
 document.querySelectorAll(".helpbtn").forEach(b => b.addEventListener("click", () => { APP.settings.helpersOpen = !APP.settings.helpersOpen; save(); markHelpers(); }));
+
+// ==== FILE: 06-progress.js ====
+// ================= Send my progress (Isaac, 29 October) =================
+// A button always on screen, beside Send feedback, shows the student what they've done since they opened the app
+// (time spent; each level and activity with its tasks, attempts, best and latest score; songs; Getting started), then
+// opens Isaac's Google Form with it filled in. The form records their school email and each report is a row in his
+// Sheet (he chose this over email or a script; the report is cumulative for the session, with its start time, so a
+// second report replaces the first). PROGRESS_FORM holds the form's address and its three questions' entry ids, from
+// the form's "Get pre-filled link"; until it's set the box says reports aren't set up yet.
+// Isaac's form "Sight Singer progress" (29 October): Minutes practised, Summary, Details, in that order
+const PROGRESS_FORM = { url: "https://docs.google.com/forms/d/e/1FAIpQLScInFdrK-dN_WPJEjnGotIcu3KOhX9NAbi8Xa0Mfz0iIKI1pA/viewform",
+  minutes: "entry.1416050397", summary: "entry.731594251", details: "entry.1634482333" };
+const SESSION = { start: new Date(), active: 0, last: 0, rows: new Map(), ids: new WeakMap(), nextId: 1 };
+// Time counts while the page is showing and the student has done something in the last two minutes (or the app is
+// busy playing or listening), so a page left open doesn't count
+const PROG_IDLE = 120;
+function progressPoke(){ SESSION.last = performance.now(); }
+["pointerdown", "keydown", "wheel", "touchstart"].forEach(t => document.addEventListener(t, progressPoke, { passive: true, capture: true }));
+setInterval(() => {
+  if (document.visibilityState === "visible" && (BUSY || performance.now() - SESSION.last < PROG_IDLE * 1000)) SESSION.active += 5;
+}, 5000);
+const PROG_NAMES = { rhythm: "Tap the rhythm", solfa: "Solfège", intervals: "Intervals", chords: "Chord notes", part: "Hold your part", read: "Sight sing" };
+function progRow(key, label){
+  if (!SESSION.rows.has(key)) SESSION.rows.set(key, { label, tasks: new Set(), attempts: 0, best: null, last: null, unit: "", order: SESSION.rows.size });
+  return SESSION.rows.get(key);
+}
+function progTaskId(ex){ if (typeof ex !== "object" || !ex) return String(ex); if (!SESSION.ids.has(ex)) SESSION.ids.set(ex, SESSION.nextId++); return SESSION.ids.get(ex); }
+// An attempt with a score: key and label name the row; ex is the task (to count tasks); unit e.g. "in tune"
+function progressScore(key, label, ex, ok, total, unit){
+  const r = progRow(key, label);
+  r.tasks.add(progTaskId(ex)); r.attempts++; r.unit = unit;
+  r.last = { ok, total };
+  if (!r.best || ok / total > r.best.ok / r.best.total) r.best = { ok, total };
+}
+// Practice skills: the activity and level on screen
+function progressSkill(id, ex, ok, total, unit){
+  progressScore("L" + APP.settings.level + ":" + id, `Level ${APP.settings.level} ${PROG_NAMES[id] || id}`, ex, ok, total, unit);
+}
+// Getting started: a row whose words come from the activity's own record (text: a function giving them)
+function progressText(key, label, text){ progRow(key, label).text = text; }
+const progPct = s => s.total ? Math.round(s.ok / s.total * 100) : 0;
+function progressLines(){
+  return [...SESSION.rows.values()].sort((a, b) => a.order - b.order).map(r => {
+    if (r.text) return `${r.label}: ${r.text()}.`;
+    const t = r.tasks.size, a = r.attempts;
+    let s = `${r.label}: ${t} ${t === 1 ? "task" : "tasks"}, ${a} ${a === 1 ? "attempt" : "attempts"}.`;
+    if (r.best) s += ` Best ${r.best.ok} of ${r.best.total} ${r.unit} (${progPct(r.best)}%)` + (a > 1 ? `; latest ${r.last.ok} of ${r.last.total}.` : ".");
+    return s;
+  });
+}
+const progMinutes = () => Math.round(SESSION.active / 60);
+const progTime = d => d.toLocaleTimeString("en-NZ", { hour: "numeric", minute: "2-digit" });
+function progressSummary(){
+  const rows = [...SESSION.rows.values()], scored = rows.filter(r => !r.text);
+  const levels = [...new Set([...SESSION.rows.keys()].filter(k => /^L\d/.test(k)).map(k => k[1]))].sort();
+  const parts = [];
+  if (levels.length) parts.push((levels.length > 1 ? "Levels " : "Level ") + levels.join(", ").replace(/, (\d)$/, " and $1"));
+  const att = scored.reduce((n, r) => n + r.attempts, 0), tasks = scored.reduce((n, r) => n + r.tasks.size, 0);
+  if (att) parts.push(`${att} ${att === 1 ? "attempt" : "attempts"} at ${tasks} ${tasks === 1 ? "task" : "tasks"}`);
+  const voice = { S: "Soprano", A: "Alto", T: "Tenor", B: "Bass" }[APP.settings.voice];
+  if (voice) parts.push(voice);
+  return parts.join(". ") + (parts.length ? "." : "");
+}
+function progressDetails(){
+  return [`Session started ${progTime(SESSION.start)} on ${SESSION.start.toLocaleDateString("en-NZ")}; report made ${progTime(new Date())}.`]
+    .concat(progressLines()).join("\n");
+}
+function progressOpen(){
+  const lines = progressLines(), m = progMinutes();
+  $("pgTime").textContent = `${m} ${m === 1 ? "minute" : "minutes"} of practice since ${progTime(SESSION.start)}.`;
+  $("pgList").innerHTML = lines.length ? lines.map(l => `<li>${solHTML(escHTML(l))}</li>`).join("") : "";
+  $("pgEmpty").hidden = !!lines.length;
+  $("pgSend").disabled = !lines.length;
+  $("pgMsg").textContent = "";
+  $("pgDlg").hidden = false;
+  setTimeout(() => $(lines.length ? "pgSend" : "pgCancel").focus(), 0);
+}
+function progressClose(){ $("pgDlg").hidden = true; $("pgBtn").focus(); }
+function progressFormUrl(){
+  const F = PROGRESS_FORM, q = [["usp", "pp_url"], [F.minutes, String(progMinutes())], [F.summary, progressSummary()], [F.details, progressDetails()]];
+  return F.url + "?" + q.map(([k, v]) => k + "=" + encodeURIComponent(v)).join("&");
+}
+function progressSend(){
+  if (!PROGRESS_FORM.url) { $("pgMsg").textContent = "Progress reports aren't set up yet. Ask your teacher."; return; }
+  const a = document.createElement("a");
+  a.href = progressFormUrl(); a.target = "_blank"; a.rel = "noopener";
+  a.click();
+  $("pgMsg").textContent = "Your report has opened in a new tab. Check you're signed in with your school account, then press Submit.";
+}
+(function(){
+  $("pgBtn").addEventListener("click", progressOpen);
+  $("pgSend").addEventListener("click", progressSend);
+  $("pgCancel").addEventListener("click", progressClose);
+  $("pgDlg").addEventListener("keydown", e => { if (e.key === "Escape") { e.preventDefault(); progressClose(); } });
+  $("pgDlg").addEventListener("click", e => { if (e.target === $("pgDlg")) progressClose(); });
+})();
 
 // ==== FILE: 06-steady.js ====
 // ================= Untimed singing: wait for each note (Solfège, Intervals, Chord notes) =================
@@ -5795,6 +6011,7 @@ function makeMelodyActivity(cfg){
     const c = steadyComment(ex.key, ex.notes, res, { compare: "Press Hear it to hear the melody, then try again." });
     if (c.ok > ex.best) ex.best = c.ok;
     const st = stat(cfg.id); st.attempts++; st.best = Math.max(st.best, Math.round(c.ok / c.total * 100)); save();
+    if (!cfg.aud) progressSkill(cfg.id, ex, c.ok, c.total, "found quickly");      // Send my progress (06-progress.js)
     RESULTS.show(`${c.ok} of ${c.total} found quickly`, ex.attempts === 1 ? "" : `Attempt ${ex.attempts} · Best: ${ex.best} of ${c.total}`, c.paras, STEADY_LEGEND);
     window.__last = { notes: res };
     practiseAfter(res);
@@ -5855,6 +6072,7 @@ function makeMelodyActivity(cfg){
     ex.lastOk = c.ok;
     if (c.ok > ex.best) { ex.best = c.ok; ex.bestAttempt = ex.attempts; }
     const st = stat(cfg.id); st.attempts++; st.best = Math.max(st.best, Math.round(c.ok / c.total * 100)); save();
+    if (!cfg.aud) progressSkill(cfg.id, ex, c.ok, c.total, "in tune");             // Send my progress (06-progress.js)
     const again = cfg.aud && cfg.retry && cfg.retry();
     RESULTS.show(`${c.ok} of ${c.total} in tune`, ex.attempts === 1 || (cfg.aud && !again) ? "" : again ? `Attempt ${ex.attempts}` : `Attempt ${ex.attempts} · Best: ${ex.best} of ${c.total}`, c.paras);
     window.__last = { notes, alone, offset: timed.offset };
@@ -6219,6 +6437,7 @@ function rhEvaluate(){
   const n = onsets.length;
   const score = Math.max(0, on - extra);              // each extra clap or tap takes one off the score
   if (score > RH.best) RH.best = score;
+  progressSkill("rhythm", RH.ex, score, n, "on time");                // Send my progress (06-progress.js)
   const st = stat("rhythm"); st.attempts++; st.best = Math.max(st.best, Math.round(score / n * 100)); save();
   const p = [];
   if (on === n && !extra) p.push("Every note was right on time. Try a new rhythm, or speed up the tempo.");
@@ -6623,6 +6842,8 @@ function reminderFor(ex){
 // The interval's name, as the prompt says it (Level 1's 2nds have no interval field)
 // The key a task's staves are drawn in: an interval has none (C major's empty signature, so its notes carry their own
 // accidentals); Chord notes keeps the task's key (Levels 4 and 5 are keyless already)
+// Chord notes: the keyboard moves so the whole chord shows at its own pitch, in the middle (Isaac, 29 October)
+const kbFit = ex => ex.type === "chord" ? ex.chord.map(n => n.midi) : null;
 const keyOf = ex => ex.type === "interval" ? KEY_BY_NAME.C : ex.key;
 const ivName = ex => ex.octave ? "octave" : ex.interval === "tritone" ? "tritone" : `${ex.size} ${ex.interval || "2nd"}`;
 
@@ -6647,7 +6868,7 @@ function makeAuralActivity(cfg){
   A.helpers = function(){
     const ex = A.ex;
     if (!ex || APP.settings.activity !== cfg.id) return;
-    if (A.state !== "listening") { LIVE.open(true, ""); LIVE.hideTarget(true); }
+    if (A.state !== "listening") { LIVE.open(true, "", kbFit(ex)); LIVE.hideTarget(true); }
     if (el("remplay")) el("remplay").hidden = !reminderFor(ex);
     const show = (cfg.type === "chord" || helperOn("score", cfg.id)) && el("answer").hidden;
     el("preview").hidden = !show;
@@ -6689,7 +6910,7 @@ function makeAuralActivity(cfg){
     RESULTS.hide(); el("answer").hidden = true; A.helpers();
     const lb = el("listen"); lb.firstChild.textContent = "I'm finished"; lb.classList.add("on");
     el("play").disabled = true; el("next").disabled = true; if (el("remplay")) el("remplay").disabled = true;
-    LIVE.open(true, say(ex, 0)); LIVE.hideTarget(true); liveInView(el("listen"));
+    LIVE.open(true, say(ex, 0), kbFit(ex)); LIVE.hideTarget(true); liveInView(el("listen"));
     const tg = ex.answer.map(n => sounding(n)), settle = makeSettle();
     A.run = { S: steadyListen(tg, {
       // the key they're on fills green, amber or red against the note to sing (not outlined)
@@ -6735,6 +6956,7 @@ function makeAuralActivity(cfg){
     el("answer").hidden = false; A.helpers();
     const st = stat(cfg.id); st.attempts++; save();
     const c = steadyComment(ex.key, ex.answer, res, { letters: names });
+    progressSkill(cfg.id, ex, c.ok, c.total, "found quickly");          // Send my progress (06-progress.js)
     const last = res[res.length - 1];
     if (last.state === "wrong" && ex.type === "chord") c.paras.push(ex.place === "bottom" ? "Listen for the lowest note of the chord and hum down to it." : ex.place === "top" ? "Listen for the highest note of the chord, the one that sits on top."
       : ex.place === "second" ? "Find the lowest note of the chord, then hum up to the next note above it." : ex.place === "third" ? "Find the highest note of the chord, then hum down to the next note below it."
@@ -6897,6 +7119,8 @@ function btTap(t, key){
 function btDone(){
   const r = BT.run, pc = r.pc;
   BT.done[pc.id] = true;
+  progressText("start:beat", "Tap the beat", () => "kept the beat for 10 seconds in " +        // Send my progress (06-progress.js)
+    BEAT_PIECES.filter(p => BT.done[p.id]).map(p => p.title.replace(/ \(.*\)$/, "")).join(", ").replace(/, ([^,]*)$/, " and $1"));
   btStop(false);
   btMeter(BEAT_GOAL);
   btSay(`You kept the beat for ${BEAT_GOAL} seconds.` + (BT.piece < BEAT_PIECES.length - 1 ? " Try the next piece." : ""), "ok");
@@ -8072,6 +8296,9 @@ function songFinish(quiet){
   SG.marks = { res, key: SG.drawnFor, rests: X.rests.map(k => ps.events[k] && ps.events[k].rest ? ps.events[k].j : -1).filter(j => j >= 0), before: !!X.before, after: !!X.after,
     first: tg[0].ev, last: tg[n - 1].ev };
   songMarksDraw();
+  // Send my progress (06-progress.js): a row for each song, part and step; a task is a phrase (or the whole song)
+  progressScore(`song:${SG.song.id}:${SG.part.id}:${run.kind}`, `${SG.song.title}, ${SG.part.name}, ${run.kind === "learn" ? "Learn it" : "Sing it"}`,
+    SG.phrase, notes.filter(r => r.state === "ok").length, n, "in tune");
   RESULTS.show("", "", run.kind === "learn" ? [run.rec ? "The marks show your go with the choir." : "The marks show your go with the accompaniment."] : []);
   const firstBad = notes.findIndex(r => r.state !== "ok");
   window.__last = { notes, alone, offset: timed.offset, extras: X };
@@ -8486,6 +8713,10 @@ function mpFoundLine(){ LIVE.sung(mpOctWords(MP.foundOct) + `You found it in ${M
 function mpFound(t){
   MP.found = true; MP.foundT = t; MP.foundOct = MP.oct;
   MP.recs.push({ t, len: MP.len });
+  progressText("start:mp", "Matching pitch", () => {               // Send my progress (06-progress.js)
+    const f = MP.recs.filter(r => r.t !== null), miss = MP.recs.length - f.length;
+    return `${f.length} ${f.length === 1 ? "note" : "notes"} found` + (miss ? `, ${miss} not found` : "") + (f.length ? `, fastest ${Math.min(...f.map(r => r.t)).toFixed(1)} s, latest with ${f[f.length - 1].len}-second notes` : "");
+  });
   LIVE.status("You found it! Keep holding it.");
   mpFoundLine();
   mpAdvice();
@@ -10083,6 +10314,7 @@ $("pNext").addEventListener("click", () => { if (PRACTISING) PRACTISING.move(1);
 // note by note (Isaac, 18 October) ----
 document.addEventListener("keydown", e => {
   if (e.metaKey || e.ctrlKey || e.altKey) return;
+  if (!$("fbDlg").hidden || !$("pgDlg").hidden) return;      // the feedback or progress box is open (06-feedback.js, 06-progress.js)
   if (e.code === "Space" && MODE === "songs" && TEACH && SG.tapping) { e.preventDefault(); if (!e.repeat) TEACH.tap(); return; }   // Sync a recording (the teacher page)
   if (e.code === "Space" && MODE === "songs" && SG.view === "song" && $("voiceDlg").hidden && !(TEACH && TEACH.editing())) {
     const t = e.target, tag = t && t.tagName;
