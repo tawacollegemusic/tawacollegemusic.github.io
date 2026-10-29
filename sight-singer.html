@@ -266,11 +266,8 @@ body:not(.mode-skills) .skills-only, body:not(.mode-aud) .aud-only, body:not(.mo
 .songhead { margin: -6px 0 4px -6px; }
 .songrow { margin-top: 12px; }
 .songrow .seg { flex-wrap: wrap; align-self: flex-start; }
-.songmix { display: grid; grid-template-columns: max-content max-content max-content; gap: 8px 22px; align-items: center; margin-top: 14px; justify-items: start; }
-.songmix .lab { justify-self: center; }
-.songmix .switch { justify-self: center; }
-.songmix > [hidden] { visibility: hidden; display: inline-flex; }      /* an empty cell keeps the grid */
-.songmix .gone { display: none !important; }
+.songmix { display: flex; flex-wrap: wrap; gap: 10px 22px; align-items: center; margin-top: 14px; padding: 12px 14px; border-radius: 10px; background: var(--paper); }
+.songmix .switch[hidden] { display: none; }
 .songrow { display: flex; flex-direction: column; gap: 6px; }
 .songrow .row { gap: 8px; }
 button.toggle[aria-pressed="true"] { background: var(--brand-tint); border-color: var(--brand); color: var(--brand-ink); }
@@ -292,6 +289,7 @@ button.toggle[aria-pressed="true"] { background: var(--brand-tint); border-color
 .sync input[type=url] { flex: 1 1 220px; min-width: 0; font: inherit; font-size: 0.95rem; padding: 8px 10px; border-radius: 8px; border: 1.5px solid var(--line); background: var(--card); color: var(--ink); }
 .secrow { display: flex; gap: 8px; align-items: center; margin-top: 14px; }
 .secrow .lab { margin-right: 2px; }
+.secrow + .songacts { margin-top: 12px; }
 /* Practice songs' three steps (Isaac, 22 October): numbered like the tabs, the one in use outlined */
 .songacts { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 8px; }
 .songacts .step { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px 10px 12px; font-weight: 600; }
@@ -399,7 +397,7 @@ body.mode-start #status { font-size: 1.35rem; }
   .songacts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
   .songacts .step { padding: 8px 6px; gap: 6px; font-size: 0.85rem; line-height: 1.2; text-align: left; }
   .songacts .helpbtn { grid-column: 1 / -1; justify-self: start; }
-}.songmix span > [hidden] { display: none; }
+}
 body.mode-start .sung:empty { display: none; }
 </style>
 </head>
@@ -516,12 +514,6 @@ body.mode-start .sung:empty { display: none; }
       <div class="seg" id="song-recrow" hidden><button type="button" data-r="rec">Recording</button><button type="button" data-r="piano">Piano</button></div>
     </div>
     <div class="ytbox" id="song-yt" hidden></div>
-    <div class="secrow">
-      <span class="lab">Phrase</span>
-      <button type="button" class="tbtn" id="song-prev" aria-label="Previous phrase" title="Previous phrase"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 5 8.5 12l7 7"/></svg></button>
-      <select id="song-sec" aria-label="Phrase"></select>
-      <button type="button" class="tbtn" id="song-next" aria-label="Next phrase" title="Next phrase"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 5l7 7-7 7"/></svg></button>
-    </div>
     <div class="tempomark" id="song-tempo"><span class="tterm" data-term="songTempo"></span><svg class="tnote" viewBox="0 0 14 22" aria-hidden="true"><ellipse cx="4.2" cy="18.2" rx="4" ry="2.9" transform="rotate(-22 4.2 18.2)"/><rect x="7.1" y="1.5" width="1.3" height="16.6"/><path class="tflag" d="M8.4 1.5C8.7 5.2 13.4 6.6 12.2 12.2C11.8 9 10.2 7.6 8.4 7.2Z"/></svg><span class="teq">=</span><span data-songtempo-val></span><input type="range" data-opt="songTempo" min="40" max="140" step="2" aria-label="Tempo"></div>
     <div class="staff-scroll songbox" id="song-box"></div>
     <div class="transport" role="group" aria-label="Playback">
@@ -532,6 +524,12 @@ body.mode-start .sung:empty { display: none; }
       <span class="where" id="song-where"></span>
     </div>
     <p class="prompt" id="song-prompt"></p>
+    <div class="secrow" id="song-secrow">
+      <span class="lab">Phrase</span>
+      <button type="button" class="tbtn" id="song-prev" aria-label="Previous phrase" title="Previous phrase"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 5 8.5 12l7 7"/></svg></button>
+      <select id="song-sec" aria-label="Phrase"></select>
+      <button type="button" class="tbtn" id="song-next" aria-label="Next phrase" title="Next phrase"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 5l7 7-7 7"/></svg></button>
+    </div>
     <div class="songacts" id="song-acts">
       <button type="button" class="step" id="song-learn"><span class="n">1</span><span class="t">Learn it</span></button>
       <button type="button" class="step" id="song-nbn" aria-pressed="false"><span class="n">2</span><span class="t">Note by note</span></button>
@@ -540,12 +538,12 @@ body.mode-start .sung:empty { display: none; }
     </div>
     <div class="hp" id="song-hp">Use headphones.</div>
     <div class="helpers" data-act="song" hidden></div>
-    <!-- what shows on the score and what the piano plays, side by side (Isaac, 27 October) -->
-    <div class="songmix" id="song-mix" role="group" aria-label="Show and hear">
-      <span></span><span class="lab">Show</span><span class="lab">Hear</span>
-      <span class="mixname" data-row="others">Other parts</span><label class="switch" data-row="others"><input type="checkbox" data-opt="songShowOthers" aria-label="Show other parts"></label><label class="switch" data-row="others"><input type="checkbox" data-opt="songOthers" aria-label="Hear other parts"></label>
-      <span class="mixname" data-row="accomp">Accompaniment</span><label class="switch" data-row="accomp"><input type="checkbox" data-opt="songShowAccomp" aria-label="Show accompaniment"></label><label class="switch" data-row="accomp"><input type="checkbox" data-opt="songAccomp" aria-label="Hear accompaniment"></label>
-      <span class="mixname">My part</span><span></span><span><label class="switch"><input type="checkbox" data-opt="songOwn" aria-label="Hear my part"></label><label class="switch" id="song-recown" hidden><input type="checkbox" data-opt="songRecOwn" aria-label="Hear my part on the piano"></label></span>
+    <!-- what the piano plays and what the score shows: three switches (Isaac, 29 October; the accompaniment goes with the
+         other parts) -->
+    <div class="songmix" id="song-mix" role="group" aria-label="What plays and what shows">
+      <label class="switch"><input type="checkbox" data-opt="songOwn"> My part plays along</label>
+      <label class="switch" id="song-othersplay"><input type="checkbox" data-opt="songOthers"> Other parts play along</label>
+      <label class="switch" id="song-othersshow"><input type="checkbox" data-opt="songShowOthers"> Show me the other parts</label>
     </div>
     <p class="hpmsg" id="song-msg" aria-live="polite"></p>
   </section>
@@ -7248,7 +7246,7 @@ function songPlan(a, z){
   else {
     s.parts.forEach(pt => { if (pt === SG.part) staves.push({ kind: "own", pt, name: pt.name }); else if (APP.settings.songShowOthers) staves.push({ kind: "part", pt, name: pt.name }); });
     // the accompaniment shows on the teacher page only (Isaac, 28 October: for students "the score looks too messy")
-    if (TEACH && APP.settings.songShowAccomp) s.accomp.forEach(ac => { for (let n = 1; n <= ac.staves; n++) staves.push({ kind: "acc", ac, staff: String(n), name: n === 1 ? (ac.name || "Accompaniment") : "" }); });
+    if (TEACH && APP.settings.songShowOthers) s.accomp.forEach(ac => { for (let n = 1; n <= ac.staves; n++) staves.push({ kind: "acc", ac, staff: String(n), name: n === 1 ? (ac.name || "Accompaniment") : "" }); });
   }
   const has = (st, bi) => st.kind === "acc" ? st.ac.voices.some(v => v.staff === st.staff && v.bars[bi].some(e => e.p))
     : st.pt.bars[bi].some(e => e.p) || !!(st.src && st.pt.more && st.pt.more[bi] && st.pt.more[bi].some(e => e.p));
@@ -7525,7 +7523,8 @@ const songPmKey = () => (SG.song && SG.song.id) + "|" + (SG.part && SG.part.id) 
 
 // ================= Playing =================
 // The piano's notes from `from` to `to` (song ticks), with the switches that are on: each part at its own volume, and the
-// singer's own part only within [ownFrom, ownTo) when given. A note already sounding at `from` plays from there.
+// singer's own part only within [ownFrom, ownTo) when given. A note already sounding at `from` plays from there. The
+// accompaniment plays with the other parts (Other parts play along; Isaac, 29 October), unless o.songAccomp says.
 function songEvents(from, to, o = {}){
   const s = SG.song, T = SG.timeline, on = k => o[k] ?? (APP.settings[k] !== false), out = [];
   s.parts.forEach(pt => {
@@ -7533,7 +7532,7 @@ function songEvents(from, to, o = {}){
     if (mine ? !on("songOwn") : !on("songOthers")) return;
     T.parts[pt.id].forEach(x => { if (!mine || o.ownFrom === undefined || (x.t >= o.ownFrom - 1e-6 && x.t < o.ownTo - 1e-6)) out.push({ ...x, v: mine ? SONG_VOL.own : SONG_VOL.other, own: mine }); });
   });
-  if (on("songAccomp")) T.accomp.forEach(x => out.push({ ...x, v: SONG_VOL.accomp }));
+  if (o.songAccomp ?? on("songOthers")) T.accomp.forEach(x => out.push({ ...x, v: SONG_VOL.accomp }));
   return out.filter(x => x.t + x.d > from + 1e-6 && x.t < to - 1e-6).map(x => { const t = Math.max(x.t, from); return { ...x, t, d: Math.min(x.t + x.d, to) - t }; })
     .sort((a, b) => a.t - b.t);
 }
@@ -7575,7 +7574,7 @@ function songPlay(from, to, evs, o = {}){
   songButtons();
   const loop = () => {
     if (SG.play !== run || SG.state !== "playing") return;
-    if (rec && APP.settings.songRecOwn) recOwnStep(run, rec, run.to);
+    if (rec && APP.settings.songOwn !== false) recOwnStep(run, rec, run.to);
     const cur = rec ? recTick(rec.time()) : run.from + Math.max(0, AUDIO.ctx.currentTime - run.t0) / run.tick;
     // a recording plays on to its end after the last bar (the last chord and the room)
     const done = rec ? rec.ended() || (run.to < songTotal() - 1e-6 && cur >= run.to - 1e-6) : cur >= run.to - 1e-6;
@@ -8034,7 +8033,7 @@ function songRecRun(){
   // other parts"
   if (learn) stages.push({ kind: "rec", own: true, say: "Listen to it. The piano plays your part with the choir." });
   if (learn) stages.push({ kind: "solo", sing: true, count: "Get ready to sing it back.", say: "Sing it back." });
-  stages.push({ kind: "rec", sing: true, own: !!APP.settings.songRecOwn, count: learn ? "Get ready to sing it with the other parts. Listen to the bar before, then come in." : "Listen to the bar before, then come in.",
+  stages.push({ kind: "rec", sing: true, own: APP.settings.songOwn !== false, count: learn ? "Get ready to sing it with the other parts. Listen to the bar before, then come in." : "Listen to the bar before, then come in.",
     say: learn ? "Sing it with the other parts." : "Sing!", marked: true });
   if (learn) stages[1].marked = false;
   run.stages = stages; run.si = -1;
@@ -8358,7 +8357,7 @@ function songButtons(){
   });
   const nb = $("song-nbn"); nb.disabled = busy; nb.setAttribute("aria-pressed", SG.nbn); nb.classList.toggle("sel", SG.nbn);
   ["song-prev", "song-next", "song-sec", "song-play", "song-stop", "song-restart", "song-scrub"].forEach(id => $(id).disabled = busy);
-  $("song-mix").querySelectorAll('[data-opt="songShowOthers"], [data-opt="songShowAccomp"]').forEach(i => { i.disabled = busy; });
+  $("song-mix").querySelector('[data-opt="songShowOthers"]').disabled = busy;
   document.querySelectorAll("#song-parts button, #song-recrow button").forEach(b => b.disabled = busy);
   const list = phrases();
   $("song-prev").disabled = busy || SG.phrase < 0; $("song-next").disabled = busy || SG.phrase >= list.length - 1;
@@ -8376,10 +8375,8 @@ function songShowMode(){
   document.querySelectorAll("#song-recrow button").forEach(b => b.classList.toggle("sel", (b.dataset.r === "rec") === !!SG.useRec));
   document.querySelector('#song-recrow button[data-r="rec"]').textContent = SG.rec && SG.rec.kind === "yt" ? "YouTube" : "Recording";
   $("song-tempo").hidden = !!SG.useRec;
-  // with the recording, the piano can only add the singer's own part (its own switch, off at first)
-  const recOn = !!(SG.useRec && SG.rec);
-  card.querySelectorAll('.songmix [data-opt="songOthers"], .songmix [data-opt="songAccomp"], .songmix [data-opt="songOwn"]').forEach(i => { i.parentElement.hidden = recOn; });
-  $("song-recown").hidden = !recOn;
+  // with the recording, the recording has the other parts: the piano can only add the singer's own part
+  $("song-othersplay").hidden = !!(SG.useRec && SG.rec) || !songHasOthers(SG.song, false);
   if (TEACH) TEACH.mode();
   const tSrc = TEACH ? TEACH.ytSrc() : null;
   const ytSrc = tSrc && tSrc.kind === "yt" ? tSrc : SG.useRec && SG.rec && SG.rec.kind === "yt" ? SG.rec : null;
@@ -8410,8 +8407,15 @@ function songList(){
     + (TEACH && TEACH.note(s) ? `<span class="hs asnote">${escHTML(TEACH.note(s))}</span>` : "") + `</button>`).join("");
   $("songs-items").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { ensureCtx(); songOpen(SONGS[+b.dataset.i], true); }));
 }
-// The part that matches the voice part in Settings (or the first part)
-function songDefaultPart(s){ const v = APP.settings.voice || "S"; return s.parts.find(p => p.voice === v) || s.parts[0]; }
+// Whether a song has other music to play or show besides the singer's part (partsOnly: not counting the accompaniment)
+function songHasOthers(s, partsOnly){ return !!s && (s.parts.length > 1 || (!partsOnly && s.accomp.length > 0)); }
+// The part that matches the voice part in Settings: one named for it first (Till There Was You's Solo sits in the alto
+// range, and an alto should get the Alto part), then one in its range, then the first part
+const VOICE_NAMES = { S: "Soprano", A: "Alto", T: "Tenor", B: "Bass" };
+function songDefaultPart(s){
+  const v = APP.settings.voice || "S", nm = VOICE_NAMES[v].toLowerCase();
+  return s.parts.find(p => p.name.toLowerCase().startsWith(nm)) || s.parts.find(p => p.voice === v) || s.parts[0];
+}
 function songOpen(s, fresh){
   songStop(); stopAllSound(); RESULTS.hide(); LIVE.close();
   if (fresh || SG.song !== s) {
@@ -8428,10 +8432,9 @@ function songOpen(s, fresh){
   $("song-title").textContent = s.title;
   $("song-by").textContent = [s.composer, s.words ? "words: " + s.words : ""].filter(Boolean).join(" · ");
   songPartButtons(s);
-  // Show and Hear for other parts and the accompaniment, only where the song has them
-  [["others", s.parts.length < 2], ["accomp", !s.accomp.length]].forEach(([k, none]) => $("song-mix").querySelectorAll(`[data-row="${k}"]`).forEach(e => e.classList.toggle("gone", none)));
-  // students hear the accompaniment but don't see it (Isaac, 28 October: "the score looks too messy"); the teacher page does
-  $("song-mix").querySelector('[data-opt="songShowAccomp"]').parentElement.hidden = !TEACH;
+  // Show me the other parts only where there's something to show: students hear the accompaniment but don't see it
+  // (Isaac, 28 October: "the score looks too messy"); the teacher page shows it with the other parts
+  $("song-othersshow").hidden = !songHasOthers(s, !TEACH);
   syncOptions();
   songSet();
   // a YouTube recording already found not to play here (opening the song again): the piano, and say why
@@ -8506,9 +8509,9 @@ function songSecTo(k){
   $("song-sing").addEventListener("click", () => songGo("sing"));
   $("song-nbn").addEventListener("click", () => { ensureCtx(); songHalt(); songNbn(!SG.nbn, true); });
   window.addEventListener("message", ytMessage);
-  ["songOthers", "songAccomp", "songOwn"].forEach(k => { if (APP.settings[k] === undefined) APP.settings[k] = true; });
+  ["songOthers", "songOwn"].forEach(k => { if (APP.settings[k] === undefined) APP.settings[k] = true; });
 })();
-// Show other parts or Show accompaniment changed: the score is drawn again, and music playing carries on
+// Show me the other parts changed: the score is drawn again, and music playing carries on
 function songShowChanged(){
   if (SG.view !== "song" || SG.state === "listening") return;
   const was = SG.state === "playing";
@@ -8750,13 +8753,13 @@ document.querySelectorAll("[data-opt]").forEach(inp => {
     save(); syncOptions();
     if (k === "audTempo") { const it = audCur(); if (it) it.tempo = APP.settings.audTempo; }
     if (k === "solf" || k === "names") { READ.redraw(); PART.redraw(); SOLFA.redraw(); SONGM.redraw(); }
-    if (k === "songOthers" || k === "songAccomp" || k === "songOwn") songPlaybackChanged();
+    if (k === "songOthers" || k === "songOwn") songPlaybackChanged();
     if (k === "songTempo") songTempoChanged();
     if (k === "counts" && RH.ex && RH.state === "idle") rhDraw(RH.lastMarks);
     if (k === "counts") { READ.redraw(); PART.redraw(); SONGM.redraw(); }
     if (k === "playChords") helpersRefresh();
     if (k === "score") AURALS.forEach(A => { if (A.state !== "listening") A.helpers(); });
-    if (k === "songShowOthers" || k === "songShowAccomp") songShowChanged();
+    if (k === "songShowOthers") songShowChanged();
   });
 });
 
@@ -8836,6 +8839,7 @@ document.addEventListener("keydown", e => {
 load();
 BT.tab = APP.settings.startTab === "beat" ? "beat" : "match";
 ["keyboard", "tuning", "guitar", "clickHear", "reminder", "playRhythm"].forEach(k => delete APP.settings[k]);   // helpers taken out on 27 October
+["songAccomp", "songShowAccomp", "songRecOwn"].forEach(k => delete APP.settings[k]);   // Practice songs switches merged on 29 October
 initAudio();
 if (APP.settings.activity === "aural") APP.settings.activity = APP.settings.auralType === "chord" ? "chords" : "intervals";   // before the split
 if (!LEVEL_INFO[APP.settings.level] || !LEVEL_INFO[APP.settings.level].built) APP.settings.level = 1;
