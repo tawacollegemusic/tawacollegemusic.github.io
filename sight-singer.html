@@ -180,6 +180,7 @@ body { padding-bottom: 64px; }
 .parts button { padding: 14px 6px; display: flex; flex-direction: column; align-items: center; gap: 2px; }
 .parts button small { font-family: var(--body); font-weight: 400; font-size: 0.78rem; color: var(--muted); }
 .parts button.sel { border-color: var(--brand); background: var(--brand-tint); }
+.parts.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }   /* Minor keys: La-based or Do-based (Isaac, 31 October) */
 @media (prefers-reduced-motion: reduce) { .tunekb .tkline, svg.score .you { transition: none; } }
 
 /* level and activity navigation */
@@ -728,6 +729,11 @@ body.mode-start .sung:empty { display: none; }
       <button type="button" data-v="A">Alto<small>A3 to B4</small></button>
       <button type="button" data-v="T">Tenor<small>C3 to D4</small></button>
       <button type="button" data-v="B">Bass<small>A2 to B3</small></button>
+    </div></div>
+    <div class="setrow"><span class="lab">Minor keys</span>
+    <div class="parts two" id="minorBtns" role="group" aria-label="Minor keys">
+      <button type="button" data-ms="la">La-based minor<small>La Ti Do Re Mi</small></button>
+      <button type="button" data-ms="do">Do-based minor<small>Do Re Me Fa So</small></button>
     </div></div>
     <div class="setrow"><span class="lab">Microphone</span>
       <div class="row"><div class="mic"><div class="lvl"><div id="lvl"></div></div></div><button type="button" id="micOn">Turn on</button></div></div>
@@ -5126,9 +5132,11 @@ function melodyComment(ex, notes, opts = {}){
   }
   if (ex.degs) {
     const leapErr = notes.map((r, i) => ({ r, i })).filter(o => o.i > 0 && !o.r.extra && Math.abs(ex.degs[o.i] - ex.degs[o.i - 1]) >= 2 && (o.r.state === "wrong" || o.r.state === "near"));
-    if (leapErr.length) p.push(leapErr.some(o => ex.degs[o.i] === 0) ? "Your leaps were the hardest part. When you leap home, hear Do in your head before you sing it."
-      : ex.level === 5 ? "Your leaps were the hardest part. Before a leap, hear the note in your head. Most leaps move between the notes of one chord: Do Mi So, Fa La Do, or So Ti Re Fa" + (ex.minor ? ", and in minor La Do Mi, Re Fa La or Mi Si Ti Re." : ".")
-      : ex.level === 4 ? "Your leaps were the hardest part. Before a leap, hear the note in your head. Most leaps move between the notes of one chord: Do Mi So, Fa La Do or So Ti Re" + (ex.minor ? ", and in minor La Do Mi, Re Fa La or Mi Si Ti." : ".")
+    const home = solfege(ex.key, tonicNote(ex.key, 4));       // Do, or La in a la-based minor key
+    const minorChords = ex.level === 5 ? (doMinor() ? "Do Me So, Fa Le Do or So Ti Re Fa" : "La Do Mi, Re Fa La or Mi Si Ti Re") : (doMinor() ? "Do Me So, Fa Le Do or So Ti Re" : "La Do Mi, Re Fa La or Mi Si Ti");
+    if (leapErr.length) p.push(leapErr.some(o => solfege(ex.key, ex.notes[o.i]) === home) ? `Your leaps were the hardest part. When you leap home, hear ${home} in your head before you sing it.`
+      : ex.level === 5 ? "Your leaps were the hardest part. Before a leap, hear the note in your head. Most leaps move between the notes of one chord: Do Mi So, Fa La Do, or So Ti Re Fa" + (ex.minor ? ", and in minor " + minorChords + "." : ".")
+      : ex.level === 4 ? "Your leaps were the hardest part. Before a leap, hear the note in your head. Most leaps move between the notes of one chord: Do Mi So, Fa La Do or So Ti Re" + (ex.minor ? ", and in minor " + minorChords + "." : ".")
       : ex.level === 3 ? "Your leaps were the hardest part. Before a leap, hear the note in your head. Most leaps move between the notes of Do Mi So, La Do Mi or So Ti Re."
       : ex.level === 2 ? "Your leaps were the hardest part. Before a leap, hear the note in your head. Most leaps move between the notes of Do Mi So or La Do Mi."
       : "Your leaps were the hardest part. Before a leap, hear the note in your head; it's always one you've just sung.");
@@ -5151,14 +5159,20 @@ function openVoice(){
   $("voiceDlg").hidden = false;
   document.querySelectorAll("#partBtns button").forEach(b => b.classList.toggle("sel", b.dataset.v === APP.settings.voice));
   $("btnVoiceDone").disabled = !APP.settings.voice;
+  markMinor();
 }
 let SETTINGS_VOICE = null;
+// Minor keys (Isaac, 31 October): la-based (La is home, Si the leading note) or do-based (Do is home: Do Re Me Fa So Le
+// Te, Ti the leading note). solfegeLower() in 01-music.js follows APP.settings.minorSolfege, so the labels, hand signs,
+// key chord buttons and comments all change with it.
+const doMinor = () => APP.settings.minorSolfege === "do";
+function markMinor(){ document.querySelectorAll("#minorBtns button").forEach(b => b.classList.toggle("sel", b.dataset.ms === (doMinor() ? "do" : "la"))); }
 function refreshVoice(){}
 
 // Solfège syllables in running text are marked so Do never reads as the English word
 function solHTML(t){
   const esc = String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-  return esc.replace(/\b(Do|Re|Mi|Fa|So|La|Ti|Si|Fi|Te|Me|Le)\b/g, '<span class="sol">$1</span>');      // Si: Level 4's minor; Fi, Te, Me and Le: Level 5
+  return esc.replace(/\b(Do|Re|Mi|Fa|So|La|Ti|Si|Fi|Te|Me|Le|Ra|Se)\b/g, '<span class="sol">$1</span>');      // Si: la-based minor; Fi, Te, Me and Le: Level 5 and do-based minor
 }
 
 // ---------- Leaps in the wrong octave (Isaac, 18 October; Level 4 on) ----------
@@ -5588,7 +5602,7 @@ function makeMelodyActivity(cfg){
     A.ex = ex; A.pi = 0; A.pm = [];
     if (typeof syncOptions === "function") syncOptions();   // the tempo marking follows the time signature (a quaver in 6/8)
     // a melody that starts on Mi or So gets the key chord, then that note (Level 3)
-    el("ref").innerHTML = `Key chord and <span class="sol">${solfege(ex.key, ex.notes[0])}</span>`;   // Level 3 can start on Mi or So
+    A.refLabel();
     RESULTS.hide(); LIVE.close();
     // Hear the melody is the answer, so in Sight sing and Solfège it waits for a first try (Isaac, 18 October).
     // Hold your part is heard before it's sung by design.
@@ -5605,7 +5619,7 @@ function makeMelodyActivity(cfg){
     ex.attempts = ex.attempts || 0; ex.best = ex.best ?? -1; ex.bestAttempt = 0; ex.lastOk = null;
     A.ex = ex; A.pi = 0; A.pm = [];
     if (typeof syncOptions === "function") syncOptions();
-    el("ref").innerHTML = `Key chord and <span class="sol">${solfege(ex.key, ex.notes[0])}</span>`;
+    A.refLabel();
     RESULTS.hide(); LIVE.close();
     resetButtons();
     A.draw(ex.results || null, ex.extras || null);
@@ -6130,6 +6144,8 @@ function makeMelodyActivity(cfg){
     if (i >= 0 && d < 30) A.goTo(i, "edge");
   });
 
+  // the key chord button names the first note: Do, or Mi or So in major; La or Do in minor, by the Minor keys setting
+  A.refLabel = () => { if (A.ex) el("ref").innerHTML = `Key chord and <span class="sol">${solfege(A.ex.key, A.ex.notes[0])}</span>`; };
   A.redraw = () => { if (A.ex && A.state !== "listening") A.draw(A.lastResults, A.lastExtras); };
   return A;
 }
@@ -7283,10 +7299,17 @@ function wholeSec(){
 // What Learn it and Sing it sing: the phrase, or the whole part
 const singSec = () => songSec() || wholeSec();
 // The bars drawn: a phrase's, with the bar before it (the lead-in), or the whole song
-function songBars(){ const sc = songSec(); return sc ? [Math.max(0, sc.a - 1), sc.z] : [0, SG.song.barTicks.length - 1]; }
+function songBars(){ const sc = songSec(); return sc ? [Math.max(0, sc.a - 1), secZ(sc)] : [0, SG.song.barTicks.length - 1]; }
+// The last bar a phrase sounds in. A phrase's z is the bar its last note starts in; a note tied on from there (Till There
+// Was You's "you." held from bar 34 to 36) carries it into later bars, so the bar that holds its end (e) counts.
+function secZ(sc, starts = SG.timeline.starts){
+  let z = sc.z;
+  while (z + 2 < starts.length && starts[z + 1] < sc.e - 1e-6) z++;
+  return z;
+}
 // Where playing starts and stops: a phrase from the bar before it to the end of its last bar; or the whole song
 function songFrom(){ const sc = songSec(); return sc ? SG.timeline.starts[Math.max(0, sc.a - 1)] : 0; }
-function songTo(){ const sc = songSec(); return sc ? SG.timeline.starts[sc.z + 1] : songTotal(); }
+function songTo(){ const sc = songSec(); return sc ? SG.timeline.starts[secZ(sc) + 1] : songTotal(); }
 // The singer's notes to sing: those in the phrase (all of them for the whole song)
 function songTargets(){ const sc = songSec(); return sc ? SG.notes.filter(n => n.t >= sc.s - 1e-6 && n.t < sc.e - 1e-6) : SG.notes.slice(); }
 // A section's words, for its name in the list
@@ -8210,7 +8233,7 @@ function songSoloStage(run, g, now){
 // it with the accompaniment (and the other parts if that switch is on). The click runs all the way through.
 function songLearnPiano(){
   const s = SG.song, run = SG.run, tg = run.tg, sc = singSec(), st = SG.timeline.starts;
-  const S0 = st[sc.a], L = st[sc.z + 1] - S0, ts = songTsAt(s, sc.a), tick = tickSecOf(ts, songTempo()), cT = clickTicksOf(ts), beat = cT * tick;
+  const S0 = st[sc.a], L = st[secZ(sc, st) + 1] - S0, ts = songTsAt(s, sc.a), tick = tickSecOf(ts, songTempo()), cT = clickTicksOf(ts), beat = cT * tick;
   const cl = countLabels(ts), bar = cl.length * beat, labels = cl.concat(upbeatCount(tg, S0)), ctx = AUDIO.ctx;
   LIVE.open(true, "Listen to it.");
   const sec = L * tick, s1 = ctx.currentTime + 0.3, c1 = s1 + sec, s2 = c1 + bar, c2 = s2 + sec, s3 = c2 + bar;
@@ -8461,7 +8484,7 @@ function songShowMode(){
   $("song-prompt").textContent = busy || SG.nbn ? "" : sc ? "Press play to listen, then work through 1, 2 and 3."
     : "Press play to listen. Choose a phrase to learn it, or sing the whole song.";
   const list = phrases();
-  $("song-sec").innerHTML = `<option value="-1">Whole song</option>` + list.map((p, i) => `<option value="${i}">${i + 1}. Bars ${SG.song.barLabels[p.a]}–${SG.song.barLabels[p.z]}: ${escHTML(secWords(SG.part, p))}</option>`).join("");
+  $("song-sec").innerHTML = `<option value="-1">Whole song</option>` + list.map((p, i) => `<option value="${i}">${i + 1}. Bars ${SG.song.barLabels[p.a]}–${SG.song.barLabels[secZ(p)]}: ${escHTML(secWords(SG.part, p))}</option>`).join("");
   $("song-sec").value = String(SG.phrase);
   $("song-recrow").hidden = !SG.rec;
   document.querySelectorAll("#song-recrow button").forEach(b => b.classList.toggle("sel", (b.dataset.r === "rec") === !!SG.useRec));
@@ -8879,6 +8902,14 @@ document.querySelectorAll("#partBtns button").forEach(b => b.addEventListener("c
   APP.settings.voice = b.dataset.v; save();
   document.querySelectorAll("#partBtns button").forEach(x => x.classList.toggle("sel", x === b));
   $("btnVoiceDone").disabled = false;
+}));
+// Minor keys: la-based or do-based (Isaac, 31 October). Everything showing solfège is drawn again straight away.
+document.querySelectorAll("#minorBtns button").forEach(b => b.addEventListener("click", () => {
+  if (APP.settings.minorSolfege === b.dataset.ms) return;
+  APP.settings.minorSolfege = b.dataset.ms; save(); markMinor();
+  [READ, PART, SOLFA].forEach(A => { A.refLabel(); A.redraw(); });
+  SONGM.redraw();
+  AUDM.redraw();
 }));
 $("btnVoiceDone").addEventListener("click", () => {
   $("voiceDlg").hidden = true; refreshVoice(); ensureCtx();
