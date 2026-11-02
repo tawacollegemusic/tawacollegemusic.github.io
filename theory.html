@@ -225,6 +225,28 @@ svg text { pointer-events: none; }
 [data-type="add-beats"] .items { --cardmin: 16rem; }
 .opt.pick.pic .rfig { max-width: 8rem; margin: 0 auto; }
 
+/* ---- one question at a time, and the Help panel ---- */
+[hidden] { display: none !important; }
+.prog { display: flex; align-items: center; gap: 1rem; margin: 0 0 1rem; font: 600 .95rem "Lexend", sans-serif; color: var(--shade); }
+.prog .bar { flex: 1; height: .6rem; border-radius: 99px; background: var(--tint); overflow: hidden; }
+.prog .bar i { display: block; height: 100%; background: var(--base); border-radius: 99px; transition: width .3s; }
+.practise.single .items { display: block; max-width: 46rem; margin: 0 auto; }
+.practise.single .item { --sp: 42px; }
+.practise.single .th { margin-bottom: .8rem; }
+.nextrow { display: flex; justify-content: center; margin-top: 1rem; }
+.cornerrow { display: flex; align-items: center; gap: .8rem; }
+.helpbtn { font: 700 1rem "Lexend", sans-serif; background: #fff; color: var(--shade); border: 2px solid #fff; border-radius: 12px; padding: .7rem 1.1rem; cursor: pointer; min-height: 2.75rem; }
+.helpbtn:hover { background: var(--tint); }
+.helpbtn:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+.helpdlg { border: 3px solid var(--base); border-radius: 18px; padding: 0; max-width: min(56rem, 94vw); width: 94vw; max-height: 90vh; overflow: auto; color: var(--ink); }
+.helpdlg::backdrop { background: rgba(30, 30, 70, .55); }
+.helpbody { padding: 1.2rem 1.5rem 0; }
+.helpbody .label { font: 700 .75rem "Lexend", sans-serif; letter-spacing: .2em; text-transform: uppercase; color: var(--shade); margin: .8rem 0 .3rem; }
+.helpbody .wtd { font: 700 1.3rem "Lexend", sans-serif; color: var(--shade); margin: .2rem 0 .4rem; }
+.helpbody .hsteps { margin: .4rem 0 0 1.2rem; }
+.helpfoot { display: flex; justify-content: center; padding: 1rem; position: sticky; bottom: 0; background: #fff; }
+@media (max-width: 700px) { .cornerrow { gap: .4rem; } .helpbtn { padding: .5rem .7rem; font-size: .9rem; min-height: 2.75rem; } .banner .corner { min-width: 5.6rem; padding: 8px 10px; } .practise.single .item { --sp: 28px; } }
+
 </style>
 </head>
 <body>
@@ -555,10 +577,11 @@ svg text { pointer-events: none; }
     home: { lessons: 'Lessons', part1: 'Elements of Music', open: 'Open' },
     lesson: { learn: 'Learn', practise: 'Practise', back: 'Back to the lessons', next: 'Next', previous: 'Back', start: 'Start practising',
       learnTitle: "What we're learning", whatToDo: 'What to do', revision: 'Revision page' },
-    marking: { check: 'Check', correct: 'Correct.', wrong: 'Not this time.', tryAgain: 'Have another go.', showMe: 'Show me',
+    marking: { next: 'Next', check: 'Check', correct: 'Correct.', wrong: 'Not this time.', tryAgain: 'Have another go.', showMe: 'Show me',
       score: 'Your score', done: 'You have finished this lesson.', again: 'Practise again with new questions',
       copyIn: 'Copy the answer in to move on.', fillAll: 'Fill in every box first.', model: 'This one is done for you.' },
     results: { send: 'Send my results', sent: 'Your results are ready to send. Press Submit on the form.', saved: 'Saved on this device.' },
+    help: { open: 'Help', close: 'Close', title: 'Help' },
     drag: { bank: 'Drag from here', resize: 'Drag a corner to change the size.', undo: 'Undo' },
     // sentences the generators put together (src/09-gen-shared.js TA.fmt fills the {gaps})
     explain: {
@@ -2744,6 +2767,21 @@ svg text { pointer-events: none; }
     return { task, item: set.example };
   };
 
+  // the Help panel on a Practise screen: What we're learning, then What to do for the task the student is on
+  Ln.help = function (n, taskId) {
+    const L = lessonOf(n), task = L.tasks.find((t) => t.id === taskId) || L.tasks[0];
+    let html = '';
+    if (L.learn) {
+      html += '<p class="label">' + D.esc(TA.STRINGS.lesson.learnTitle) + '</p><p class="infotext">' + D.rich(L.learn.text) + '</p><div class="figwrap">' + TA.diagrams[n]() + '</div>';
+      const w = L.learn.worked.find((x) => x.task === task.id);
+      if (w) html += '<p class="label">' + D.esc(TA.STRINGS.lesson.whatToDo) + '</p><h3 class="wtd">' + D.esc(w.head) + '</h3>' +
+        (w.hint ? '<p class="hint">' + D.esc(w.hint) + '</p>' : '') + (w.steps ? '<ol class="hsteps">' + w.steps.map((c) => '<li>' + D.esc(c) + '</li>').join('') + '</ol>' : '');
+    } else {
+      html += '<p class="label">' + D.esc(TA.STRINGS.lesson.whatToDo) + '</p><h3 class="wtd">' + D.esc(task.appHeading || task.heading) + '</h3>' + (task.instruction ? '<p class="hint">' + D.rich(task.instruction) + '</p>' : '');
+    }
+    return html;
+  };
+
   // the HTML of one step, and a function that finishes it once it is on the page
   Ln.render = function (n, step) {
     const L = lessonOf(n), st = Ln.steps(n)[step];
@@ -2806,7 +2844,7 @@ svg text { pointer-events: none; }
     // Tasks that can be drawn twice as long under the pattern rules get double the book's count: more drill, same words.
     const longer = (task) => (Pr.DRILL.has(n + '.' + task.id) ? { ...task, items: task.items * 2 } : task);
     const sets = L.tasks.map((task, ti) => ({ task, ti, items: TA.GEN[n][task.id].make(TA.rng(Pr.seedOf(seed, n, ti)), longer(task), L).items }));
-    let html = '';
+    let html = '<div class="prog" aria-live="polite"><span class="pl"></span><span class="bar"><i></i></span></div>';
     if (L.beforeTasks) html += '<p class="before">' + D.rich(L.beforeTasks) + '</p>';
     sets.forEach((set, si) => {
       const t = set.task, heading = t.appHeading || t.heading;
@@ -2815,7 +2853,8 @@ svg text { pointer-events: none; }
         (t.instruction ? '<p class="instr">' + D.rich(t.instruction) + '</p>' : '') + '<div class="items">';
       set.items.forEach((it, i) => {
         html += '<article class="item" data-id="' + it.id + '"><span class="num" aria-hidden="true">' + (i + 1) + '</span><div class="body"></div>' +
-          '<div class="actions"><button type="button" class="btn solid check" disabled>' + D.esc(S().marking.check) + '</button></div><div class="fb" aria-live="polite"></div></article>';
+          '<div class="actions"><button type="button" class="btn solid check" disabled>' + D.esc(S().marking.check) + '</button></div><div class="fb" aria-live="polite"></div>' +
+          '<div class="nextrow"><button type="button" class="btn solid next" hidden>' + D.esc(S().marking.next) + '</button></div></article>';
       });
       html += '</div>' + (t.type === 'note-to-key' ? '<div class="sharedkb"></div>' : '') + '</section>';
     });
@@ -2834,10 +2873,15 @@ svg text { pointer-events: none; }
       return { got, total };
     };
 
+    const order = [];                                   // every question, in the order the student meets them
+    const single = !(TA.SHOW_ALL || /[?&]all\b/.test(G.location.search || ''));   // add ?all to the address to see every question at once (for tests)
+    let at = 0;
     sets.forEach((set) => {
       const sec = root.querySelector('section.task[data-task="' + set.task.id + '"]');
-      set.items.forEach((item) => {
+      set.items.forEach((item, qi) => {
         const card = sec.querySelector('.item[data-id="' + item.id + '"]');
+        order.push({ id: item.id, sec, card, task: set.task, qi });
+        const nextBtn = card.querySelector('.next');
         const body = card.querySelector('.body'), fb = card.querySelector('.fb'), checkBtn = card.querySelector('.check');
         const st = (state[item.id] = { tries: 0, first: null, done: false });
         if (!item.model) scored.push(item.id);
@@ -2874,6 +2918,7 @@ svg text { pointer-events: none; }
           if (m.correct) {
             st.done = true; if (st.tries === 1) st.first = true; else if (st.first === null) st.first = false;
             say(true, m.feedback); view.lock(true); checkBtn.hidden = true;
+            if (single && order[order.length - 1].id !== item.id) { nextBtn.hidden = false; nextBtn.focus({ preventScroll: true }); }
           } else {
             if (!built.needsCheck && view.clear) view.clear();           // a tap or a choice: pick again
             if (st.tries === 1) { st.first = false; say(false, firstWrong(item, m, hintFor(L, set.task))); }
@@ -2885,6 +2930,26 @@ svg text { pointer-events: none; }
         }
       });
     });
+
+    // one question at a time: the next one appears when the student presses Next
+    const prog = root.querySelector('.prog');
+    function show(i) {
+      at = i;
+      order.forEach((q, k) => { q.card.hidden = single && k !== i; });
+      const cur = order[i];
+      root.querySelectorAll('section.task').forEach((sec) => { sec.hidden = single && sec !== cur.sec; });
+      root.querySelectorAll('hr.divide').forEach((h) => { h.hidden = single; });
+      if (prog) {
+        prog.hidden = !single;
+        prog.querySelector('.pl').textContent = 'Question ' + (i + 1) + ' of ' + order.length;
+        prog.querySelector('.bar i').style.width = Math.round((i / order.length) * 100) + '%';
+      }
+      if (ctx.onTask) ctx.onTask(cur.task.id);
+      if (state[cur.id].done && i < order.length - 1) show(i + 1);      // a model item that is already done
+    }
+    order.forEach((q, k) => { q.card.querySelector('.next').addEventListener('click', () => { show(k + 1); if (root.scrollIntoView) root.scrollIntoView({ block: 'start' }); }); });
+    root.classList.toggle('single', single);
+    show(0);
 
     // Lesson 12 Task 3: one keyboard for all the items, used for whichever item the student is on
     const kbHost = root.querySelector('.sharedkb');
@@ -2923,10 +2988,11 @@ svg text { pointer-events: none; }
         '<div class="row"><button type="button" class="btn solid again">' + D.esc(S().marking.again) + '</button><a class="btn" href="#/">' + D.esc(S().lesson.back) + '</a></div>';
       host.querySelector('.again').addEventListener('click', () => ctx.again());
       if (ctx.finished) ctx.finished(sc.got, sc.total);
+      if (prog) { prog.querySelector('.bar i').style.width = '100%'; }
       host.scrollIntoView({ block: 'center', behavior: 'smooth' });
     }
     setScore();
-    return { state, views };
+    return { state, views, show };
   }
 })(typeof globalThis !== 'undefined' ? globalThis : this);
 
@@ -3054,10 +3120,20 @@ svg text { pointer-events: none; }
   function practise(n, seed) {
     const L = lessonOf(n), r = TA.practise.render(n, seed);
     return {
-      html: '<div class="sheet practisesheet">' + banner('Music theory · Lesson ' + n, L.title, '<div class="corner scorebox"><span class="slab">' + E(S().marking.score) + '</span><b class="sc">0 / 0</b><a href="#/lesson/' + n + '">' + E('Lesson ' + n) + '</a></div>') +
+      html: '<div class="sheet practisesheet">' + banner('Music theory · Lesson ' + n, L.title, '<div class="cornerrow"><button type="button" class="helpbtn">' + E(S().help.open) + '</button><div class="corner scorebox"><span class="slab">' + E(S().marking.score) + '</span><b class="sc">0 / 0</b><a href="#/lesson/' + n + '">' + E('Lesson ' + n) + '</a></div></div>') +
+        '<dialog class="helpdlg" aria-label="' + E(S().help.title) + '"><div class="helpbody"></div><div class="helpfoot"><button type="button" class="btn solid helpclose">' + E(S().help.close) + '</button></div></dialog>' +
         '<section class="frame practise">' + r.html + '</section>' + footer() + '</div>',
       mount(root) {
+        let task = null;
+        const dlg = root.querySelector('.helpdlg'), body = root.querySelector('.helpbody');
+        root.querySelector('.helpbtn').addEventListener('click', () => {
+          body.innerHTML = TA.learn.help(n, task);
+          if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
+        });
+        root.querySelector('.helpclose').addEventListener('click', () => { if (dlg.close) dlg.close(); else dlg.removeAttribute('open'); });
+        dlg.addEventListener('click', (e) => { if (e.target === dlg && dlg.close) dlg.close(); });
         r.mount(root, {
+          onTask: (id) => { task = id; },
           score: (g, t) => { const el = root.querySelector('.sc'); if (el) el.textContent = g + ' / ' + t; },
           finished: (g, t) => TA.progress.record(n, g, t),
           again: () => UI.go('#/lesson/' + n + '/practise/' + (seed + 1))
