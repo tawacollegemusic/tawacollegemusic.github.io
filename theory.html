@@ -246,6 +246,11 @@ svg text { pointer-events: none; }
 .helpbody .hsteps { margin: .4rem 0 0 1.2rem; }
 .helpfoot { display: flex; justify-content: center; padding: 1rem; position: sticky; bottom: 0; background: #fff; }
 @media (max-width: 700px) { .cornerrow { gap: .4rem; } .helpbtn { padding: .5rem .7rem; font-size: .9rem; min-height: 2.75rem; } .banner .corner { min-width: 5.6rem; padding: 8px 10px; } .practise.single .item { --sp: 28px; } }
+.helpex { margin: .6rem 0 .2rem; }
+.helpbody { padding-bottom: 1.4rem; }
+.helpdlg[open] { display: flex; flex-direction: column; overflow: hidden; }
+.helpbody { overflow: auto; flex: 1 1 auto; min-height: 0; }
+.helpfoot { position: static; flex: none; border-top: 1px solid var(--tint); }
 
 </style>
 </head>
@@ -2774,8 +2779,18 @@ svg text { pointer-events: none; }
     if (L.learn) {
       html += '<p class="label">' + D.esc(TA.STRINGS.lesson.learnTitle) + '</p><p class="infotext">' + D.rich(L.learn.text) + '</p><div class="figwrap">' + TA.diagrams[n]() + '</div>';
       const w = L.learn.worked.find((x) => x.task === task.id);
-      if (w) html += '<p class="label">' + D.esc(TA.STRINGS.lesson.whatToDo) + '</p><h3 class="wtd">' + D.esc(w.head) + '</h3>' +
-        (w.hint ? '<p class="hint">' + D.esc(w.hint) + '</p>' : '') + (w.steps ? '<ol class="hsteps">' + w.steps.map((c) => '<li>' + D.esc(c) + '</li>').join('') + '</ol>' : '');
+      if (w) {
+        html += '<p class="label">' + D.esc(TA.STRINGS.lesson.whatToDo) + '</p><h3 class="wtd">' + D.esc(w.head) + '</h3>' +
+          (w.hint ? '<p class="hint">' + D.esc(w.hint) + '</p>' : '') + (w.steps ? '<ol class="hsteps">' + w.steps.map((c) => '<li>' + D.esc(c) + '</li>').join('') + '</ol>' : '');
+        if (!w.steps) {                                                   // the worked example, as on the Learn screen
+          const ex = Ln.example(L, task.id), built = V.build(ex.item, ex.task, { mode: 'example', lesson: L });
+          html += '<div class="example helpex"><div class="exwrap ex-' + ex.item.type + '">' + built.html + '</div></div>';
+        } else {                                                          // Lesson 2: the clef drawn stroke by stroke
+          const clef = task.id === 't1' ? 'treble' : 'bass', a = TA.STROKES[clef].anchor, ay = clef === 'treble' ? 1 : 3, top = 4.4;
+          let sv = D.lines(0.3, 15.7, top) + D.clefHand(clef, 1.2 + a[0], ay, 1, top, { upTo: w.steps.length, w: 0.14 });
+          html += '<div class="figwrap">' + D.svg(16, 12.4, sv, { cls: 'fig', label: 'The finished ' + clef + ' clef' }) + '</div>';
+        }
+      }
     } else {
       html += '<p class="label">' + D.esc(TA.STRINGS.lesson.whatToDo) + '</p><h3 class="wtd">' + D.esc(task.appHeading || task.heading) + '</h3>' + (task.instruction ? '<p class="hint">' + D.rich(task.instruction) + '</p>' : '');
     }
