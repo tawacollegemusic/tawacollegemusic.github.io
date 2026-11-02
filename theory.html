@@ -1328,7 +1328,7 @@ svg text { pointer-events: none; }
         const octave = TA.parseNote(c.name).octave;
         return {
           type: task.type, key: c.name, note: c.name, prompt: c.name, show: { staves }, input: { kind: 'grand-place' },
-          answer: { stave: c.stave, pos: c.pos }, bank: gx.bankNote(r), model: i === 0,
+          answer: { stave: c.stave, pos: c.pos }, bank: gx.bankNote(r),
           explain: TA.fmt(TA.STRINGS.explain.grand, { name: c.name, octave, stave: c.stave, at: gx.at(c.pos) })
         };
       };
@@ -2342,9 +2342,13 @@ svg text { pointer-events: none; }
     return w ? w.hint : S().marking.tryAgain;
   };
 
+  Pr.DRILL = new Set(['1.t1', '1.t2', '1.t3', '3.t3', '4.t1', '4.t2', '5.t1', '5.t2', '5.t3', '6.t1', '6.t3', '9.t1', '9.t3', '11.t1', '12.t1']);
+
   Pr.render = function (n, seed) {
     const L = lessonOf(n);
-    const sets = L.tasks.map((task, ti) => ({ task, ti, items: TA.GEN[n][task.id].make(TA.rng(Pr.seedOf(seed, n, ti)), task, L).items }));
+    // Tasks that can be drawn twice as long under the pattern rules get double the book's count: more drill, same words.
+    const longer = (task) => (Pr.DRILL.has(n + '.' + task.id) ? { ...task, items: task.items * 2 } : task);
+    const sets = L.tasks.map((task, ti) => ({ task, ti, items: TA.GEN[n][task.id].make(TA.rng(Pr.seedOf(seed, n, ti)), longer(task), L).items }));
     let html = '';
     if (L.beforeTasks) html += '<p class="before">' + D.rich(L.beforeTasks) + '</p>';
     sets.forEach((set, si) => {
