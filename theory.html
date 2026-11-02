@@ -1,0 +1,2655 @@
+<!doctype html>
+<html lang="en-NZ">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; font-src 'self'; img-src 'self' data:; form-action https://docs.google.com; base-uri 'none'">
+<title>Theory Practice</title>
+<style>
+/* Theory Practice: Tawa College style, unit colour indigo (RULES 6). Lexend for headings, Fira Sans for text, Kalam for
+   student work, Bravura for printed music. Fonts are served from the site (theory/fonts), not a CDN. */
+@font-face { font-family: "Lexend"; src: url(theory/fonts/lexend.woff2) format("woff2"); font-weight: 100 900; font-display: swap; }
+@font-face { font-family: "Fira Sans"; src: url(theory/fonts/FiraSans-Regular.woff2) format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Fira Sans"; src: url(theory/fonts/FiraSans-Bold.woff2) format("woff2"); font-weight: 700; font-display: swap; }
+@font-face { font-family: "Kalam"; src: url(theory/fonts/Kalam-Regular.woff2) format("woff2"); font-display: swap; }
+@font-face { font-family: "Bravura"; src: url(theory/fonts/bravura.woff2) format("woff2"); font-display: swap; }
+
+:root { --base: #3F3D8F; --shade: #2F2E6B; --tint: #D9D8E9; --light: #B2B1D2; --red: #D8001D; --ink: #2B2B2B; --grey: #6E6E6E;
+  --pencil: #4D4D4D; --divider: #B0B0B0; --page: #FFFFFF; --sp: 26px; color-scheme: light; }
+@media (min-width: 1500px) { :root { --sp: 36px; } html { font-size: 21px; } }
+* { box-sizing: border-box; }
+html { font-size: 17px; -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--page); color: var(--ink); font: 1rem/1.5 "Fira Sans", system-ui, sans-serif; }
+a { color: var(--base); }
+.hand { font-family: "Kalam", cursive; color: var(--pencil); }
+.mus { font-family: "Bravura"; }
+svg text { font-family: "Fira Sans", sans-serif; }
+svg text.mus { font-family: "Bravura"; }
+.st { display: block; margin: 0 auto; overflow: visible; }
+
+.sheet { max-width: 1120px; margin: 0 auto; padding: 18px 16px 8px; }
+@media (min-width: 1500px) { .sheet { max-width: 1560px; } }
+.sheet > * + * { margin-top: 16px; }
+
+/* the banner */
+.banner { background: var(--base); color: #fff; border-radius: 22px 22px 0 0; padding: 20px 26px; display: flex; gap: 16px; align-items: center; justify-content: space-between; min-height: 6.4rem; margin-bottom: -16px; }
+.banner .eyebrow { font: 700 .72rem/1 "Lexend", sans-serif; letter-spacing: .22em; text-transform: uppercase; }
+.banner h1 { font: 700 2rem/1.15 "Lexend", sans-serif; margin: .5rem 0 0; }
+.banner .corner { background: #fff; color: var(--shade); border-radius: 12px; padding: 10px 16px; font: 600 .9rem/1.3 "Lexend", sans-serif; text-align: center; text-decoration: none; min-width: 8rem; }
+.scorebox { display: flex; flex-direction: column; gap: 2px; }
+.scorebox .slab { font-weight: 400; font-size: .75rem; }
+.scorebox b { font: 700 1.4rem/1.1 "Lexend", sans-serif; }
+.scorebox a { font-size: .8rem; font-weight: 500; margin-top: 2px; }
+
+/* the frame: 2 pt indigo border, rounded corners, like the 13 October pages */
+.frame { border: 2px solid var(--base); border-top: 0; border-radius: 0 0 22px 22px; overflow: hidden; background: #fff; margin-top: 0; }
+.info { background: var(--tint); padding: 18px 26px 22px; }
+.todo { background: #fff; padding: 18px 26px 24px; }
+.label { font: 700 .72rem/1 "Lexend", sans-serif; letter-spacing: .22em; text-transform: uppercase; color: var(--shade); margin: 0 0 12px; }
+.infotext { font-size: 1.15rem; margin: 0 0 6px; max-width: 60rem; }
+.figwrap { margin-top: .8rem; }
+.fig { margin: 0 auto; }
+h2.wtd { font: 700 1.35rem/1.25 "Lexend", sans-serif; color: var(--shade); margin: 0 0 .3rem; }
+.hint { margin: 0 0 .5rem; font-size: 1.1rem; max-width: 56rem; }
+.instr { margin: 0 0 .6rem; }
+
+/* Learn */
+.exwrap { max-width: 900px; margin: .8rem auto .4rem; display: flex; flex-direction: column; align-items: center; gap: .6rem; }
+.exwrap .st { max-width: 100%; }
+.stroke-cap { font: 500 1.2rem/1.3 "Lexend", sans-serif; color: var(--shade); text-align: center; margin: .6rem 0; }
+.strokeno { display: inline-grid; place-items: center; width: 1.7rem; height: 1.7rem; border-radius: 50%; background: var(--base); color: #fff; font-size: 1rem; margin-right: .4rem; }
+.dots { display: flex; justify-content: center; gap: .5rem; }
+.dots .dot { width: .7rem; height: .7rem; border-radius: 50%; background: var(--tint); }
+.dots .dot.on { background: var(--base); }
+.learnnav { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.learnnav .count { font: 500 1rem/1 "Lexend", sans-serif; color: var(--shade); }
+.replay { margin-top: .4rem; }
+@keyframes appear { from { opacity: 0; } to { opacity: 1; } }
+@keyframes appear2 { from { opacity: 0; } to { opacity: 1; } }
+.example .ans, .example input.box[readonly], .example .opt.pen, .example .wk.on, .example .cell input[readonly] { animation: appear .8s ease 1.2s both; }
+.example.again .ans, .example.again input.box[readonly], .example.again .opt.pen, .example.again .wk.on, .example.again .cell input[readonly] { animation-name: appear2; }
+html.still .example *, html.still .example { animation: none !important; }
+
+/* buttons */
+button { font: inherit; cursor: pointer; }
+.btn { display: inline-flex; align-items: center; justify-content: center; font: 600 1rem/1 "Lexend", sans-serif; color: var(--base); background: #fff; border: 2px solid var(--base); border-radius: 12px; padding: .75rem 1.1rem; min-height: 2.9rem; text-decoration: none; }
+.btn:hover { background: var(--tint); }
+.btn.solid { background: var(--base); color: #fff; }
+.btn.solid:hover { background: var(--shade); }
+.btn:disabled { opacity: .4; cursor: default; }
+.btn.small { min-height: 2.3rem; padding: .45rem .8rem; font-size: .85rem; }
+.btn:focus-visible, a:focus-visible, input:focus-visible, .piece:focus-visible, .tap:focus-visible, .tapkey:focus-visible { outline: 3px solid var(--red); outline-offset: 2px; }
+.opts { display: flex; gap: .6rem; flex-wrap: wrap; justify-content: center; }
+.opt { min-width: 3.4rem; font-size: 1.05rem; }
+.opt.chosen { background: var(--tint); }
+.opt.pen { font-family: "Kalam", cursive; font-weight: 400; color: var(--pencil); border-color: var(--pencil); box-shadow: 0 0 0 3px #fff, 0 0 0 5px var(--pencil); }
+.mark-btn svg.mk { width: 1.6rem; height: 1.6rem; }
+
+/* home and lesson menu */
+.home, .lessonmenu { padding: 22px 26px 28px; }
+.lessonshead { font: 700 1.5rem/1.2 "Lexend", sans-serif; color: var(--shade); margin: 0 0 .8rem; }
+.lessons { list-style: none; margin: 0 0 1.2rem; padding: 0; display: grid; gap: .5rem; grid-template-columns: repeat(auto-fill, minmax(21rem, 1fr)); }
+.lrow { display: grid; grid-template-columns: 2.6rem 1fr; grid-template-rows: auto auto; column-gap: .8rem; align-items: center; border: 2px solid var(--light); border-radius: 14px; padding: .65rem .9rem; text-decoration: none; color: var(--ink); min-height: 4rem; }
+.lrow:hover { border-color: var(--base); background: var(--tint); }
+.ln { grid-row: 1 / 3; width: 2.6rem; height: 2.6rem; border-radius: 50%; background: var(--base); color: #fff; display: grid; place-items: center; font: 700 1.1rem/1 "Lexend", sans-serif; }
+.lt { font: 600 1.05rem/1.25 "Lexend", sans-serif; color: var(--shade); }
+.ls { font-size: .85rem; color: var(--grey); min-height: 1.2em; }
+.bigbtns { display: flex; gap: 1rem; flex-wrap: wrap; }
+.bigbtn { flex: 1 1 14rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .3rem; min-height: 8rem; border: 3px solid var(--base); border-radius: 20px; text-decoration: none; color: var(--base); background: #fff; }
+.bigbtn:hover { background: var(--tint); }
+.bigbtn.solid { background: var(--base); color: #fff; }
+.bigbtn.solid:hover { background: var(--shade); }
+.bt { font: 700 1.9rem/1 "Lexend", sans-serif; }
+.bs { font-size: .95rem; opacity: .85; }
+.progline { margin: 1rem 0 0; color: var(--grey); }
+
+/* practise */
+.practise { padding: 18px 26px 28px; }
+.before { margin: 0 0 1rem; }
+section.task { margin: 0; }
+hr.divide { border: 0; border-top: 2px dashed var(--divider); margin: 1.6rem 0 1.4rem; }
+.th { font: 700 1.35rem/1.3 "Lexend", sans-serif; color: var(--shade); margin: 0 0 .6rem; }
+.th a { color: var(--base); }
+.items { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--cardmin, 12rem), 1fr)); gap: 1rem; }
+[data-type="line-or-space"] .items, [data-type="name-note"] .items, [data-type="name-note-octave"] .items, [data-type="clear-note"] .items { --cardmin: 11.5rem; }
+[data-type="which-line"] .items, [data-type="which-space"] .items { --cardmin: 11rem; }
+[data-type="higher-note"] .items, [data-type="up-down"] .items, [data-type="step-leap"] .items, [data-type="find-letter"] .items { --cardmin: 17rem; }
+[data-type="hidden-word"] .items, [data-type="note-to-key"] .items { --cardmin: 18rem; }
+[data-type="next-letter"] .items, [data-type="fill-gaps"] .items, [data-type="fill-octave"] .items { --cardmin: 24rem; }
+[data-type="find-key"] .items, [data-type="name-key"] .items, [data-type="name-key-octave"] .items,
+[data-type="copy-note"] .items, [data-type="place-note-named"] .items, [data-type="place-note-letter"] .items, [data-type="spell-word"] .items,
+[data-type="place-clef"] .items, [data-type="grand-staff-place"] .items { --cardmin: 100%; }
+@media (max-width: 700px) { .items { grid-template-columns: repeat(auto-fill, minmax(min(var(--cardmin, 12rem), 100%), 1fr)); } }
+.item { position: relative; border: 2px solid transparent; border-radius: 14px; padding: .6rem .5rem .5rem; display: flex; flex-direction: column; gap: .5rem; align-items: stretch; background: #fff; }
+.item.right { border-color: var(--base); }
+.item.wrong { border-color: var(--red); }
+[data-n="3"] .item.wrong, [data-n="4"] .item.wrong { border-color: var(--base); }
+.item .num { position: absolute; top: .45rem; left: .55rem; font: 700 .85rem/1 "Lexend", sans-serif; color: var(--grey); }
+.item .body { display: flex; flex-direction: column; align-items: center; gap: .5rem; width: 100%; }
+.actions { display: flex; justify-content: center; }
+.fb { display: flex; gap: .5rem; align-items: flex-start; min-height: 1.4em; font-size: .98rem; }
+.fbicon svg.mk { width: 1.5rem; height: 1.5rem; flex: none; }
+.fbtext { padding-top: .1rem; }
+.item.model { background: #F4F4F8; }
+.prompt, .prompt-letter { font: 700 1.6rem/1 "Lexend", sans-serif; color: var(--shade); text-align: center; }
+.prompt-letter { margin-top: .2rem; }
+
+/* boxes */
+.box { width: 2.7rem; height: 2.7rem; border: 2px solid var(--base); border-radius: 4px; background: #fff; text-align: center; font: 600 1.3rem/1 "Fira Sans", sans-serif; color: var(--ink); padding: 0; text-transform: uppercase; }
+.box.wide { width: 3.5rem; }
+.box[readonly] { font-family: "Kalam", cursive; font-weight: 400; color: var(--pencil); background: #fff; }
+.box:disabled { background: #F4F4F8; color: var(--ink); opacity: 1; }
+.model { font-family: "Kalam", cursive; color: var(--pencil); font-size: 1.15rem; margin-left: .25rem; }
+.stavebox { position: relative; width: 100%; padding-bottom: 3.3rem; margin: 0 auto; }
+.boxrow { position: absolute; left: 0; right: 0; bottom: 0; height: 3.1rem; }
+.bx { position: absolute; top: 0; transform: translateX(-50%); display: flex; align-items: center; white-space: nowrap; }
+.keypick { text-align: center; color: var(--grey); font-size: .95rem; }
+.letters { display: flex; flex-wrap: wrap; gap: .45rem; justify-content: center; }
+.cell { width: 2.9rem; height: 2.9rem; border: 2px solid var(--base); border-radius: 6px; display: grid; place-items: center; background: #fff; }
+.cell.fixed { background: var(--tint); font: 700 1.4rem/1 "Fira Sans", sans-serif; color: var(--shade); }
+.cell .box { width: 100%; height: 100%; border: 0; border-radius: 4px; }
+.rowarrow { width: 100%; max-width: 30rem; height: 1.2rem; display: block; margin: 0 auto .2rem; }
+
+/* keyboards */
+.kb { width: 100%; display: grid; gap: .7rem; }
+.kbrow { position: relative; display: grid; grid-template-columns: repeat(var(--n), 1fr); width: 100%; max-height: 14rem; }
+.wk { position: relative; background: #fff; border: 1px solid var(--ink); border-left: 0; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 4%; min-width: 0; }
+.wk:first-child { border-left: 1px solid var(--ink); }
+.bk { position: absolute; top: 0; height: 62%; background: var(--ink); border-radius: 0 0 3px 3px; z-index: 2; pointer-events: none; }
+.tapkey { cursor: pointer; }
+.wk.on { background: var(--tint); }
+.wk.ans { box-shadow: inset 0 0 0 3px var(--pencil); }
+.wk.pick { background: var(--tint); box-shadow: inset 0 0 0 3px var(--base); }
+.wk .mark { position: absolute; bottom: 6%; font-size: 1.1rem; color: var(--pencil); }
+.klab { font: 400 clamp(.6rem, 1.1vw, .9rem)/1 "Fira Sans", sans-serif; color: var(--shade); }
+.klab.hand { font-family: "Kalam", cursive; font-size: clamp(.7rem, 1.4vw, 1.1rem); color: var(--pencil); }
+.klab.b { font-weight: 700; }
+.kb-bx { width: 94%; display: flex; justify-content: center; position: relative; z-index: 3; }
+.kb-bx .box { width: 100%; height: 2.3rem; padding: 0; font-size: 1rem; border-width: 2px; }
+.kb-bx .box.wide { font-size: .95rem; }
+.sharedkb { margin-top: 1rem; }
+
+/* drawing */
+.draw { touch-action: none; user-select: none; -webkit-user-select: none; max-width: 100%; }
+.draw .piece { cursor: grab; }
+.draw .piece:focus { outline: none; }
+.draw .piece:focus-visible .hit { stroke: var(--base); stroke-width: .08; stroke-dasharray: .3 .2; }
+.draw .handle { cursor: nwse-resize; }
+.draw.locked .piece { pointer-events: none; }
+.banklab { pointer-events: none; }
+.drawbar { display: flex; gap: .8rem; align-items: center; justify-content: center; color: var(--grey); font-size: .92rem; }
+svg.tapfocus { outline: none; }
+.tap { cursor: pointer; }
+
+.finish { margin-top: 1.6rem; padding: 1.2rem 0 0; border-top: 2px dashed var(--divider); text-align: center; }
+.bigscore { font-size: 1.6rem; margin: .2rem 0 1rem; }
+.bigscore b { font-family: "Lexend", sans-serif; color: var(--shade); }
+.finish .row { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+.finish[hidden] { display: none; }
+
+footer { text-align: center; font-size: .82rem; color: var(--grey); border-top: 1px solid #ddd; padding: 12px 0 20px; margin-top: 20px; }
+footer b { color: var(--ink); }
+
+@media (max-width: 600px) {
+  html { font-size: 16px; }
+  .sheet { padding: 10px 8px 4px; }
+  .banner { padding: 14px 16px; border-radius: 16px 16px 0 0; }
+  .banner h1 { font-size: 1.5rem; }
+  .banner .corner { min-width: 5.5rem; padding: 8px 10px; }
+  .info, .todo, .practise, .home, .lessonmenu { padding-left: 14px; padding-right: 14px; }
+  .frame { border-radius: 0 0 16px 16px; }
+  .th { font-size: 1.15rem; }
+  .lessons { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) { .example *, .example { animation: none !important; } }
+[hidden] { display: none !important; }
+.opts { gap: .4rem; }
+.opt { min-width: 2.6rem; padding-left: .6rem; padding-right: .6rem; }
+svg text { pointer-events: none; }
+
+</style>
+</head>
+<body>
+<div id="app" aria-live="polite"></div>
+<script>
+(function () { var G = globalThis; G.TA = G.TA || {}; G.TA.DATA = {"_about": "Lessons 1 to 12 of the Music Theory workbook, for the Theory Practice app. Every student-facing string here is copied from Isaac's lesson files (Source files/lessonNN.json and the captions and hints inside lessonNN.py, 2 November 2026). Do not reword them. A string the app needs that is not here goes in src/strings.js and passes tests/lint. 'introduces' lists the ideas a lesson teaches; a lesson may use only ideas introduced by itself or an earlier lesson (src/00-core.js TA.allowed). 'items' is the number of exercises in one practice set (the book's count, minus its old model answer where it had one).", "version": "2026-11-02", "lintExceptions": {"_about": "Book wording that breaks a lint rule. The app keeps the book's words until Isaac decides (asked 2 November 2026). tests/check.js lists these as 'waiting on Isaac' and does not fail on them. Remove a line once he has answered, and change the text in both the book and here if he rewords it.", "A stave has five lines": "Lesson 1 info starts with the article A (the A rule, 12 October)", "A clef at the start": "Lesson 2 info", "A dot either side of line 4": "Lesson 2 bass clef step 4", "A tune moves by": "Lesson 5 info", "A note is an oval": "Lesson 7 info", "A and G can each go in two places": "Lesson 10 Task 3: starts with the note A"}, "lessons": [{"n": 1, "title": "The stave", "introduces": ["stave", "line-space", "line-number", "space-number"], "learn": {"text": "A **stave** has **five lines** and **four spaces**, counted from the bottom up. Every note sits either **on a line** or **in a space**.", "diagram": "A stave with no clef. Lines numbered Line 1 to Line 5 and spaces Space 1 to Space 4, counted from the bottom, with the caption 'count up from the bottom'. One line note and one space note labelled 'Line note' and 'Space note'.", "worked": [{"task": "t1", "head": "Task 1: line or space?", "hint": "Is there a line going through it (line) or does it sit between the lines (space)?"}, {"task": "t2", "head": "Task 2: which line?", "hint": "Count up from line 1."}, {"task": "t3", "head": "Task 3: which space?", "hint": "Count up from space 1."}]}, "tasks": [{"id": "t1", "number": 1, "heading": "Line or space?", "instruction": "Write **line** or **space** in the box under each note.", "type": "line-or-space", "items": 8, "clef": null}, {"id": "t2", "number": 2, "heading": "Which line?", "instruction": "Write the line number (1 to 5).", "type": "which-line", "items": 5, "clef": null}, {"id": "t3", "number": 3, "heading": "Which space?", "instruction": "Write the space number (1 to 4).", "type": "which-space", "items": 5, "clef": null}]}, {"n": 2, "title": "Clefs", "introduces": ["clef-treble", "clef-bass"], "learn": {"text": "A **clef** at the start of every stave tells you which note each line stands for.", "diagram": "Two panels. Treble clef: a printed treble clef with line 2 highlighted, a note on line 2 and the letter G beside the stave; title 'Treble clef'; caption 'The curl wraps around line 2, so line 2 is G. For higher sounds.' Bass clef: a printed bass clef with line 4 highlighted, a note on line 4 and the letter F; title 'Bass clef'; caption 'The dots sit either side of line 4, so line 4 is F. For lower sounds.'", "worked": [{"task": "t1", "head": "Treble clef", "steps": ["Dot just below line 2", "Up to line 3, curve round", "Down to line 1, curve round", "Curl up high and hook over", "Down the middle to a blob"], "note": "Animate the hand-drawn clef one stroke at a time (curriculum/clef-strokes.json), the new stroke in red."}, {"task": "t2", "head": "Bass clef", "steps": ["Big dot on line 4", "Curve up over line 5", "Sweep down past line 2", "A dot either side of line 4"], "note": "As above."}]}, "tasks": [{"id": "t1", "number": 1, "heading": "Trace these two treble clefs, then draw 5 more", "appHeading": "Place and size these treble clefs", "type": "place-clef", "clef": "treble", "items": 7, "traced": 2, "note": "Isaac (2 November): students drag a clef from a bank onto the stave and resize it; marked on how close it is to the right place and size. The first 2 items show a faint clef to cover (the 'trace'); the other 5 have no guide."}, {"id": "t2", "number": 2, "heading": "Trace these two bass clefs, then draw 5 more", "appHeading": "Place and size these bass clefs", "type": "place-clef", "clef": "bass", "items": 7, "traced": 2}]}, {"n": 3, "title": "The musical alphabet", "introduces": ["letters", "letters-forwards-up", "letters-backwards-down"], "learn": {"text": "Every note in music has a **letter name**. It tells you which note to play or sing. There are only seven: **A B C D E F G**. After G you go back to A, but it sounds higher.", "diagram": "The letters A B C D E F G then A in boxes, an arrow over them labelled 'Going up: the letters go forwards', an arrow back labelled 'Going down: the letters go backwards', and the last A marked 'back to A, but higher'. No red: this page has no notation, so arrows and labels are indigo.", "worked": [{"task": "t1", "head": "Task 1: what comes next?", "hint": "Go forwards along the line of letters above. After G comes A."}, {"task": "t2", "head": "Task 2: going down", "hint": "Go backwards along the line of letters above. Before A comes G."}, {"task": "t3", "head": "Task 3: fill the gaps", "hint": "First work out which way the letters go. C, D goes forwards."}]}, "tasks": [{"id": "t1", "number": 1, "heading": "What comes next?", "instruction": "Write the next letter.", "type": "next-letter", "items": 4, "shown": 3, "blanks": 1, "direction": "forwards"}, {"id": "t2", "number": 2, "heading": "Going down", "instruction": "Write the next two letters.", "type": "next-letter", "items": 4, "shown": 2, "blanks": 2, "direction": "backwards"}, {"id": "t3", "number": 3, "heading": "Fill the gaps", "instruction": "Work out if each row goes forwards or backwards, then write the missing letters.", "type": "fill-gaps", "items": 4, "length": 7, "gaps": 2, "note": "Rows go forwards or backwards in a mix (never all one way); no arrow shows the direction."}]}, {"n": 4, "title": "Letter names on the keyboard", "introduces": ["keyboard", "keyboard-white-letters", "black-key-groups", "octave-eight-letters"], "learn": {"text": "Every piano and keyboard uses the seven letters of the musical alphabet on its white keys. The black keys come in groups of **two** and **three**, and they help you find your way around.", "diagram": "A keyboard with every white key lettered, the groups of two black keys outlined, the caption 'C is always the white key just to the left of a group of two black keys (outlined).', and a bracket from C to the next C labelled 'one octave: 8 letters from C up to the next C' with 'going up: the letters go forwards'. No red on this page: marks are indigo.", "worked": [{"task": "t1", "head": "Task 1: Find the Cs", "hint": "Find a group of two black keys. Colour the white key on its left and write C."}, {"task": "t2", "head": "Task 2: Name the keys", "hint": "Find the nearest C. Go forwards one white key at a time up to the box."}, {"task": "t3", "head": "Task 3: Up an octave", "hint": "Go forwards through the letters until you reach the same letter again (8 in all)."}]}, "tasks": [{"id": "t1", "number": 1, "heading": "Colour every C and write C on it", "appHeading": "Tap every C", "type": "find-key", "items": 1, "whiteKeys": 22, "target": "C", "note": "One long keyboard starting on a white key that is not C. Marked right only when every C is chosen and nothing else."}, {"id": "t2", "number": 2, "heading": "Name each key with a box", "type": "name-key", "items": 2, "whiteKeys": 11, "boxes": 4, "note": "Two keyboards of 11 white keys, each starting on a different letter, 4 boxed white keys each."}, {"id": "t3", "number": 3, "heading": "Fill in the octave", "type": "fill-octave", "items": 4, "length": 8}]}, {"n": 5, "title": "Higher and lower", "introduces": ["higher-lower", "up-down", "step-leap"], "learn": {"text": "High sounds are like a whistle and low sounds are like a big drum. The higher a note sits on the stave, the higher it sounds. A tune moves by **steps** and **leaps**.", "diagram": "A stave with no clef and notes climbing, a red arrow labelled 'higher on the stave = higher sound', with 'lower sound' and 'higher sound' at its ends; a step labelled 'to the next line or space' and a leap labelled 'skips a line or space'.", "worked": [{"task": "t1", "head": "Task 1: Circle the higher note", "hint": "Find the note in each pair that sits higher on the stave. Draw a circle around it."}, {"task": "t2", "head": "Task 2: Up or down?", "hint": "Is the second note higher or lower than the first one? Write up or down in the box."}, {"task": "t3", "head": "Task 3: Step or leap?", "hint": "Next line or space? Write step. Skips over a line or space? Write leap."}]}, "tasks": [{"id": "t1", "number": 1, "heading": "Which note in each pair sits higher? Circle it.", "appHeading": "Which note in each pair sits higher? Tap it.", "type": "higher-note", "items": 7, "clef": null}, {"id": "t2", "number": 2, "heading": "Do these pairs of notes go up or down?", "type": "up-down", "items": 5, "clef": null}, {"id": "t3", "number": 3, "heading": "Do these pairs of notes move by a step or a leap?", "type": "step-leap", "items": 5, "clef": null}]}, {"n": 6, "title": "Treble clef notes", "introduces": ["read-treble"], "learn": {"text": "In the treble clef, every line and space has its own letter name. The bottom line is **E**. Going up one line or space at a time, the letters follow the musical alphabet.", "diagram": "A treble clef stave with all nine notes E F G A B C D E F, a 'Lines' row of letters (E G B D F) and a 'Spaces' row (F A C E) under them, and a red arrow labelled 'going up the stave, the letters go forwards: E F G A B C D E F'.", "worked": [{"task": "t1", "head": "Task 1: Name the note", "hint": "Start on the bottom line, E. Count up the alphabet, one line or space at a time, to the note."}, {"task": "t2", "head": "Task 2: Find the letter", "hint": "Find the letter in the diagram above. Circle the note that sits on that line or in that space."}, {"task": "t3", "head": "Task 3: Find the word", "hint": "Name each note. Then read the letters from left to right to find the word."}]}, "tasks": [{"id": "t1", "number": 1, "heading": "What is each note called? Write its letter in the box.", "type": "name-note", "items": 8, "clef": "treble"}, {"id": "t2", "number": 2, "heading": "Which note matches the letter? Circle it.", "appHeading": "Which note matches the letter? Tap it.", "type": "find-letter", "items": 4, "clef": "treble", "choices": 3}, {"id": "t3", "number": 3, "heading": "Name each note to find the two hidden words.", "type": "hidden-word", "items": 2, "clef": "treble"}]}, {"n": 7, "title": "Drawing notes", "introduces": ["draw-note"], "learn": {"text": "A note is an oval, a little wider than it is tall. Draw it so anyone can see straight away whether it is **on a line** or **in a space**.", "diagram": "Five pencil notes on a treble clef stave, each with a tick or a red cross and two caption lines: line note ('the line goes through', 'the middle'); space note ('fills the space and', 'just touches both lines'); a circle ('too round:', 'make it an oval'); too big ('it crosses the lines', 'around it'); half on a line ('is it a line or', 'a space? No one can tell').", "worked": [{"task": "t1", "head": "Task 1: Trace, then copy", "hint": "Trace over the light note. Then draw the same note in the gap: the same line or space, and the same size."}, {"task": "t2", "head": "Task 2: Line or space", "hint": "Count up from the bottom to the line or space. Line note: line through the middle. Space note: fill the space."}, {"task": "t3", "head": "Task 3: Is it clear?", "hint": "Look at the right and wrong notes above. Clear? Tick it. Not clear? Cross it."}]}, "tasks": [{"id": "t1", "number": 1, "heading": "Trace each light note, then draw the same note beside it.", "appHeading": "Place a note beside each light note: the same line or space, and the same size.", "type": "copy-note", "items": 6, "clef": "treble"}, {"id": "t2", "number": 2, "heading": "Draw a note on each line or in each space.", "appHeading": "Place a note on each line or in each space.", "type": "place-note-named", "items": 4, "clef": "treble"}, {"id": "t3", "number": 3, "heading": "Is each note drawn clearly? Tick or cross.", "type": "clear-note", "items": 5, "clef": "treble"}], "noteKinds": {"_about": "Sizes in staff spaces, from lesson07.py KINDS (rx, ry are radii; offset is how far the centre sits from its line or space).", "line": {"clear": true, "rx": 0.82, "ry": 0.5, "offset": 0, "caption": ["the line goes through", "the middle"]}, "space": {"clear": true, "rx": 0.82, "ry": 0.5, "offset": 0, "caption": ["fills the space and", "just touches both lines"]}, "circle": {"clear": false, "rx": 0.5, "ry": 0.5, "offset": 0, "title": "a circle", "caption": ["too round:", "make it an oval"]}, "big": {"clear": false, "rx": 1.25, "ry": 0.95, "offset": 0, "title": "too big", "caption": ["it crosses the lines", "around it"]}, "half": {"clear": false, "rx": 0.82, "ry": 0.5, "offset": 0.27, "title": "half on a line", "caption": ["is it a line or", "a space? No one can tell"]}}}, {"n": 8, "title": "Treble clef memory aids", "introduces": ["draw-treble", "aid-treble"], "learn": {"text": "Lines: use **Every Good Boy Deserves Fruit**. Spaces: use **FACE**.", "diagram": "Two treble clef staves. Lines: a note on each line with Every, Good, Boy, Deserves, Fruit under them and the caption 'Lines: say the words from the bottom line up'. Spaces: a note in each space spelling F A C E, caption 'Spaces: FACE, bottom up' and 'the spaces spell FACE'.", "worked": [{"task": "t1", "head": "Task 1: Draw a line note", "hint": "Say Every Good Boy Deserves Fruit from the bottom line up. Stop at the word that starts with the letter. Draw it there."}, {"task": "t2", "head": "Task 2: Draw a space note", "hint": "Say F, A, C, E from the bottom space up. Stop at the letter. Draw the note in that space."}, {"task": "t3", "head": "Task 3: Spell the word", "hint": "Draw a note for each letter. Line word or FACE letter? Use the right memory aid to find where it goes."}]}, "beforeTasks": "**Try to do these by memorising the memory aid rather than looking at the chart with the answers.**", "tasks": [{"id": "t1", "number": 1, "heading": "Draw the line notes.", "appHeading": "Place the line notes.", "type": "place-note-letter", "where": "line", "items": 4, "clef": "treble"}, {"id": "t2", "number": 2, "heading": "Draw the space notes.", "appHeading": "Place the space notes.", "type": "place-note-letter", "where": "space", "items": 4, "clef": "treble"}, {"id": "t3", "number": 3, "heading": "Draw the notes to spell each word.", "appHeading": "Place the notes to spell each word.", "instruction": "**E** and **F** can each go in two places. Either one is right.", "type": "spell-word", "items": 2, "clef": "treble"}]}, {"n": 9, "title": "Bass clef notes", "introduces": ["read-bass"], "learn": {"text": "In the bass clef, every line and space has its own letter name. The bottom line is **G**. Going up one line or space at a time, the letters follow the musical alphabet.", "diagram": "A bass clef stave with all nine notes G A B C D E F G A, a 'Lines' row (G B D F A) and a 'Spaces' row (A C E G), and a red arrow labelled 'going up the stave, the letters go forwards: G A B C D E F G A'.", "worked": [{"task": "t1", "head": "Task 1: Name the note", "hint": "Start on the bottom line, G. Count up the alphabet, one line or space at a time, to the note."}, {"task": "t2", "head": "Task 2: Find the letter", "hint": "Find the letter in the diagram above. Circle the note that sits on that line or in that space."}, {"task": "t3", "head": "Task 3: Find the word", "hint": "Name each note. Then read the letters from left to right to find the word."}]}, "tasks": [{"id": "t1", "number": 1, "heading": "What is each note called? Write its letter in the box.", "type": "name-note", "items": 8, "clef": "bass"}, {"id": "t2", "number": 2, "heading": "Which note matches the letter? Circle it.", "appHeading": "Which note matches the letter? Tap it.", "type": "find-letter", "items": 4, "clef": "bass", "choices": 3}, {"id": "t3", "number": 3, "heading": "Name each note to find the two hidden words.", "type": "hidden-word", "items": 2, "clef": "bass"}]}, {"n": 10, "title": "Bass clef memory aids", "introduces": ["draw-bass", "aid-bass"], "learn": {"text": "Lines: use **Good Burritos Don't Fall Apart**. Spaces: use **All Cows Eat Grass**.", "diagram": "Two bass clef staves. Lines: a note on each line with Good, Burritos, Don't, Fall, Apart under them, caption 'Lines: say the words from the bottom line up'. Spaces: a note in each space with All, Cows, Eat, Grass, caption 'Spaces: bottom space up'.", "worked": [{"task": "t1", "head": "Task 1: Draw a line note", "hint": "Say Good Burritos Don't Fall Apart from the bottom line up. Stop at the word that starts with the letter. Draw it there."}, {"task": "t2", "head": "Task 2: Draw a space note", "hint": "Say All Cows Eat Grass from the bottom space up. Stop at the word that starts with the letter. Draw the note in that space."}, {"task": "t3", "head": "Task 3: Spell the word", "hint": "Draw a note for each letter. Line word or space word? Use the right memory aid to find where it goes."}]}, "beforeTasks": "**Try to do these by memorising the memory aid rather than looking at the chart with the answers.**", "tasks": [{"id": "t1", "number": 1, "heading": "Draw the line notes.", "appHeading": "Place the line notes.", "type": "place-note-letter", "where": "line", "items": 4, "clef": "bass"}, {"id": "t2", "number": 2, "heading": "Draw the space notes.", "appHeading": "Place the space notes.", "type": "place-note-letter", "where": "space", "items": 4, "clef": "bass"}, {"id": "t3", "number": 3, "heading": "Draw the notes to spell each word.", "appHeading": "Place the notes to spell each word.", "instruction": "**A** and **G** can each go in two places. Either one is right.", "type": "spell-word", "items": 2, "clef": "bass"}]}, {"n": 11, "title": "Notes on the keyboard", "introduces": ["octave-numbers", "middle-c"], "learn": {"text": "Every key has a letter name and an **octave number**, which goes up by one at each C. The C in the middle of the piano is **Middle C (C4)**. Each note on a stave sits right above its own key.", "diagram": "A keyboard from C2 to B5 with C2, C3, C4, C5 printed on every C (C4 bold) and octave brackets under the keys ('octave 2' ... 'octave 4: starts at Middle C'); a bass stave over the low keys and a treble stave over the high keys, each note joined to its key by a grey dotted line; red octave brackets beside each stave (treble: 4 from line 1 to line 3, 5 from space 3 to line 5; bass: 2 from line 1 to line 2, 3 from space 2 to line 5).", "worked": [{"task": "t1", "head": "Task 1: Name the key", "hint": "Find the C to the left and read its number. Count forwards to the key. Keep the same number."}, {"task": "t2", "head": "Task 2: Treble clef notes", "hint": "Name the note. Bottom line E up to B is octave 4. C in space 3 up to top line F is octave 5."}, {"task": "t3", "head": "Task 3: Bass clef notes", "hint": "Name the note. Bottom line G up to B is octave 2. C in space 2 up to top line A is octave 3."}]}, "tasks": [{"id": "t1", "number": 1, "heading": "Write the letter and octave number in every box.", "type": "name-key-octave", "items": 1, "from": "C2", "to": "B5", "boxes": 8, "note": "Every C is printed with its number in handwriting, plus a few other given keys (the book gives A3, D4, B4, F5; choose different ones each set). Boxed keys are white keys only."}, {"id": "t2", "number": 2, "heading": "What note and octave?", "type": "name-note-octave", "items": 5, "clef": "treble"}, {"id": "t3", "number": 3, "heading": "What note and octave?", "type": "name-note-octave", "items": 5, "clef": "bass"}]}, {"n": 12, "title": "Revision: reading notes", "revision": true, "introduces": ["grand-staff-choose"], "learn": null, "tasks": [{"id": "t1", "number": 1, "heading": "Name each note to find the hidden word. (See Lessons 6 and 9)", "type": "hidden-word", "items": 6, "clef": "mixed", "note": "Three words in the treble clef and three in the bass, in a mixed order."}, {"id": "t2", "number": 2, "heading": "Draw each note on the right stave, in the right octave.", "appHeading": "Place each note on the right stave, in the right octave.", "instruction": "This is a **grand staff**: treble on top, bass below. The octave number tells you which stave to use.", "type": "grand-staff-place", "items": 9, "newHere": true, "note": "The grand staff is new on this page (its own lesson is 32), so this task keeps an explanation and its first item is a worked model, shown done in pencil."}, {"id": "t3", "number": 3, "heading": "Name each note, then join it to its key. (See Lesson 11)", "appHeading": "Name each note, then tap its key. (See Lesson 11)", "type": "note-to-key", "items": 8, "from": "C2", "to": "B5", "note": "Short staves under the keyboard: bass notes on the left, treble on the right."}]}], "words": {"_about": "Hidden-word and spell-word bank: real words made only of A to G, suitable for 13-year-olds. A word is usable in a clef only if every letter has a place on that clef's stave (all seven do in both clefs). Repeated letters are fine. Add words here, never in code.", "short": ["ACE", "ADD", "AGE", "BAD", "BAG", "BED", "BEE", "CAB", "DAB", "DAD", "EGG", "FED", "FEE"], "medium": ["ACED", "AGED", "BEAD", "BEEF", "CAFE", "CAGE", "DEAF", "DEED", "EDGE", "FACE", "FADE", "FEED"], "long": ["ADDED", "BADGE", "CAGED", "EDGED", "FACED", "FADED", "BAGGED", "DECADE", "DEFACE", "FACADE", "BEGGED", "BAGGAGE", "CABBAGE"]}}; G.TA.STROKES = {"_about": "Hand-drawn clefs from Lesson 2 (diagrams.py hclef). Units: staff spaces. x right from the clef's left edge, y UP from line 1 (line 2 = 1, line 4 = 3). Draw 'line' strokes through a Catmull-Rom spline (TA.smooth in src/00-core.js, 8 points per segment). Dot radius: treble 0.2 sp, bass 0.3 sp; the bass pair of dots 0.14 sp. The treble clef's last step also draws a blob of radius 0.2 sp at blob. Pen width about 0.12 sp. Anchor = the point that must sit on its line: treble curl centre on line 2, bass big dot on line 4.", "treble": {"steps": [{"type": "dot", "data": [0.95, 0.8]}, {"type": "line", "data": [[0.95, 0.8], [0.8, 1.15], [0.85, 1.6], [1.15, 1.95], [1.55, 1.98], [1.85, 1.72], [1.97, 1.35]]}, {"type": "line", "data": [[1.97, 1.35], [1.95, 0.9], [1.8, 0.35], [1.3, 0.0], [0.75, 0.05], [0.35, 0.45], [0.2, 1.0], [0.35, 1.6], [0.7, 2.1]]}, {"type": "line", "data": [[0.7, 2.1], [1.25, 2.7], [1.75, 3.4], [2.05, 4.2], [1.95, 4.9], [1.7, 5.4], [1.45, 5.3], [1.3, 4.9], [1.27, 4.4]]}, {"type": "line", "data": [[1.27, 4.4], [1.33, 3.2], [1.42, 2.0], [1.5, 0.8], [1.58, -0.5], [1.6, -1.3], [1.45, -1.7], [1.1, -1.8], [0.85, -1.55]]}], "blob": [0.98, -1.5], "anchor": [1.1, 1.0], "anchorLine": 2, "extent": {"x0": 0.15, "x1": 2.1, "y0": -1.85, "y1": 5.45}, "captions": ["Dot just below line 2", "Up to line 3, curve round", "Down to line 1, curve round", "Curl up high and hook over", "Down the middle to a blob"]}, "bass": {"steps": [{"type": "dot", "data": [0.38, 3.0]}, {"type": "line", "data": [[0.2, 3.1], [0.42, 3.6], [0.85, 3.95], [1.35, 3.97], [1.78, 3.68], [1.98, 3.1]]}, {"type": "line", "data": [[1.98, 3.1], [1.92, 2.4], [1.62, 1.7], [1.12, 1.1], [0.45, 0.55], [0.12, 0.4]]}, {"type": "dots", "data": [[2.45, 3.5], [2.45, 2.5]]}], "anchor": [0.38, 3.0], "anchorLine": 4, "extent": {"x0": 0.05, "x1": 2.6, "y0": 0.35, "y1": 4.05}, "captions": ["Big dot on line 4", "Curve up over line 5", "Sweep down past line 2", "A dot either side of line 4"]}}; })();
+/* ---- src/00-core.js ---- */
+/* Theory Practice: core music model, shared checks and marking helpers.
+ *
+ * FRAMEWORK FILE: written and tested with the plan (2 November 2026). Generators, screens and drawing code are
+ * built on top of it. Do not change a fact in here (a pitch, a range, a tolerance, a lint rule) without Isaac's
+ * say-so; add new helpers below the existing ones instead. tests/core.test.js pins every fact.
+ *
+ * Runs in the browser (plain script, defines globalThis.TA) and in Node (tests load it into a vm context).
+ * Stave positions are half-spaces from the bottom line: 0 = line 1, 1 = space 1, 2 = line 2 ... 8 = line 5.
+ * No ledger lines in Lessons 1 to 12, so a position is always 0 to 8.
+ */
+(function (G) {
+  'use strict';
+  const TA = (G.TA = G.TA || {});
+
+  // ---------- random numbers: every set comes from a seed, so a set can be rebuilt and tested ----------
+  TA.rng = function (seed) {
+    let a = (seed >>> 0) || 1;
+    const next = function () {            // mulberry32
+      a = (a + 0x6d2b79f5) >>> 0;
+      let t = a;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+    next.int = (lo, hi) => lo + Math.floor(next() * (hi - lo + 1));       // lo..hi inclusive
+    next.pick = (arr) => arr[Math.floor(next() * arr.length)];
+    next.shuffle = (arr) => {
+      const out = arr.slice();
+      for (let i = out.length - 1; i > 0; i--) { const j = Math.floor(next() * (i + 1)); [out[i], out[j]] = [out[j], out[i]]; }
+      return out;
+    };
+    next.chance = (p) => next() < p;
+    return next;
+  };
+
+  // ---------- letters ----------
+  TA.LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+  TA.stepLetter = function (letter, steps) {          // steps > 0 forwards (going up), < 0 backwards (going down)
+    const i = TA.LETTERS.indexOf(letter);
+    if (i < 0) throw new Error('not a letter: ' + letter);
+    return TA.LETTERS[(((i + steps) % 7) + 7) % 7];
+  };
+  TA.letterRun = function (start, n, dir) {            // dir +1 forwards, -1 backwards
+    const out = [];
+    for (let k = 0; k < n; k++) out.push(TA.stepLetter(start, k * dir));
+    return out;
+  };
+
+  // ---------- the stave ----------
+  TA.POSITIONS = [0, 1, 2, 3, 4, 5, 6, 7, 8];
+  TA.isLine = (pos) => pos % 2 === 0;
+  TA.lineNumber = (pos) => (TA.isLine(pos) ? pos / 2 + 1 : null);          // 1 to 5
+  TA.spaceNumber = (pos) => (TA.isLine(pos) ? null : (pos + 1) / 2);       // 1 to 4
+  TA.posOfLine = (n) => (n - 1) * 2;
+  TA.posOfSpace = (n) => n * 2 - 1;
+  TA.placeName = (pos) => (TA.isLine(pos) ? 'line ' + TA.lineNumber(pos) : 'space ' + TA.spaceNumber(pos));
+
+  // bottom line of each clef (Lessons 6, 9, 11): treble E4 to F5, bass G2 to A3
+  TA.CLEFS = {
+    treble: { bottom: { letter: 'E', octave: 4 } },
+    bass: { bottom: { letter: 'G', octave: 2 } }
+  };
+  // diatonic number: C0 = 0, D0 = 1 ... (7 a octave)
+  const DIA = { C: 0, D: 1, E: 2, F: 3, G: 4, A: 5, B: 6 };
+  const DIA_LETTER = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+  TA.dia = (letter, octave) => octave * 7 + DIA[letter];
+  TA.fromDia = (d) => ({ letter: DIA_LETTER[((d % 7) + 7) % 7], octave: Math.floor(d / 7) });
+  TA.noteName = (n) => n.letter + n.octave;                                 // 'E4'
+  TA.parseNote = function (s) {
+    const m = /^([A-G])([0-9])$/.exec(String(s).trim().toUpperCase());
+    return m ? { letter: m[1], octave: +m[2] } : null;
+  };
+  TA.noteAt = function (clef, pos) {
+    if (!TA.CLEFS[clef]) throw new Error('no letters without a clef');
+    if (!(pos >= 0 && pos <= 8 && pos === Math.floor(pos))) throw new Error('position out of range: ' + pos);
+    const b = TA.CLEFS[clef].bottom;
+    return TA.fromDia(TA.dia(b.letter, b.octave) + pos);
+  };
+  TA.letterAt = (clef, pos) => TA.noteAt(clef, pos).letter;
+  TA.posOf = function (clef, letter, octave) {         // null when the note is not on the stave
+    const b = TA.CLEFS[clef].bottom;
+    const p = TA.dia(letter, octave) - TA.dia(b.letter, b.octave);
+    return p >= 0 && p <= 8 ? p : null;
+  };
+  TA.positionsOfLetter = (clef, letter) => TA.POSITIONS.filter((p) => TA.letterAt(clef, p) === letter);
+  TA.linePositionOf = (clef, letter) => TA.positionsOfLetter(clef, letter).find(TA.isLine);       // undefined if none
+  TA.spacePositionOf = (clef, letter) => TA.positionsOfLetter(clef, letter).find((p) => !TA.isLine(p));
+  TA.onStave = (clef) => TA.POSITIONS.map((p) => TA.noteAt(clef, p));
+
+  // octave brackets beside the stave (Lesson 11): where the octave number changes, at C
+  TA.octaveOf = (clef, pos) => TA.noteAt(clef, pos).octave;
+
+  // memory aids (Lessons 8 and 10)
+  TA.AIDS = {
+    treble: { lines: ['Every', 'Good', 'Boy', 'Deserves', 'Fruit'], spaces: ['F', 'A', 'C', 'E'], spacesSaid: 'FACE' },
+    bass: { lines: ['Good', 'Burritos', "Don't", 'Fall', 'Apart'], spaces: ['All', 'Cows', 'Eat', 'Grass'] }
+  };
+
+  // ---------- the keyboard ----------
+  // A white key is named by its note ('C4'). Black keys sit to the right of C, D, F, G and A.
+  TA.hasBlackRight = (letter) => ['C', 'D', 'F', 'G', 'A'].includes(letter);
+  TA.whiteKeys = function (from, count) {             // from 'E3' (or a letter for Lesson 4: octave 3 is used)
+    const f = typeof from === 'string' && from.length === 1 ? { letter: from, octave: 3 } : TA.parseNote(from);
+    const d0 = TA.dia(f.letter, f.octave);
+    const out = [];
+    for (let k = 0; k < count; k++) out.push(TA.fromDia(d0 + k));
+    return out;
+  };
+  TA.whiteKeysBetween = function (from, to) {
+    const a = TA.parseNote(from), b = TA.parseNote(to);
+    return TA.whiteKeys(from, TA.dia(b.letter, b.octave) - TA.dia(a.letter, a.octave) + 1);
+  };
+  TA.blackGroupOf = (letter) => (['C', 'D', 'E'].includes(letter) ? 2 : 3);   // which group a white key's neighbours are in
+
+  // ---------- what each lesson may use ----------
+  // TA.allowed(lessons, n) -> Set of idea tags introduced by Lesson n or earlier.
+  TA.allowed = function (lessons, n) {
+    const s = new Set();
+    for (const L of lessons) if (L.n <= n) for (const t of L.introduces) s.add(t);
+    return s;
+  };
+  // the tags an item's content needs; tests compare these with TA.allowed (see ITEM-SCHEMA.md)
+  TA.needs = function (item) {
+    const need = new Set();
+    const sh = item.show || {};
+    const staves = sh.staves || (sh.stave ? [sh.stave] : []);
+    for (const st of staves) {
+      need.add('stave');
+      if (st.clef === 'treble' || st.clef === 'bass') need.add('clef-' + st.clef);
+      if (st.clef === 'grand') { need.add('grand-staff-choose'); need.add('read-treble'); need.add('read-bass'); }
+      for (const nt of st.notes || []) {
+        if (!(nt.pos >= 0 && nt.pos <= 8)) need.add('ledger-lines');
+      }
+      if (st.octaveMarks) need.add('octave-numbers');
+    }
+    if (sh.keyboard) need.add('keyboard');
+    if (sh.keyboard && sh.keyboard.octaveLabels) need.add('octave-numbers');
+    if (sh.letters) need.add('letters');
+    const inp = item.input || {};
+    const reads = { 'name-note': 1, 'hidden-word': 1, 'find-letter': 1, 'name-note-octave': 1 };
+    if (reads[item.type]) for (const st of staves) if (st.clef === 'treble' || st.clef === 'bass') need.add('read-' + st.clef);
+    if (inp.kind === 'place-note') need.add('draw-note');
+    if (item.type === 'place-note-letter' || item.type === 'spell-word') for (const st of staves) need.add('draw-' + st.clef);
+    if (item.type === 'grand-staff-place') { need.add('draw-treble'); need.add('draw-bass'); }
+    if (['name-key-octave', 'name-note-octave', 'note-to-key', 'grand-staff-place'].includes(item.type)) need.add('octave-numbers');
+    if (inp.kind === 'boxes' && item.type !== 'which-line' && item.type !== 'which-space') need.add('letters');
+    if (inp.kind === 'place-clef') need.add('clef-' + item.clef);
+    return need;
+  };
+
+  // ---------- pattern rules (RULES.md section 4); generators use these to throw a set away and draw again ----------
+  TA.patterns = {
+    // longest run of equal values
+    maxRun(values) {
+      let best = 0, run = 0, prev;
+      for (const v of values) { run = v === prev ? run + 1 : 1; prev = v; best = Math.max(best, run); }
+      return best;
+    },
+    // strict alternation of two values over 4 or more items (up, down, up, down)
+    alternates(values) {
+      if (values.length < 4) return false;
+      const u = [...new Set(values)];
+      if (u.length !== 2) return false;
+      for (let i = 1; i < values.length; i++) if (values[i] === values[i - 1]) return false;
+      return true;
+    },
+    // a two-answer set (line/space, up/down, step/leap, tick/cross, first/second): no run of 3, no strict
+    // alternation, each answer at least a third of the items (rounded down)
+    binaryOk(values) {
+      const u = [...new Set(values)];
+      if (values.length >= 3 && u.length < 2) return false;
+      const minShare = Math.floor(values.length / 3);
+      for (const x of u) if (values.filter((v) => v === x).length < minShare) return false;
+      return TA.patterns.maxRun(values) <= 2 && !TA.patterns.alternates(values);
+    },
+    // line and space notes in equal numbers (one more of either when the count is odd)
+    balanced(positions) {
+      const lines = positions.filter(TA.isLine).length;
+      return Math.abs(lines - (positions.length - lines)) <= 1;
+    },
+    // no two neighbouring items the same, and no item twice in a set
+    distinct(keys) { return new Set(keys).size === keys.length; },
+    noRepeatNeighbours(keys) { for (let i = 1; i < keys.length; i++) if (keys[i] === keys[i - 1]) return false; return true; }
+  };
+
+  // ---------- wording lint (RULES.md section 2); run over every string a student sees ----------
+  const AMERICAN = [/\bcolor/i, /\bcenter/i, /\bgray\b/i, /\bfavorite/i, /\bmemoriz/i, /\brecogniz/i, /\borganiz/i, /\bpracticing\b/i,
+    /\bwhole note/i, /\bhalf note/i, /\bquarter note/i, /\beighth note/i, /\bmeasure\b/i, /\bstaff\b/i];
+  const AI_ISMS = [/\bnot just\b/i, /\bnot only\b.*\bbut\b/i, /\blet'?s dive\b/i, /\bgreat job\b/i, /\bawesome\b/i, /\boops\b/i,
+    /\byou'?ve got this\b/i, /\bstudents (often|usually|tend)\b/i, /\bmost students\b/i, /\bcommon mistake\b/i, /\bmany students\b/i];
+  TA.lint = function (text, where) {
+    const problems = [];
+    const s = String(text);
+    const plain = s.replace(/\*\*/g, '');
+    if (/—/.test(plain.replace(/(^|\n)\s*Task \d+ — /g, '$1'))) problems.push('em dash');
+    if (/\s–\s/.test(plain)) problems.push('en dash used as a dash');
+    // the "A" rule: no sentence, label, step or option starts with "A " (article or note)
+    // (a list after a colon, "seven: A B C D E F G", is not a sentence, so colons don't split)
+    const starts = plain.split(/(?<=[.!?])\s+|\n+/).map((x) => x.trim()).filter(Boolean);
+    for (const st of starts) if (/^A\s/.test(st)) problems.push('starts with "A ": ' + st.slice(0, 40));
+    if (/\ba sharp\b(?! sign)/.test(plain)) problems.push('"a sharp": say "a sharp sign"');
+    const noGrand = plain.replace(/grand staff/gi, '');
+    for (const r of AMERICAN) if (r.test(noGrand)) problems.push('American or US form: ' + r);
+    for (const r of AI_ISMS) if (r.test(plain)) problems.push('phrasing to avoid: ' + r);
+    if (/[A-Za-z]!/.test(plain)) problems.push('exclamation mark');
+    return problems.map((p) => (where ? where + ': ' : '') + p);
+  };
+
+  // ---------- drag-and-resize marking (RULES.md section 5) ----------
+  // A placed note: {cy, rx, ry} in staff spaces, cy measured UP from line 1 (so position p is at cy = p / 2).
+  TA.NOTE_TOL = { centre: 0.15, half: 0.3, ryMin: 0.4, ryMax: 0.62, ratioMin: 1.3, ratioMax: 2.1 };
+  TA.markNote = function (placed, targetPos, opts) {
+    const T = Object.assign({}, TA.NOTE_TOL, opts || {});
+    const nearest = Math.max(0, Math.min(8, Math.round(placed.cy * 2)));
+    const off = Math.abs(placed.cy - targetPos / 2);
+    const offNearest = Math.abs(placed.cy - nearest / 2);
+    const ratio = placed.rx / placed.ry;
+    // shape first: a note that can't be read can't be on the right line
+    if (placed.ry > T.ryMax) return { ok: false, why: 'big', pos: nearest };
+    if (ratio < T.ratioMin) return { ok: false, why: 'circle', pos: nearest };
+    if (placed.ry < T.ryMin) return { ok: false, why: 'small', pos: nearest };
+    if (ratio > T.ratioMax) return { ok: false, why: 'flat', pos: nearest };
+    if (offNearest > T.centre) return { ok: false, why: 'half', pos: nearest };
+    if (nearest !== targetPos) return { ok: false, why: 'place', pos: nearest };
+    return { ok: off <= T.centre, why: 'ok', pos: nearest };
+  };
+  TA.NOTE_FEEDBACK = {
+    big: 'This note is too big: it crosses the lines around it.',
+    circle: 'This note is too round: make it an oval.',
+    small: 'This note is too small. Make it fill the space between two lines.',
+    flat: 'This note is too long and thin. Make it a little wider than it is tall.',
+    half: 'This note is half on a line. Is it a line or a space? No one can tell.',
+    place: null,           // generator explains: 'This note is in space 3. Put it on line 4.'
+    ok: 'This note is clear.'
+  };
+  // A placed clef: {x, ay, scale} where (x, ay) is where the clef's anchor (clef-strokes.json) landed, in staff
+  // spaces from the stave's left end and line 1, and scale is its size against the correct size (1 = right).
+  TA.CLEF_TOL = { anchor: 0.3, scaleMin: 0.85, scaleMax: 1.2, xMax: 3.5 };
+  TA.markClef = function (kind, placed, opts) {
+    const T = Object.assign({}, TA.CLEF_TOL, opts || {});
+    const lineY = kind === 'treble' ? 1 : 3;          // line 2 or line 4, in staff spaces above line 1
+    if (placed.scale < T.scaleMin) return { ok: false, why: 'small' };
+    if (placed.scale > T.scaleMax) return { ok: false, why: 'big' };
+    if (Math.abs(placed.ay - lineY) > T.anchor) return { ok: false, why: placed.ay > lineY ? 'high' : 'low' };
+    if (placed.x > T.xMax) return { ok: false, why: 'start' };
+    return { ok: true, why: 'ok' };
+  };
+  TA.CLEF_FEEDBACK = {
+    treble: {
+      small: 'Make the clef bigger. It reaches above the top line and below the bottom line.',
+      big: 'Make the clef smaller. It reaches only a little above the top line and below the bottom line.',
+      high: 'Move the clef down. The curl wraps around line 2.',
+      low: 'Move the clef up. The curl wraps around line 2.',
+      start: 'Move the clef to the start of the stave.',
+      ok: 'The curl wraps around line 2, so line 2 is G.'
+    },
+    bass: {
+      small: 'Make the clef bigger. It curves up over line 5 and sweeps down past line 2.',
+      big: 'Make the clef smaller. It curves up over line 5 and sweeps down past line 2.',
+      high: 'Move the clef down. The dots sit either side of line 4.',
+      low: 'Move the clef up. The dots sit either side of line 4.',
+      start: 'Move the clef to the start of the stave.',
+      ok: 'The dots sit either side of line 4, so line 4 is F.'
+    }
+  };
+
+  // ---------- Catmull-Rom for the hand-drawn clefs (same maths as diagrams.py smooth) ----------
+  TA.smooth = function (pts, n) {
+    n = n || 8;
+    if (pts.length < 3) return pts.slice();
+    const P = [pts[0]].concat(pts, [pts[pts.length - 1]]);
+    const out = [];
+    for (let i = 1; i < P.length - 2; i++) {
+      const p0 = P[i - 1], p1 = P[i], p2 = P[i + 1], p3 = P[i + 2];
+      for (let k = 0; k < n; k++) {
+        const t = k / n, t2 = t * t, t3 = t2 * t;
+        out.push([0, 1].map((j) => 0.5 * (2 * p1[j] + (-p0[j] + p2[j]) * t + (2 * p0[j] - 5 * p1[j] + 4 * p2[j] - p3[j]) * t2 +
+          (-p0[j] + 3 * p1[j] - 3 * p2[j] + p3[j]) * t3)));
+      }
+    }
+    out.push(pts[pts.length - 1]);
+    return out;
+  };
+
+  // ---------- colours and type (RULES.md section 6) ----------
+  TA.STYLE = {
+    base: '#3F3D8F', shade: '#2F2E6B', tint: '#D9D8E9', light: '#B2B1D2',
+    red: '#D8001D', ink: '#2B2B2B', grey: '#6E6E6E', pencil: '#4D4D4D', divider: '#B0B0B0', white: '#FFFFFF',
+    fontHead: 'Lexend', fontBody: 'Fira Sans', fontHand: 'Kalam', fontMusic: 'Bravura', fontMusicWords: 'Times New Roman'
+  };
+  TA.GLYPH = { gClef: '', fClef: '', whole: '', brace: '' };
+
+  // ---------- simple marking for choice, number, tick, text and box answers ----------
+  const norm = (v) => (typeof v === 'string' ? v.trim().toUpperCase() : v);
+  TA.same = function (a, b) {
+    if (Array.isArray(a) || Array.isArray(b)) {
+      if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) return false;
+      return a.every((x, i) => TA.same(x, b[i]));
+    }
+    return norm(a) === norm(b);
+  };
+  TA.sameSet = (a, b) => Array.isArray(a) && Array.isArray(b) && a.length === b.length &&
+    a.slice().sort().every((x, i) => x === b.slice().sort()[i]);
+  // which boxes of a multi-box answer are right: [true, false, ...]
+  TA.boxes = (answer, response) => answer.map((x, i) => Array.isArray(response) && TA.same(x, response[i]));
+
+  // registry the generators fill in: TA.GEN[lessonNumber][taskId] = { make(rng, task, lesson), mark(item, response) }
+  TA.GEN = TA.GEN || {};
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+/* ---- src/05-strings.js ---- */
+/* Theory Practice: every interface word that is not in curriculum/lessons.json. tests/check.js lints all of it.
+ * Starter set from the framework (2 November 2026). Add to it; keep it in NZ English, plain and short, no em dashes,
+ * no sentence starting with "A", no exclamation marks, and nothing that compares a student with other students.
+ */
+(function (G) {
+  'use strict';
+  const TA = G.TA;
+  TA.STRINGS = {
+    app: { name: 'Theory Practice', school: 'Tawa College Music Department' },
+    home: { lessons: 'Lessons', part1: 'Elements of Music', open: 'Open' },
+    lesson: { learn: 'Learn', practise: 'Practise', back: 'Back to the lessons', next: 'Next', previous: 'Back', start: 'Start practising',
+      learnTitle: "What we're learning", whatToDo: 'What to do', revision: 'Revision page' },
+    marking: { check: 'Check', correct: 'Correct.', wrong: 'Not this time.', tryAgain: 'Have another go.', showMe: 'Show me',
+      score: 'Your score', done: 'You have finished this lesson.', again: 'Practise again with new questions',
+      copyIn: 'Copy the answer in to move on.', fillAll: 'Fill in every box first.', model: 'This one is done for you.' },
+    results: { send: 'Send my results', sent: 'Your results are ready to send. Press Submit on the form.', saved: 'Saved on this device.' },
+    drag: { bank: 'Drag from here', resize: 'Drag a corner to change the size.', undo: 'Undo' },
+    // sentences the generators put together (src/09-gen-shared.js TA.fmt fills the {gaps})
+    explain: {
+      run: 'The letters go {dir}: {run}.',
+      octave: 'An octave has eight letters. This one goes up from {start} to the next {start}: {run}.',
+      findC: 'Every C is the white key just to the left of a group of two black keys.',
+      keyNames: 'Find the nearest C and go forwards one white key at a time. The boxed keys are {names}.',
+      higher: 'The {which} note sits higher on the stave, so it is the higher note.',
+      up: 'The second note is higher than the first, so the notes go up.',
+      down: 'The second note is lower than the first, so the notes go down.',
+      step: 'The second note is on the next line or space, so it is a step.',
+      leap: 'The second note skips over a line or space, so it is a leap.',
+      nameNote: 'The bottom line is {bottom}. Counting up to {place}, this note is {letter}.',
+      findLetter: 'The letter {letter} is {at}, so that is the note to choose.',
+      word: 'The notes spell {word}.',
+      copy: 'The light note is {at}, so the new note goes {at} too, the same size.',
+      namedLine: 'Count up from the bottom to {place}. The line goes through the middle of the note.',
+      namedSpace: 'Count up from the bottom to {place}. The note fills the space.',
+      lineAid: 'Say {aid} from the bottom line up. The word {word} starts with {letter}, so {letter} is on line {n}.',
+      spaceAidWords: 'Say {aid} from the bottom space up. The word {word} starts with {letter}, so {letter} is in space {n}.',
+      spaceAidFace: 'Say F, A, C, E from the bottom space up. The letter {letter} comes {nth}, so {letter} is in space {n}.',
+      spell: 'Each note goes where its letter is on the stave. The word is {word}.',
+      kinds: {
+        line: 'This note is clear: the line goes through the middle.',
+        space: 'This note is clear: it fills the space and just touches both lines.',
+        circle: 'This note is not clear: it is too round, so make it an oval.',
+        big: 'This note is not clear: it crosses the lines around it.',
+        half: 'This note is not clear: is it a line or a space? No one can tell.'
+      },
+      clefTreble: 'The curl wraps around line 2, so line 2 is G.',
+      clefBass: 'The dots sit either side of line 4, so line 4 is F.',
+      octaveKeys: 'The octave number goes up by one at each C. The boxed keys are {names}.',
+      noteOctave: 'The bottom line is {bottom}. Counting up to {place}, this note is {name}.',
+      grand: '{name} is in octave {octave}, so it goes on the {stave} stave, {at}.',
+      noteKey: 'The note is {name}. Count forwards from C{octave} on the keyboard to find {name}.'
+    },
+    placed: {
+      ok: 'This note is clear. It is {at}.',
+      place: 'This note is {at}. Put it {target}.',
+      sameSize: 'This note is not the same size as the light note. Make it the same size.',
+      letterFault: 'The note for {letter}: {fault}',
+      letterPlace: 'The note for {letter} is {at}.',
+      grandStave: 'The octave number tells you which stave to use.',
+      keyWrong: 'The note and its key do not match yet.'
+    }
+  };
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+/* ---- src/07-words.js ---- */
+/* GENERATED by build.py from curriculum/lessons.json (words). Do not edit: change the words in the JSON. */
+(function (G) { G.TA = G.TA || {}; G.TA.WORDS = {"short": ["ACE", "ADD", "AGE", "BAD", "BAG", "BED", "BEE", "CAB", "DAB", "DAD", "EGG", "FED", "FEE"], "medium": ["ACED", "AGED", "BEAD", "BEEF", "CAFE", "CAGE", "DEAF", "DEED", "EDGE", "FACE", "FADE", "FEED"], "long": ["ADDED", "BADGE", "CAGED", "EDGED", "FACED", "FADED", "BAGGED", "DECADE", "DEFACE", "FACADE", "BEGGED", "BAGGAGE", "CABBAGE"]}; })(typeof globalThis !== 'undefined' ? globalThis : this);
+
+/* ---- src/09-gen-shared.js ---- */
+/* Theory Practice: helpers shared by the generators (RULES 7.3). Logic only: no document, no window.
+ *   TA.drawSet   draw a whole set, test it, draw again if it fails (moved here from 10-gen-l01.js)
+ *   TA.fmt       fill {gaps} in a sentence from TA.STRINGS
+ *   TA.gx        marking helpers and the generator factories that more than one lesson uses
+ */
+(function (G) {
+  'use strict';
+  const TA = G.TA;
+  const P = TA.patterns;
+  const S = () => TA.STRINGS;
+
+  // Draw the items until the set keeps the rules (okItems), then draw the example until it keeps its rules
+  // against that set (okExample). Pass okExample = null for a revision lesson, which has no example. A generator
+  // that hits the limit has rules that are too tight to meet by chance: build the set more cleverly (e.g. shuffle a
+  // balanced list) rather than raising the limit.
+  const MAX_TRIES = 5000;
+  function drawSet(rng, n, makeOne, okItems, okExample) {
+    for (let t = 0; t < MAX_TRIES; t++) {
+      const items = [];
+      for (let i = 0; i < n; i++) items.push(makeOne(rng, i, items));
+      if (!okItems(items)) continue;
+      if (okExample === null) {            // a revision lesson: no worked example
+        items.forEach((it, i) => { it.id = it.type + '-' + i; });
+        return { items };
+      }
+      for (let e = 0; e < 200; e++) {
+        const example = makeOne(rng, n, items);
+        if (!okExample || okExample(example, items)) {
+          items.forEach((it, i) => { it.id = it.type + '-' + i; });
+          example.id = example.type + '-example';
+          return { items, example };
+        }
+      }
+    }
+    throw new Error('could not draw a set that keeps the rules');
+  }
+  TA.drawSet = drawSet;
+
+  TA.fmt = (text, vars) => String(text).replace(/\{(\w+)\}/g, (m, k) => (k in vars ? vars[k] : m));
+
+  const gx = (TA.gx = {});
+  const r2 = (x) => Math.round(x * 100) / 100;
+
+  // ---------- small helpers ----------
+  gx.at = (pos) => (TA.isLine(pos) ? 'on line ' + TA.lineNumber(pos) : 'in space ' + TA.spaceNumber(pos));
+  gx.words = () => [].concat(TA.WORDS.short, TA.WORDS.medium, TA.WORDS.long);
+  gx.pos = (it) => it.show.stave.notes[0].pos;
+  gx.right = (it) => S().marking.correct + ' ' + it.explain;
+  gx.wrong = (it) => S().marking.wrong + ' ' + it.explain;
+  gx.not = (a, b) => JSON.stringify(a) !== JSON.stringify(b);
+  // the example is never one of the items, and its answer differs from the first item's (RULES 4.4)
+  gx.okExample = (ex, items) => !items.some((i) => i.key === ex.key) && gx.not(ex.answer, items[0].answer);
+
+  // ---------- marking ----------
+  // a plain answer: choice, number, tick, tap-note
+  gx.markSame = function (item, response) {
+    const correct = TA.same(item.answer, response);
+    return { correct, feedback: correct ? gx.right(item) : gx.wrong(item) };
+  };
+  // boxes: an array of strings (any case); detail.boxes says which boxes were right
+  gx.markBoxes = function (item, response) {
+    const correct = TA.same(item.answer, response);
+    return { correct, feedback: correct ? gx.right(item) : gx.wrong(item), detail: { boxes: TA.boxes(item.answer, response) } };
+  };
+  // a placed note against one target position. extra(res) may add a reason it is still wrong (the size check)
+  gx.markPlacedNote = function (item, placed, target) {
+    const res = TA.markNote(placed, target);
+    let text;
+    if (res.ok) text = TA.fmt(S().placed.ok, { at: gx.at(res.pos) });
+    else if (res.why === 'place') text = TA.fmt(S().placed.place, { at: gx.at(res.pos), target: gx.at(target) });
+    else text = TA.NOTE_FEEDBACK[res.why];
+    return { correct: res.ok, feedback: (res.ok ? S().marking.correct : S().marking.wrong) + ' ' + text, detail: { why: res.why, pos: res.pos } };
+  };
+  gx.markClefPlaced = function (item, placed) {
+    const res = TA.markClef(item.clef, placed);
+    const text = TA.CLEF_FEEDBACK[item.clef][res.why];
+    return { correct: res.ok, feedback: (res.ok ? S().marking.correct : S().marking.wrong) + ' ' + text, detail: { why: res.why } };
+  };
+
+  // ---------- where a piece starts in the bank (RULES 4.7): never already inside the tolerance ----------
+  gx.bankClef = function (rng) {
+    const scale = rng.chance(0.5) ? 0.6 + rng() * 0.18 : 1.3 + rng() * 0.4;       // 60 to 78%, or 130 to 170%
+    return { scale: r2(scale) };
+  };
+  gx.bankNote = function (rng) {
+    const scale = rng.chance(0.5) ? 0.6 + rng() * 0.18 : 1.3 + rng() * 0.4;       // ry 0.30 to 0.39, or 0.65 to 0.85
+    const ratio = 1 + rng() * 1.2;                                                // width to height 1.0 to 2.2
+    return { scale: r2(scale), ratio: r2(ratio) };
+  };
+
+  // ---------- readings of a stave that Lessons 6, 9 and 12 share ----------
+  const stave = (clef, positions, look) => ({ clef, notes: positions.map((pos) => ({ pos, look: look || 'printed' })) });
+
+  gx.nameNote = function (clef) {
+    const bottom = TA.CLEFS[clef].bottom.letter;
+    const one = (task, pos) => ({
+      type: task.type, key: 'p' + pos, show: { stave: stave(clef, [pos]) }, input: { kind: 'boxes' }, answer: [TA.letterAt(clef, pos)],
+      explain: TA.fmt(S().explain.nameNote, { bottom, place: TA.placeName(pos), letter: TA.letterAt(clef, pos) })
+    });
+    return {
+      make(rng, task) {
+        return drawSet(rng, task.items, (r) => one(task, r.int(0, 8)), (items) => {
+          const pos = items.map(gx.pos);
+          return P.balanced(pos) && P.noRepeatNeighbours(pos) && P.noRepeatNeighbours(items.map((i) => i.answer[0])) && new Set(pos).size >= 6;
+        }, (ex, items) => !items.some((i) => i.key === ex.key) && ex.answer[0] !== items[0].answer[0]);
+      },
+      mark: gx.markBoxes
+    };
+  };
+
+  gx.findLetter = function (clef) {
+    return {
+      make(rng, task) {
+        const one = (r, letter) => {
+          const idx = r.int(0, task.choices - 1);
+          const others = r.shuffle(TA.LETTERS.filter((l) => l !== letter)).slice(0, task.choices - 1);
+          let o = 0;
+          const pos = [];
+          for (let i = 0; i < task.choices; i++) pos.push(r.pick(TA.positionsOfLetter(clef, i === idx ? letter : others[o++])));
+          return {
+            type: task.type, key: letter, letter, show: { stave: stave(clef, pos) }, input: { kind: 'tap-note', options: pos.map((x, i) => i) },
+            answer: idx, explain: TA.fmt(S().explain.findLetter, { letter, at: gx.at(pos[idx]) })
+          };
+        };
+        const rank = (it, which) => {                  // is the matching note the highest (or lowest) of its group?
+          const ps = it.show.stave.notes.map((n) => n.pos), m = ps[it.answer];
+          return which === 'hi' ? m === Math.max(...ps) : m === Math.min(...ps);
+        };
+        return drawSet(rng, task.items, (r, i, items) => {
+          const used = items.map((x) => x.letter);
+          return one(r, r.pick(TA.LETTERS.filter((l) => !used.includes(l))));
+        }, (items) => {
+          const ans = items.map((i) => i.answer);
+          return new Set(ans).size >= 2 && P.maxRun(ans) <= 2 && items.filter((i) => rank(i, 'hi')).length <= 2 &&
+            items.filter((i) => rank(i, 'lo')).length <= 2;
+        }, (ex, items) => !items.some((i) => i.key === ex.key) && ex.answer !== items[0].answer);
+      },
+      mark: gx.markSame
+    };
+  };
+
+  // hidden words: clef is 'treble', 'bass' or 'mixed' (Lesson 12: three of each, in a mixed order)
+  gx.hiddenWord = function (clefSetting) {
+    return {
+      make(rng, task) {
+        const all = gx.words();
+        const one = (r, i, items) => {
+          const clef = clefSetting === 'mixed' ? r.pick(['treble', 'bass']) : clefSetting;
+          const used = items.map((x) => x.word);
+          const word = r.pick(all.filter((w) => !used.includes(w)));
+          const pos = word.split('').map((l) => r.pick(TA.positionsOfLetter(clef, l)));
+          return {
+            type: task.type, key: word, word, show: { stave: stave(clef, pos) }, input: { kind: 'boxes' }, answer: word.split(''),
+            explain: TA.fmt(S().explain.word, { word })
+          };
+        };
+        const clefOf = (it) => it.show.stave.clef;
+        const okItems = (items) => {
+          const lens = items.map((i) => i.word.length);
+          if (clefSetting === 'mixed') {
+            const cl = items.map(clefOf);
+            return cl.filter((c) => c === 'treble').length === items.length / 2 && P.maxRun(cl) <= 2 && !P.alternates(cl) && new Set(lens).size >= 3;
+          }
+          return new Set(lens).size === items.length;          // words of different lengths
+        };
+        return drawSet(rng, task.items, one, okItems,
+          clefSetting === 'mixed' ? null : (ex, items) => !items.some((i) => i.key === ex.key) && gx.not(ex.answer, items[0].answer));
+      },
+      mark: gx.markBoxes
+    };
+  };
+
+  // ---------- drawing on a stave that Lessons 8 and 10 share ----------
+  // Task 1 and 2: a letter is given, the student places a note on its line or in its space
+  gx.placeLetter = function (clef, where) {
+    const pool = (where === 'line' ? [0, 2, 4, 6, 8] : [1, 3, 5, 7]).map((p) => ({ pos: p, letter: TA.letterAt(clef, p) }));
+    const aid = TA.AIDS[clef];
+    const explain = (letter, pos) => {
+      if (where === 'line') {
+        const k = TA.lineNumber(pos);
+        return TA.fmt(S().explain.lineAid, { aid: aid.lines.join(' '), word: aid.lines[k - 1], letter, n: k });
+      }
+      const k = TA.spaceNumber(pos);
+      if (clef === 'treble') return TA.fmt(S().explain.spaceAidFace, { letter, nth: ['first', 'second', 'third', 'fourth'][k - 1], n: k });
+      return TA.fmt(S().explain.spaceAidWords, { aid: aid.spaces.join(' '), word: aid.spaces[k - 1], letter, n: k });
+    };
+    return {
+      make(rng, task) {
+        const one = (r) => {
+          const c = r.pick(pool);
+          return {
+            type: task.type, key: c.letter, letter: c.letter, prompt: c.letter, show: { stave: stave(clef, []) },
+            input: { kind: 'place-note' }, answer: c.pos, explain: explain(c.letter, c.pos), bank: gx.bankNote(r)
+          };
+        };
+        // with four items and four places, the example needs one place left over, so one place is used twice
+        const distinctWanted = Math.min(task.items, pool.length - 1);
+        return drawSet(rng, task.items, one, (items) => {
+          const k = items.map((i) => i.key);
+          return new Set(k).size === distinctWanted && P.noRepeatNeighbours(k);
+        }, (ex, items) => !items.some((i) => i.key === ex.key) && ex.answer !== items[0].answer);
+      },
+      mark(item, response) { return gx.markPlacedNote(item, response, item.answer); }
+    };
+  };
+
+  // Task 3: spell a word. Either place is right for the letters that have two (E, F treble; A, G bass)
+  gx.spellWord = function (clef) {
+    return {
+      make(rng, task) {
+        const all = gx.words();
+        const one = (r, i, items) => {
+          const used = items.map((x) => x.word);
+          const word = r.pick(all.filter((w) => !used.includes(w)));
+          return {
+            type: task.type, key: word, word, prompt: word, show: { stave: stave(clef, []) }, input: { kind: 'place-notes' },
+            answer: word.split('').map((l) => TA.positionsOfLetter(clef, l)), explain: TA.fmt(S().explain.spell, { word }),
+            bank: gx.bankNote(r)
+          };
+        };
+        return drawSet(rng, task.items, one, (items) => new Set(items.map((i) => i.word.length)).size === items.length,
+          (ex, items) => !items.some((i) => i.key === ex.key) && gx.not(ex.answer, items[0].answer));
+      },
+      mark(item, response) {
+        const per = item.answer.map((places, i) => {
+          const tries = places.map((p) => TA.markNote(response[i], p));
+          return tries.find((t) => t.ok) || tries[0];
+        });
+        const bad = per.findIndex((t) => !t.ok);
+        if (bad < 0) return { correct: true, feedback: S().marking.correct + ' ' + item.explain, detail: { letters: per } };
+        const letter = item.word[bad];
+        const t = per[bad];
+        const fault = t.why === 'place' ? TA.fmt(S().placed.letterPlace, { letter, at: gx.at(t.pos) }) : TA.fmt(S().placed.letterFault, { letter, fault: TA.NOTE_FEEDBACK[t.why] });
+        return { correct: false, feedback: S().marking.wrong + ' ' + fault, detail: { letters: per } };
+      }
+    };
+  };
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+/* ---- src/10-gen-l01.js ---- */
+/* Lesson 1: The stave. REFERENCE GENERATOR, written with the framework: copy its shape for Lessons 2 to 12.
+ *
+ * Every generator file:
+ *   - registers TA.GEN[n][taskId] = { make(rng, task, lesson), mark(item, response) }
+ *   - draws a whole set, checks it against the pattern rules (TA.patterns) and draws again if it fails
+ *     (never "fixes" one item by hand: that leaves a pattern)
+ *   - returns { items, example }: the example is for the Learn screen's worked example and is never one of the items
+ *   - takes every student-facing word from the lesson data or a short sentence that passes TA.lint
+ *   - never touches the page (no document, no window): tests run it in Node
+ */
+(function (G) {
+  'use strict';
+  const TA = G.TA;
+  const P = TA.patterns;
+  TA.GEN[1] = TA.GEN[1] || {};
+
+  const drawSet = TA.drawSet;           // shared with the other generator files (src/09-gen-shared.js)
+
+  const oneNote = (type, pos, input, answer, explain) => ({
+    type, key: 'p' + pos, show: { stave: { clef: null, notes: [{ pos, look: 'printed' }] } }, input, answer, explain
+  });
+
+  // Task 1: line or space?
+  TA.GEN[1].t1 = {
+    make(rng, task) {
+      return drawSet(rng, task.items, (r) => {
+        const pos = r.int(0, 8);
+        const ans = TA.isLine(pos) ? 'line' : 'space';
+        return oneNote(task.type, pos, { kind: 'choice', options: ['line', 'space'] }, ans,
+          ans === 'line' ? 'There is a line going through it, so it is a line note.' : 'It sits between the lines, so it is a space note.');
+      }, (items) => {
+        const pos = items.map((i) => i.show.stave.notes[0].pos);
+        return P.binaryOk(items.map((i) => i.answer)) && P.balanced(pos) && P.noRepeatNeighbours(pos);
+      }, (ex, items) => !items.some((i) => i.key === ex.key) && ex.answer !== items[0].answer);
+    },
+    mark(item, response) {
+      const correct = TA.same(item.answer, response);
+      return { correct, feedback: correct ? 'Correct. ' + item.explain : 'Not this time. ' + item.explain };
+    }
+  };
+
+  // Tasks 2 and 3: which line? which space?
+  function numbered(kind) {
+    return {
+      make(rng, task) {
+        const places = kind === 'line' ? [0, 2, 4, 6, 8] : [1, 3, 5, 7];
+        return drawSet(rng, task.items, (r) => {
+          const pos = r.pick(places);
+          const num = kind === 'line' ? TA.lineNumber(pos) : TA.spaceNumber(pos);
+          return oneNote(task.type, pos, { kind: 'number', options: kind === 'line' ? [1, 2, 3, 4, 5] : [1, 2, 3, 4] }, num,
+            'Count up from ' + kind + ' 1. This note is ' + (kind === 'line' ? 'on ' : 'in ') + TA.placeName(pos) + '.');
+        }, (items) => {
+          const pos = items.map((i) => i.show.stave.notes[0].pos);
+          // the example is never one of the items, so the items leave out one place and repeat another
+          // (never side by side): RULES.md 4.4
+          return new Set(pos).size === Math.min(items.length, places.length - 1) && P.noRepeatNeighbours(pos);
+        }, (ex, items) => !items.some((i) => i.key === ex.key) && ex.answer !== items[0].answer);
+      },
+      mark(item, response) {
+        const correct = Number(response) === item.answer;
+        return { correct, feedback: (correct ? 'Correct. ' : 'Not this time. ') + item.explain };
+      }
+    };
+  }
+  TA.GEN[1].t2 = numbered('line');
+  TA.GEN[1].t3 = numbered('space');
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+/* ---- src/11-gen-l02.js ---- */
+/* Lesson 2: Clefs. Two tasks of 7 clefs each, placed and sized by the student (RULES 5.4). */
+(function (G) {
+  'use strict';
+  const TA = G.TA;
+  const gx = TA.gx;
+  TA.GEN[2] = TA.GEN[2] || {};
+
+  function clefTask(clef) {
+    const explain = clef === 'treble' ? TA.STRINGS.explain.clefTreble : TA.STRINGS.explain.clefBass;
+    return {
+      make(rng, task) {
+        // items 0 and 1 show a faint clef to cover (the trace); the rest have no guide. Items are numbered, so none is "the same".
+        const one = (r, i) => ({
+          type: task.type, key: 'clef' + i, clef, show: { stave: { clef: null, notes: [] }, trace: i < task.traced },
+          input: { kind: 'place-clef' }, answer: 'ok', explain, bank: gx.bankClef(r)
+        });
+        return TA.drawSet(rng, task.items, one, () => true, () => true);
+      },
+      mark: gx.markClefPlaced
+    };
+  }
+  TA.GEN[2].t1 = clefTask('treble');
+  TA.GEN[2].t2 = clefTask('bass');
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+/* ---- src/12-gen-l03.js ---- */
+/* Lesson 3: The musical alphabet. No notation here, so no stave. Rows of letter boxes. */
+(function (G) {
+  'use strict';
+  const TA = G.TA;
+  const P = TA.patterns;
+  const gx = TA.gx;
+  TA.GEN[3] = TA.GEN[3] || {};
+
+  const runText = (row) => row.join(' ');
+
+  // Tasks 1 and 2: the next letter (forwards) or the next two letters (going down)
+  function nextLetter() {
+    return {
+      make(rng, task) {
+        const dir = task.direction === 'forwards' ? 1 : -1;
+        const one = (r) => {
+          const start = r.pick(TA.LETTERS);
+          const row = TA.letterRun(start, task.shown + task.blanks, dir);
+          return {
+            type: task.type, key: start, direction: dir, show: { letters: row.slice(0, task.shown).concat(new Array(task.blanks).fill(null)) },
+            input: { kind: 'boxes' }, answer: row.slice(task.shown),
+            explain: TA.fmt(TA.STRINGS.explain.run, { dir: dir === 1 ? 'forwards' : 'backwards', run: runText(row) })
+          };
+        };
+        // the book's hint is "after G comes A" (or before A comes G), so one row in each set goes round the end
+        const wraps = (it) => {
+          const row = TA.letterRun(it.key, task.shown + task.blanks, dir);
+          return row.some((l, i) => i > 0 && (dir === 1 ? row[i - 1] === 'G' && l === 'A' : row[i - 1] === 'A' && l === 'G'));
+        };
+        return TA.drawSet(rng, task.items, one, (items) => P.distinct(items.map((i) => i.key)) && items.some(wraps),
+          (ex, items) => gx.okExample(ex, items));
+      },
+      mark: gx.markBoxes
+    };
+  }
+  TA.GEN[3].t1 = nextLetter();
+  TA.GEN[3].t2 = nextLetter();
+
+  // Task 3: fill the gaps. Rows go forwards or backwards in a mix, and nothing shows which.
+  TA.GEN[3].t3 = {
+    make(rng, task) {
+      const one = (r, i, items) => {
+        const dir = r.chance(0.5) ? 1 : -1;
+        const start = r.pick(TA.LETTERS);
+        const row = TA.letterRun(start, task.length, dir);
+        const gaps = r.shuffle([...Array(task.length).keys()]).slice(0, task.gaps).sort((a, b) => a - b);
+        return {
+          type: task.type, key: start + (dir === 1 ? 'f' : 'b') + gaps.join(''), direction: dir,
+          show: { letters: row.map((l, k) => (gaps.includes(k) ? null : l)) }, input: { kind: 'boxes' },
+          answer: gaps.map((k) => row[k]),
+          explain: TA.fmt(TA.STRINGS.explain.run, { dir: dir === 1 ? 'forwards' : 'backwards', run: runText(row) })
+        };
+      };
+      return TA.drawSet(rng, task.items, one, (items) => {
+        const d = items.map((i) => i.direction);
+        return P.distinct(items.map((i) => i.key)) && P.maxRun(d) <= 2 && !P.alternates(d) && new Set(d).size === 2;
+      }, (ex, items) => gx.okExample(ex, items));
+    },
+    mark: gx.markBoxes
+  };
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+/* ---- src/13-gen-l04.js ---- */
+/* Lesson 4: Letter names on the keyboard. Keys have letters but no octave numbers yet. */
+(function (G) {
+  'use strict';
+  const TA = G.TA;
+  const P = TA.patterns;
+  const gx = TA.gx;
+  TA.GEN[4] = TA.GEN[4] || {};
+  const NOT_C = ['D', 'E', 'F', 'G', 'A', 'B'];
+  const keyboard = (keys, boxes) => ({ keys, boxes: boxes || [], given: {}, octaveLabels: false });
+
+  // Task 1: tap every C on one long keyboard that does not start on C
+  TA.GEN[4].t1 = {
+    make(rng, task) {
+      const one = (r, i) => {
+        const start = r.pick(NOT_C);
+        const keys = TA.whiteKeys(start, i < task.items ? task.whiteKeys : 15);   // the worked example is a shorter keyboard
+        return {
+          type: task.type, key: 'kb' + start + keys.length, show: { keyboard: keyboard(keys) }, input: { kind: 'keys' },
+          answer: keys.map((k, x) => (k.letter === 'C' ? x : -1)).filter((x) => x >= 0), explain: TA.STRINGS.explain.findC
+        };
+      };
+      return TA.drawSet(rng, task.items, one, () => true, (ex, items) => ex.show.keyboard.keys[0].letter !== items[0].show.keyboard.keys[0].letter);
+    },
+    mark(item, response) {
+      const correct = TA.sameSet(item.answer, response);
+      const got = Array.isArray(response) ? response : [];
+      return {
+        correct, feedback: correct ? gx.right(item) : gx.wrong(item),
+        detail: { missed: item.answer.filter((x) => !got.includes(x)), extra: got.filter((x) => !item.answer.includes(x)) }
+      };
+    }
+  };
+
+  // Task 2: name four boxed white keys on an 11-key keyboard (a different starting letter each time)
+  TA.GEN[4].t2 = {
+    make(rng, task) {
+      const one = (r) => {
+        const start = r.pick(TA.LETTERS);
+        const keys = TA.whiteKeys(start, task.whiteKeys);
+        const firstC = keys.findIndex((k) => k.letter === 'C');
+        // every box has a C at or before it, as the hint says ("find the nearest C, go forwards")
+        const choices = keys.map((k, x) => x).filter((x) => x >= firstC);
+        const boxes = r.shuffle(choices).slice(0, task.boxes).sort((a, b) => a - b);
+        return {
+          type: task.type, key: 'kb' + start, show: { keyboard: keyboard(keys, boxes) }, input: { kind: 'boxes' },
+          answer: boxes.map((x) => keys[x].letter),
+          explain: TA.fmt(TA.STRINGS.explain.keyNames, { names: boxes.map((x) => keys[x].letter).join(' ') })
+        };
+      };
+      const spread = (it) => new Set(it.answer).size >= 3 && it.answer.filter((l) => l === 'C').length <= 1;
+      return TA.drawSet(rng, task.items, one, (items) => items.every(spread) && P.distinct(items.map((i) => i.key)),
+        (ex, items) => spread(ex) && gx.okExample(ex, items));
+    },
+    mark: gx.markBoxes
+  };
+
+  // Task 3: fill in the octave: eight letters from a letter up to the same letter
+  TA.GEN[4].t3 = {
+    make(rng, task) {
+      const one = (r) => {
+        const start = r.pick(TA.LETTERS);
+        const row = TA.letterRun(start, task.length - 1, 1).concat([start]);
+        return {
+          type: task.type, key: start, direction: 1, show: { letters: [start].concat(new Array(task.length - 1).fill(null)) },
+          input: { kind: 'boxes' }, answer: row.slice(1),
+          explain: TA.fmt(TA.STRINGS.explain.octave, { start, run: row.join(' ') })
+        };
+      };
+      return TA.drawSet(rng, task.items, one, (items) => P.distinct(items.map((i) => i.key)), (ex, items) => gx.okExample(ex, items));
+    },
+    mark: gx.markBoxes
+  };
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+/* ---- src/14-gen-l05.js ---- */
+/* Lesson 5: Higher and lower. Pairs of notes on a stave with no clef. Never the same note twice. */
+(function (G) {
+  'use strict';
+  const TA = G.TA;
+  const P = TA.patterns;
+  const gx = TA.gx;
+  TA.GEN[5] = TA.GEN[5] || {};
+
+  const pair = (type, a, b, input, answer, explain) => ({
+    type, key: a + '-' + b, show: { stave: { clef: null, notes: [{ pos: a, look: 'printed' }, { pos: b, look: 'printed' }] } }, input, answer, explain
+  });
+  const two = (r) => { const a = r.int(0, 8); let b = r.int(0, 7); if (b >= a) b++; return [a, b]; };      // two different places
+  const E = () => TA.STRINGS.explain;
+
+  TA.GEN[5].t1 = {
+    make(rng, task) {
+      return TA.drawSet(rng, task.items, (r) => {
+        const [a, b] = two(r);
+        const ans = b > a ? 1 : 0;
+        return pair(task.type, a, b, { kind: 'tap-note', options: [0, 1] }, ans, TA.fmt(E().higher, { which: ans === 1 ? 'second' : 'first' }));
+      }, (items) => P.binaryOk(items.map((i) => i.answer)) && P.distinct(items.map((i) => i.key)), gx.okExample);
+    },
+    mark: gx.markSame
+  };
+
+  TA.GEN[5].t2 = {
+    make(rng, task) {
+      return TA.drawSet(rng, task.items, (r) => {
+        const [a, b] = two(r);
+        return pair(task.type, a, b, { kind: 'choice', options: ['up', 'down'] }, b > a ? 'up' : 'down', b > a ? E().up : E().down);
+      }, (items) => P.binaryOk(items.map((i) => i.answer)) && P.distinct(items.map((i) => i.key)), gx.okExample);
+    },
+    mark: gx.markSame
+  };
+
+  TA.GEN[5].t3 = {
+    make(rng, task) {
+      return TA.drawSet(rng, task.items, (r) => {
+        const [a, b] = two(r);
+        const step = Math.abs(a - b) === 1;
+        return pair(task.type, a, b, { kind: 'choice', options: ['step', 'leap'] }, step ? 'step' : 'leap', step ? E().step : E().leap);
+      }, (items) => {
+        const ans = items.map((i) => i.answer);
+        const dirs = items.map((i) => i.show.stave.notes[1].pos > i.show.stave.notes[0].pos);
+        const sizes = items.filter((i) => i.answer === 'leap').map((i) => Math.abs(i.show.stave.notes[1].pos - i.show.stave.notes[0].pos));
+        return P.binaryOk(ans) && P.distinct(items.map((i) => i.key)) && ans.filter((x) => x === 'step').length >= 2 &&
+          ans.filter((x) => x === 'leap').length >= 2 && new Set(dirs).size === 2 && new Set(sizes).size >= 2;
+      }, gx.okExample);
+    },
+    mark: gx.markSame
+  };
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+/* ---- src/15-gen-l06.js ---- */
+/* Lesson 6: Treble clef notes. The shared readings live in 09-gen-shared.js. */
+(function (G) {
+  'use strict';
+  const TA = G.TA;
+  TA.GEN[6] = { t1: TA.gx.nameNote('treble'), t2: TA.gx.findLetter('treble'), t3: TA.gx.hiddenWord('treble') };
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+/* ---- src/16-gen-l07.js ---- */
+/* Lesson 7: Drawing notes. The student places a pencil oval and sizes it. Marking is TA.markNote (RULES 5.3). */
+(function (G) {
+  'use strict';
+  const TA = G.TA;
+  const P = TA.patterns;
+  const gx = TA.gx;
+  TA.GEN[7] = TA.GEN[7] || {};
+  const CLEF = 'treble';
+  const STD = { rx: 0.82, ry: 0.5 };                  // the book's pencil oval
+  const stave = (notes) => ({ clef: CLEF, notes });
+  const place = (task, pos) => TA.placeName(pos);
+
+  // Task 1: copy the light note: the same line or space, and the same size (within 20%)
+  TA.GEN[7].t1 = {
+    make(rng, task) {
+      const one = (r) => {
+        const pos = r.int(0, 8);
+        return {
+          type: task.type, key: 'p' + pos, show: { stave: stave([{ pos, look: 'light', rx: STD.rx, ry: STD.ry }]) },
+          input: { kind: 'place-note' }, answer: pos, explain: TA.fmt(TA.STRINGS.explain.copy, { at: gx.at(pos) }), bank: gx.bankNote(r)
+        };
+      };
+      return TA.drawSet(rng, task.items, one, (items) => {
+        const pos = items.map(gx.pos);
+        return P.balanced(pos) && P.noRepeatNeighbours(pos) && new Set(pos).size >= items.length - 1;
+      }, (ex, items) => !items.some((i) => i.key === ex.key) && ex.answer !== items[0].answer);
+    },
+    mark(item, response) {
+      const m = gx.markPlacedNote(item, response, item.answer);
+      if (!m.correct) return m;
+      const light = item.show.stave.notes[0];
+      const same = Math.abs(response.rx - light.rx) <= 0.2 * light.rx && Math.abs(response.ry - light.ry) <= 0.2 * light.ry;
+      return same ? m : { correct: false, feedback: TA.STRINGS.marking.wrong + ' ' + TA.STRINGS.placed.sameSize, detail: { why: 'size', pos: m.detail.pos } };
+    }
+  };
+
+  // Task 2: place a note on a named line or in a named space
+  TA.GEN[7].t2 = {
+    make(rng, task) {
+      const one = (r) => {
+        const pos = r.int(0, 8);
+        const label = TA.isLine(pos) ? 'line ' + TA.lineNumber(pos) : 'space ' + TA.spaceNumber(pos);
+        return {
+          type: task.type, key: label, label, prompt: label[0].toUpperCase() + label.slice(1), show: { stave: stave([]) },
+          input: { kind: 'place-note' }, answer: pos,
+          explain: TA.fmt(TA.isLine(pos) ? TA.STRINGS.explain.namedLine : TA.STRINGS.explain.namedSpace, { place: label }), bank: gx.bankNote(r)
+        };
+      };
+      return TA.drawSet(rng, task.items, one, (items) => P.balanced(items.map((i) => i.answer)) && P.distinct(items.map((i) => i.key)),
+        (ex, items) => !items.some((i) => i.key === ex.key) && ex.answer !== items[0].answer);
+    },
+    mark(item, response) { return gx.markPlacedNote(item, response, item.answer); }
+  };
+
+  // Task 3: is each note drawn clearly? Tick or cross. One of each kind in a set, the five kinds from lessons.json.
+  TA.GEN[7].t3 = {
+    make(rng, task, lesson) {
+      const kinds = Object.keys(lesson.noteKinds).filter((k) => !k.startsWith('_'));
+      // deal the five kinds in a shuffled order, then pick a place for each
+      for (let t = 0; t < 5000; t++) {
+        const order = rng.shuffle(kinds);
+        const items = order.map((kind) => note(rng, task, lesson, kind));
+        const ans = items.map((i) => i.answer);
+        if (!P.binaryOk(ans) || !P.noRepeatNeighbours(items.map((i) => i.key)) || !P.distinct(items.map((i) => i.key))) continue;
+        for (let e = 0; e < 200; e++) {
+          const ex = note(rng, task, lesson, rng.pick(kinds));
+          if (!items.some((i) => i.key === ex.key) && ex.answer !== items[0].answer) {
+            items.forEach((it, i) => { it.id = it.type + '-' + i; });
+            ex.id = ex.type + '-example';
+            return { items, example: ex };
+          }
+        }
+      }
+      throw new Error('could not draw a set that keeps the rules');
+    },
+    mark: gx.markSame
+  };
+  function note(r, task, lesson, kind) {
+    const k = lesson.noteKinds[kind];
+    const pos = kind === 'line' ? r.pick([0, 2, 4, 6, 8]) : kind === 'space' ? r.pick([1, 3, 5, 7]) : r.int(0, 8);
+    const n = { pos, look: kind, rx: k.rx, ry: k.ry };
+    if (k.offset) n.dy = r.chance(0.5) ? k.offset : -k.offset;
+    return {
+      type: task.type, key: kind + pos, kind, show: { stave: stave([n]) }, input: { kind: 'tick', options: ['tick', 'cross'] },
+      answer: k.clear ? 'tick' : 'cross', explain: TA.STRINGS.explain.kinds[kind]
+    };
+  }
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+/* ---- src/17-gen-l08.js ---- */
+/* Lesson 8: Treble clef memory aids. Place notes from a printed letter: line notes, space notes, then spell a word. */
+(function (G) {
+  'use strict';
+  const TA = G.TA;
+  TA.GEN[8] = { t1: TA.gx.placeLetter('treble', 'line'), t2: TA.gx.placeLetter('treble', 'space'), t3: TA.gx.spellWord('treble') };
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+/* ---- src/18-gen-l09.js ---- */
+/* Lesson 9: Bass clef notes. Same tasks as Lesson 6 on the bass clef. */
+(function (G) {
+  'use strict';
+  const TA = G.TA;
+  TA.GEN[9] = { t1: TA.gx.nameNote('bass'), t2: TA.gx.findLetter('bass'), t3: TA.gx.hiddenWord('bass') };
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+/* ---- src/19-gen-l10.js ---- */
+/* Lesson 10: Bass clef memory aids. Same tasks as Lesson 8 on the bass clef. */
+(function (G) {
+  'use strict';
+  const TA = G.TA;
+  TA.GEN[10] = { t1: TA.gx.placeLetter('bass', 'line'), t2: TA.gx.placeLetter('bass', 'space'), t3: TA.gx.spellWord('bass') };
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+/* ---- src/20-gen-l11.js ---- */
+/* Lesson 11: Notes on the keyboard. The keyboard runs C2 to B5. Octave numbers come in here. */
+(function (G) {
+  'use strict';
+  const TA = G.TA;
+  const P = TA.patterns;
+  const gx = TA.gx;
+  TA.GEN[11] = TA.GEN[11] || {};
+
+  // Task 1: write the letter and octave number in 8 boxed white keys. Every C is given, plus a few other keys.
+  TA.GEN[11].t1 = {
+    make(rng, task) {
+      const keys = TA.whiteKeysBetween(task.from, task.to);
+      const one = (r) => {
+        const boxes = [], others = [];
+        for (let oct = 0; oct < 4; oct++) {                     // two boxes in every octave, and one more key given
+          const idx = [1, 2, 3, 4, 5, 6].map((k) => oct * 7 + k);     // every white key in the octave except C
+          const pick = r.shuffle(idx);
+          boxes.push(pick[0], pick[1]);
+          others.push(pick[2]);
+        }
+        boxes.sort((a, b) => a - b);
+        const given = {};
+        keys.forEach((k, x) => { if (k.letter === 'C' || others.includes(x)) given[x] = TA.noteName(k); });
+        return {
+          type: task.type, key: 'kb' + boxes.join('-'), show: { keyboard: { keys, boxes, given, octaveLabels: true } }, input: { kind: 'boxes' },
+          answer: boxes.map((x) => TA.noteName(keys[x])), explain: TA.fmt(TA.STRINGS.explain.octaveKeys, { names: boxes.map((x) => TA.noteName(keys[x])).join(' ') })
+        };
+      };
+      return TA.drawSet(rng, task.items, one, () => true, gx.okExample);
+    },
+    mark: gx.markBoxes
+  };
+
+  // Tasks 2 and 3: name the note and its octave. Both octaves of the clef come up in every set.
+  function noteOctave(clef) {
+    const bottom = TA.CLEFS[clef].bottom.letter + (TA.CLEFS[clef].bottom.octave);
+    return {
+      make(rng, task) {
+        const one = (r) => {
+          const pos = r.int(0, 8);
+          const name = TA.noteName(TA.noteAt(clef, pos));
+          return {
+            type: task.type, key: 'p' + pos, show: { stave: { clef, notes: [{ pos, look: 'printed' }] } }, input: { kind: 'boxes' }, answer: [name],
+            explain: TA.fmt(TA.STRINGS.explain.noteOctave, { bottom, place: TA.placeName(pos), name })
+          };
+        };
+        return TA.drawSet(rng, task.items, one, (items) => {
+          const pos = items.map(gx.pos);
+          const oct = pos.map((p) => TA.octaveOf(clef, p));
+          const counts = [...new Set(oct)].map((o) => oct.filter((x) => x === o).length);
+          return P.balanced(pos) && P.distinct(pos) && counts.length === 2 && Math.min(...counts) >= 2 && P.noRepeatNeighbours(items.map((i) => i.answer[0]));
+        }, (ex, items) => !items.some((i) => i.key === ex.key) && ex.answer[0] !== items[0].answer[0]);
+      },
+      mark: gx.markBoxes
+    };
+  }
+  TA.GEN[11].t2 = noteOctave('treble');
+  TA.GEN[11].t3 = noteOctave('bass');
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+/* ---- src/21-gen-l12.js ---- */
+/* Lesson 12: Revision, reading notes. No Learn screen and no worked example. */
+(function (G) {
+  'use strict';
+  const TA = G.TA;
+  const P = TA.patterns;
+  const gx = TA.gx;
+  TA.GEN[12] = TA.GEN[12] || {};
+
+  // Task 1: six hidden words, three in each clef, in a mixed order
+  TA.GEN[12].t1 = gx.hiddenWord('mixed');
+
+  // Task 2: the grand staff. Notes that sit on one of the two staves with no ledger lines (Middle C is left out).
+  // The first item is shown done, as a model (item.model), and is not scored.
+  const GRAND = [];
+  for (const stave of ['treble', 'bass']) for (let p = 0; p <= 8; p++) GRAND.push({ stave, pos: p, name: TA.noteName(TA.noteAt(stave, p)) });
+  TA.GEN[12].t2 = {
+    make(rng, task) {
+      const staves = [{ clef: 'treble', notes: [] }, { clef: 'bass', notes: [] }];
+      const one = (r, i, items) => {
+        const used = items.map((x) => x.key);
+        const c = r.pick(GRAND.filter((g) => !used.includes(g.name)));
+        const octave = TA.parseNote(c.name).octave;
+        return {
+          type: task.type, key: c.name, note: c.name, prompt: c.name, show: { staves }, input: { kind: 'grand-place' },
+          answer: { stave: c.stave, pos: c.pos }, bank: gx.bankNote(r), model: i === 0,
+          explain: TA.fmt(TA.STRINGS.explain.grand, { name: c.name, octave, stave: c.stave, at: gx.at(c.pos) })
+        };
+      };
+      return TA.drawSet(rng, task.items, one, (items) => {
+        const st = items.map((i) => i.answer.stave);
+        const treble = st.filter((s) => s === 'treble').length;
+        return Math.abs(treble - (st.length - treble)) <= 1 && P.maxRun(st) <= 2 && !P.alternates(st);
+      }, null);
+    },
+    mark(item, response) {
+      const ok = response && response.stave === item.answer.stave;
+      if (!ok) return { correct: false, feedback: TA.STRINGS.marking.wrong + ' ' + TA.STRINGS.placed.grandStave + ' ' + item.explain, detail: { why: 'stave' } };
+      const m = gx.markPlacedNote(item, response, item.answer.pos);
+      return m.correct ? { correct: true, feedback: TA.STRINGS.marking.correct + ' ' + item.explain, detail: m.detail } : m;
+    }
+  };
+
+  // Task 3: name the note, then tap its key on the C2 to B5 keyboard. Bass notes first, then treble notes.
+  TA.GEN[12].t3 = {
+    make(rng, task) {
+      const names = TA.whiteKeysBetween(task.from, task.to).map(TA.noteName);
+      const half = task.items / 2;
+      const one = (r, i) => {
+        const clef = i < half ? 'bass' : 'treble';
+        const pos = r.int(0, 8);
+        const name = TA.noteName(TA.noteAt(clef, pos));
+        return {
+          type: task.type, key: name, show: { stave: { clef, notes: [{ pos, look: 'printed' }] }, keyboard: { from: task.from, to: task.to, octaveLabels: true } },
+          input: { kind: 'note-and-key' }, answer: { name, key: names.indexOf(name) },
+          explain: TA.fmt(TA.STRINGS.explain.noteKey, { name, octave: TA.noteAt(clef, pos).octave })
+        };
+      };
+      const group = (items, from, to) => items.slice(from, to).map(gx.pos);
+      const mono = (p) => p.every((x, i) => i === 0 || x > p[i - 1]) || p.every((x, i) => i === 0 || x < p[i - 1]);
+      return TA.drawSet(rng, task.items, one, (items) => {
+        const b = group(items, 0, half), t = group(items, half, items.length);
+        return P.distinct(items.map((i) => i.key)) && P.balanced(b) && P.balanced(t) && !mono(b) && !mono(t);
+      }, null);
+    },
+    mark(item, response) {
+      const nameOk = response && String(response.name).trim().toUpperCase() === item.answer.name;
+      const keyOk = response && response.key === item.answer.key;
+      const correct = !!(nameOk && keyOk);
+      return {
+        correct, feedback: correct ? gx.right(item) : gx.wrong(item), detail: { name: !!nameOk, key: !!keyOk }
+      };
+    }
+  };
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+/* ---- ui/10-draw.js ---- */
+/* Theory Practice: the drawing engine (SVG as strings). Everything is drawn in staff-space units (1 unit = the gap
+ * between two lines), then scaled by the browser. y runs down the page in the SVG; "up" values (cy, ay) are measured
+ * up from line 1 as in src/00-core.js. RULES 6.4: red only on notation; RULES 6.5: student work is pencil. */
+(function (G) {
+  'use strict';
+  const TA = G.TA;
+  const C = TA.STYLE;
+  const D = (TA.draw = {});
+
+  D.esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  const n2 = (x) => Math.round(x * 100) / 100;
+  const at = (o) => Object.keys(o).filter((k) => o[k] !== undefined && o[k] !== null && o[k] !== false)
+    .map((k) => k + '="' + D.esc(typeof o[k] === 'number' ? n2(o[k]) : o[k]) + '"').join(' ');
+  D.tag = (name, o, inner) => '<' + name + ' ' + at(o || {}) + (inner === undefined ? '/>' : '>' + inner + '</' + name + '>');
+
+  // **bold** in the lesson data becomes <strong>
+  D.rich = (s) => D.esc(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+
+  // An SVG that scales with its box. W and H are in staff spaces. The box grows to at most --sp pixels a space.
+  D.svg = function (W, H, inner, o) {
+    o = o || {};
+    return '<svg ' + at({
+      viewBox: '0 0 ' + n2(W) + ' ' + n2(H), class: 'st' + (o.cls ? ' ' + o.cls : ''), xmlns: 'http://www.w3.org/2000/svg',
+      style: 'width:100%;max-width:calc(var(--sp,26px) * ' + n2(W * (o.scale || 1)) + ');aspect-ratio:' + n2(W) + '/' + n2(H),
+      role: o.label ? 'img' : 'presentation', 'aria-label': o.label, 'aria-hidden': o.label ? undefined : 'true', 'data-w': n2(W), 'data-h': n2(H)
+    }) + '>' + inner + '</svg>';
+  };
+
+  // ---------- the stave ----------
+  // top = y of line 5. line k (1 to 5) is at y = top + (5 - k). pos p is at y = top + (8 - p) / 2.
+  D.y = (top, pos) => top + (8 - pos) / 2;
+  D.yUp = (top, up) => top + 4 - up;                       // up = staff spaces above line 1
+  D.lines = function (x0, x1, top, o) {
+    o = o || {};
+    let s = '';
+    for (let k = 0; k < 5; k++) s += D.tag('line', { x1: x0, x2: x1, y1: top + k, y2: top + k, stroke: o.color || C.ink, 'stroke-width': o.w || 0.07 });
+    return s;
+  };
+  D.barLine = (x, top, o) => D.tag('line', { x1: x, x2: x, y1: top, y2: top + 4, stroke: (o && o.color) || C.ink, 'stroke-width': (o && o.w) || 0.07 });
+
+  // ---------- printed music (Bravura) ----------
+  D.glyph = (cp, x, y, size, color, extra) => D.tag('text', Object.assign({ x, y, 'font-size': size || 4, fill: color || C.ink, class: 'mus' }, extra || {}), String.fromCodePoint(cp));
+  D.clefPrinted = function (kind, x, top, color) {
+    return kind === 'treble' ? D.glyph(0xE050, x, top + 3, 4, color) : D.glyph(0xE062, x, top + 1, 4, color);   // treble on line 2, bass on line 4
+  };
+  D.CLEF_W = 2.75;
+  D.notePrinted = (cx, y, color) => D.glyph(0xE0A2, cx - 0.844, y, 4, color);          // the whole-note glyph is 1.688 wide, centred on its baseline
+
+  // ---------- pencil (student work) ----------
+  D.oval = function (cx, y, rx, ry, o) {
+    o = o || {};
+    return D.tag('ellipse', { cx, cy: y, rx, ry, fill: o.fill || 'none', stroke: o.color || C.pencil, 'stroke-width': o.w || 0.12, 'stroke-dasharray': o.dash, class: o.cls });
+  };
+  D.tick = (x, y, s, color) => D.tag('path', { d: 'M' + (x - s * 0.5) + ' ' + y + ' L' + (x - s * 0.12) + ' ' + (y + s * 0.42) + ' L' + (x + s * 0.55) + ' ' + (y - s * 0.5), fill: 'none',
+    stroke: color || C.base, 'stroke-width': s * 0.16, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' });
+  D.cross = (x, y, s, color) => D.tag('path', { d: 'M' + (x - s * 0.45) + ' ' + (y - s * 0.45) + ' L' + (x + s * 0.45) + ' ' + (y + s * 0.45) + ' M' + (x + s * 0.45) + ' ' + (y - s * 0.45) + ' L' + (x - s * 0.45) + ' ' + (y + s * 0.45),
+    fill: 'none', stroke: color || C.red, 'stroke-width': s * 0.16, 'stroke-linecap': 'round' });
+  D.text = (str, x, y, o) => {
+    o = o || {};
+    return D.tag('text', { x, y, 'font-size': o.size || 0.9, fill: o.color || C.ink, 'text-anchor': o.anchor || 'middle', 'font-weight': o.weight, 'font-family': o.font, class: o.cls }, D.esc(str));
+  };
+  D.arrow = function (x1, y1, x2, y2, o) {
+    o = o || {};
+    const a = Math.atan2(y2 - y1, x2 - x1), h = o.head || 0.55;
+    const p = (da) => [x2 - h * Math.cos(a + da), y2 - h * Math.sin(a + da)];
+    const l = p(0.45), r = p(-0.45);
+    return D.tag('line', { x1, y1, x2: x2 - h * 0.6 * Math.cos(a), y2: y2 - h * 0.6 * Math.sin(a), stroke: o.color || C.red, 'stroke-width': o.w || 0.14 }) +
+      D.tag('path', { d: 'M' + x2 + ' ' + y2 + ' L' + l[0] + ' ' + l[1] + ' L' + r[0] + ' ' + r[1] + ' Z', fill: o.color || C.red });
+  };
+
+  // ---------- hand-drawn clefs (curriculum/clef-strokes.json, drawn through TA.smooth) ----------
+  // The group is placed so the clef's anchor lands at (ax, ay) (ay measured up from line 1) at the given scale.
+  // upTo = how many strokes to draw (default all); redLast makes the newest stroke red (Lesson 2 Learn steps).
+  D.clefHand = function (kind, ax, ay, scale, top, o) {
+    o = o || {};
+    const S = TA.STROKES[kind];
+    const steps = S.steps.slice(0, o.upTo === undefined ? S.steps.length : o.upTo);
+    const w = (o.w || 0.12) / scale;
+    const col = (i) => (o.redLast && i === steps.length - 1 ? C.red : o.color || C.pencil);
+    let inner = '';
+    steps.forEach((st, i) => {
+      const c = col(i);
+      if (st.type === 'line') {
+        const pts = TA.smooth(st.data, 8);
+        inner += D.tag('path', { d: 'M' + pts.map((p) => n2(p[0]) + ' ' + n2(p[1])).join(' L'), fill: 'none', stroke: c, 'stroke-width': w, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' });
+      } else if (st.type === 'dot') {
+        inner += D.tag('circle', { cx: st.data[0], cy: st.data[1], r: kind === 'treble' ? 0.2 : 0.3, fill: c });
+      } else if (st.type === 'dots') {
+        for (const p of st.data) inner += D.tag('circle', { cx: p[0], cy: p[1], r: 0.14, fill: c });
+      }
+      if (kind === 'treble' && i === 4 && S.blob) inner += D.tag('circle', { cx: S.blob[0], cy: S.blob[1], r: 0.2, fill: c });
+    });
+    const a = S.anchor;
+    return D.tag('g', { transform: 'translate(' + n2(ax) + ' ' + n2(D.yUp(top, ay)) + ') scale(' + n2(scale) + ' ' + n2(-scale) + ') translate(' + -a[0] + ' ' + -a[1] + ')', class: o.cls, opacity: o.opacity }, inner);
+  };
+  D.clefBox = function (kind, scale) {                 // the piece's box relative to its anchor, in staff spaces (for hit areas and handles)
+    const S = TA.STROKES[kind], e = S.extent, a = S.anchor;
+    return { x0: (e.x0 - a[0]) * scale, x1: (e.x1 - a[0]) * scale, yUp0: (e.y0 - a[1]) * scale, yUp1: (e.y1 - a[1]) * scale };
+  };
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+/* ---- ui/20-view.js ---- */
+/* Theory Practice: how every kind of exercise looks and answers. One builder for each family of items.
+ * A builder returns { html, bind(root, ctl) }. In practise mode bind() wires the inputs and returns
+ *   { get(), ready(), lock(on), reveal(), clear() }
+ * ctl.answer(response) is called for items that mark straight away (a tap or a choice); ctl.change() when a
+ * Check-button item changes. In example mode (the Learn screens) the item is shown with its answer drawn in pencil. */
+(function (G) {
+  'use strict';
+  const TA = G.TA;
+  const D = TA.draw, C = TA.STYLE;
+  const V = (TA.view = {});
+  const ST = () => TA.STRINGS;
+  const esc = D.esc;
+
+  V.CLEF_W = 3.4;                                           // room for a printed clef at the left of a stave
+  const PAD = { top: 2.1, bottom: 2.2 };                    // above and below the five lines when there is a clef
+  const NOCLEF = { top: 1.2, bottom: 1.2 };
+  V.pencilLabel = (txt) => '<span class="hand">' + esc(txt) + '</span>';
+
+  // ---------- geometry of a stave item ----------
+  // W, H, top (y of line 5), and the x of each note slot, from how many notes there are and whether there is a clef
+  V.staveGeom = function (clef, nNotes, o) {
+    o = o || {};
+    const pad = clef ? PAD : NOCLEF;
+    const x0 = clef ? V.CLEF_W + 0.5 : 1.2;
+    const slot = o.slot || 3.2;
+    const W = o.W || x0 + nNotes * slot + (o.right === undefined ? 0.8 : o.right);
+    const xs = []; for (let i = 0; i < nNotes; i++) xs.push(o.W && nNotes === 1 ? (x0 + W - 0.4) / 2 : x0 + slot * (i + 0.5));
+    return { W, top: pad.top, H: pad.top + 4 + pad.bottom + (o.extra || 0), xs, x0, lineX0: 0.2, lineX1: W - 0.2 };
+  };
+  V.staveBase = function (clef, g, o) {
+    o = o || {};
+    let s = D.lines(g.lineX0, g.lineX1, g.top, o);
+    if (clef) s += D.clefPrinted(clef, g.lineX0 + 0.35, g.top);
+    return s;
+  };
+
+  // a note as the book draws it: printed, light (to trace), or one of the Lesson 7 kinds in pencil
+  V.noteShape = function (n, x, g, o) {
+    o = o || {};
+    const y = D.y(g.top, n.pos) - (n.dy || 0);
+    if (n.look === 'light') return D.oval(x, y, n.rx || 0.82, n.ry || 0.5, { color: C.light, w: 0.16 });
+    if (n.look && n.look !== 'printed' && n.look !== 'pencil') return D.oval(x, y, n.rx, n.ry, { color: C.pencil, w: 0.12 });
+    if (n.look === 'pencil') return D.oval(x, y, 0.82, 0.5, { color: C.pencil });
+    return D.notePrinted(x, y, o.color || C.ink);
+  };
+
+  // ---------- HTML pieces ----------
+  const btn = (label, v, cls) => '<button type="button" class="btn opt ' + (cls || '') + '" data-v="' + esc(v) + '">' + esc(label) + '</button>';
+  const markSvg = (kind, indigo) => D.svg(1.2, 1.2, kind === 'tick' ? D.tick(0.6, 0.65, 1, C.base) : D.cross(0.6, 0.6, 1, indigo ? C.base : C.red), { cls: 'mk', scale: 1 });
+  V.markSvg = markSvg;
+  const box = (i, o) => '<input class="box' + (o && o.cls ? ' ' + o.cls : '') + '" data-i="' + i + '" maxlength="' + ((o && o.max) || 1) + '" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="' + esc((o && o.label) || 'Answer') + '"' +
+    (o && o.value ? ' value="' + esc(o.value) + '" readonly' : '') + '>';
+  const pct = (x, W) => n2(x / W * 100) + '%';
+  const n2 = (x) => Math.round(x * 100) / 100;
+
+  // wire a row of single-letter boxes: type to fill, move on, Enter checks
+  function wireBoxes(root, ctl, state) {
+    const boxes = [...root.querySelectorAll('input.box:not([readonly])')];
+    boxes.forEach((b, i) => {
+      b.addEventListener('input', () => {
+        b.value = b.value.toUpperCase();
+        if (b.value.length >= b.maxLength && boxes[i + 1]) boxes[i + 1].focus();
+        ctl.change();
+      });
+      b.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && !b.value && boxes[i - 1]) boxes[i - 1].focus();
+        if (e.key === 'ArrowLeft' && boxes[i - 1]) boxes[i - 1].focus();
+        if (e.key === 'ArrowRight' && boxes[i + 1]) boxes[i + 1].focus();
+        if (e.key === 'Enter') ctl.submit();
+      });
+    });
+    return {
+      get: () => boxes.map((b) => b.value.trim()),
+      ready: () => boxes.length > 0 && boxes.every((b) => b.value.trim().length >= 1),
+      lock: (on) => boxes.forEach((b) => { b.disabled = !!on; }),
+      clear: () => { boxes.forEach((b) => { b.value = ''; }); if (boxes[0]) boxes[0].focus(); },
+      reveal: (answer) => {
+        root.querySelectorAll('.model').forEach((m) => m.remove());
+        boxes.forEach((b, i) => {
+          const m = document.createElement('span');
+          m.className = 'model hand';
+          m.textContent = answer[i];
+          b.insertAdjacentElement('afterend', m);
+        });
+      }
+    };
+  }
+  V.wireBoxes = wireBoxes;
+
+  // ---------- notes on a stave, with options under them ----------
+  // line-or-space, which-line, which-space, up-down, step-leap
+  function choiceFamily(item, task, o) {
+    const st = item.show.stave, notes = st.notes;
+    const g = V.staveGeom(st.clef, notes.length, { slot: notes.length > 1 ? 4.2 : 3.2, W: notes.length > 1 ? 11 : 9 });
+    let s = V.staveBase(st.clef, g);
+    notes.forEach((n, i) => { s += V.noteShape(n, g.xs[i], g); });
+    const ex = o.mode === 'example';
+    if (ex) s += '<g class="ans">' + exampleMarks(item, g) + '</g>';
+    const opts = item.input.options.map((v) => btn(String(v), v, ex && TA.same(v, item.answer) ? 'pen' : '')).join('');
+    return {
+      html: D.svg(g.W, g.H, s, { label: 'Stave with ' + (notes.length === 1 ? 'one note' : 'two notes') }) + '<div class="opts">' + opts + '</div>',
+      bind(root, ctl) {
+        let locked = false;
+        root.querySelectorAll('button.opt').forEach((b) => b.addEventListener('click', () => {
+          if (locked) return;
+          const v = item.input.kind === 'number' ? Number(b.dataset.v) : b.dataset.v;
+          root.querySelectorAll('button.opt').forEach((x) => x.classList.toggle('chosen', x === b));
+          ctl.answer(v);
+        }));
+        return {
+          get: () => null, ready: () => false, lock: (on) => { locked = !!on; root.querySelectorAll('button.opt').forEach((b) => { b.disabled = !!on; }); },
+          clear: () => root.querySelectorAll('button.opt').forEach((b) => b.classList.remove('chosen')),
+          reveal: () => root.querySelectorAll('button.opt').forEach((b) => b.classList.toggle('pen', TA.same(b.dataset.v, String(item.answer)) || TA.same(Number(b.dataset.v), item.answer)))
+        };
+      }
+    };
+  }
+  // red marks the worked examples add: counting numbers, arrows, a line through the note
+  function exampleMarks(item, g) {
+    const st = item.show.stave, notes = st.notes;
+    const y = (p) => D.y(g.top, p);
+    let s = '';
+    if (item.type === 'line-or-space') {
+      const p = notes[0].pos, x = g.xs[0];
+      if (TA.isLine(p)) s += D.tag('line', { x1: x - 1.7, x2: x + 1.7, y1: y(p), y2: y(p), stroke: C.red, 'stroke-width': 0.14 });
+      else s += D.arrow(x + 1.6, y(p + 1), x + 1.6, y(p - 1) - 0.0, { head: 0.4 }) + D.arrow(x + 1.6, y(p - 1), x + 1.6, y(p + 1), { head: 0.4 });
+    } else if (item.type === 'which-line' || item.type === 'which-space') {
+      const p = notes[0].pos, x = g.lineX0 + 0.1;
+      const ps = item.type === 'which-line' ? [0, 2, 4, 6, 8] : [1, 3, 5, 7];
+      ps.filter((q) => q <= p).forEach((q, i) => { s += D.text(String(i + 1), g.xs[0] - 2.4, y(q) + 0.28, { size: 0.9, color: C.red, weight: 700 }); });
+    } else if (item.type === 'up-down' || item.type === 'step-leap') {
+      const a = notes[0].pos, b = notes[1].pos;
+      s += D.arrow(g.xs[0] + 1.1, y(a), g.xs[1] - 1.1, y(b), { head: 0.5 });
+    }
+    return s;
+  }
+
+  // ---------- tap a note: higher-note and find-letter ----------
+  function tapFamily(item, task, o) {
+    const st = item.show.stave, notes = st.notes;
+    const g = V.staveGeom(st.clef, notes.length, { slot: notes.length === 2 ? 4.4 : 3.6, right: 0.6, W: notes.length === 2 ? 11 : undefined });
+    let s = V.staveBase(st.clef, g);
+    notes.forEach((n, i) => { s += V.noteShape(n, g.xs[i], g); });
+    const ex = o.mode === 'example';
+    notes.forEach((n, i) => { s += D.tag('rect', { x: g.xs[i] - 1.5, y: D.y(g.top, n.pos) - 1.4, width: 3, height: 2.8, fill: 'transparent', class: 'tap', 'data-i': i, tabindex: ex ? undefined : 0, role: ex ? undefined : 'button', 'aria-label': ex ? undefined : 'Note ' + (i + 1) }); });
+    s += '<g class="sel"></g>';
+    if (ex) s += '<g class="ans">' + D.oval(g.xs[item.answer], D.y(g.top, notes[item.answer].pos), 1.35, 0.95, { color: C.pencil, w: 0.13 }) + '</g>';
+    const prompt = item.type === 'find-letter' ? '<div class="prompt-letter">' + esc(item.letter) + '</div>' : '';
+    return {
+      html: D.svg(g.W, g.H, s, { label: 'Stave with ' + notes.length + ' notes' }) + prompt,
+      bind(root, ctl) {
+        let locked = false;
+        const svg = root.querySelector('svg'), sel = svg.querySelector('.sel');
+        const circle = (i, cls) => { sel.innerHTML = D.oval(g.xs[i], D.y(g.top, notes[i].pos), 1.35, 0.95, { color: C.pencil, w: 0.13 }); };
+        const pick = (i) => { if (locked) return; circle(i); ctl.answer(i); };
+        svg.querySelectorAll('.tap').forEach((r) => {
+          r.addEventListener('click', () => pick(Number(r.dataset.i)));
+          r.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(Number(r.dataset.i)); } });
+        });
+        return { get: () => null, ready: () => false, lock: (on) => { locked = !!on; }, clear: () => { sel.innerHTML = ''; }, reveal: () => circle(item.answer) };
+      }
+    };
+  }
+
+  // ---------- name the note, or the notes of a word: letters in boxes under the stave ----------
+  function boxFamily(item, task, o) {
+    const sts = item.show.stave, notes = sts.notes, n = notes.length;
+    const single = n === 1;
+    const g = V.staveGeom(sts.clef, n, { slot: single ? 4 : 2.9, right: single ? 3 : 0.6 });
+    let s = V.staveBase(sts.clef, g);
+    notes.forEach((nt, i) => { s += V.noteShape(nt, g.xs[i], g); });
+    const ex = o.mode === 'example';
+    const wide = item.answer[0].length > 1;
+    if (ex) s += '<g class="ans">' + countMarks(item, g) + '</g>';
+    let boxes = '';
+    notes.forEach((nt, i) => { boxes += '<div class="bx" style="left:' + pct(g.xs[i], g.W) + '">' + box(i, { max: wide ? 2 : 1, cls: wide ? 'wide' : '', label: 'Note ' + (i + 1) + ' letter', value: ex ? item.answer[i] : '' }) + '</div>'; });
+    return {
+      html: '<div class="stavebox" style="max-width:calc(var(--sp,26px) * ' + g.W + ')">' + D.svg(g.W, g.H, s, { label: 'Stave with ' + n + (single ? ' note' : ' notes') }) + '<div class="boxrow">' + boxes + '</div></div>',
+      needsCheck: true,
+      bind(root, ctl) { return wireBoxes(root, ctl); }
+    };
+  }
+  // the red letters the book writes while counting up from the bottom line
+  function countMarks(item, g) {
+    if (item.type === 'hidden-word') return '';
+    const clef = item.show.stave.clef, p = item.show.stave.notes[0].pos;
+    let s = '';
+    for (let q = 0; q <= p; q++) s += D.text(TA.noteName(TA.noteAt(clef, q)).replace(/[0-9]/g, ''), g.xs[0] - 1.65, D.y(g.top, q) + 0.3, { size: 0.85, color: C.red, weight: 700 });
+    return s;
+  }
+
+  // ---------- rows of letters (Lessons 3 and 4) ----------
+  function lettersFamily(item, task, o) {
+    const row = item.show.letters, ex = o.mode === 'example';
+    let cells = '', k = 0;
+    row.forEach((l, i) => {
+      if (l) cells += '<div class="cell fixed">' + esc(l) + '</div>';
+      else cells += '<div class="cell">' + box(k++, { label: 'Letter ' + (i + 1), value: ex ? item.answer[k - 1] : '' }) + '</div>';
+    });
+    const arrow = ex ? '<svg class="rowarrow" viewBox="0 0 100 6" preserveAspectRatio="none" aria-hidden="true"><line x1="' + (item.direction === 1 ? 4 : 96) + '" x2="' + (item.direction === 1 ? 94 : 6) + '" y1="3" y2="3" stroke="' + C.base + '" stroke-width="1.2"/>' +
+      '<path d="' + (item.direction === 1 ? 'M97 3 L92 0.5 L92 5.5 Z' : 'M3 3 L8 0.5 L8 5.5 Z') + '" fill="' + C.base + '"/></svg>' : '';
+    return { html: arrow + '<div class="letters">' + cells + '</div>', needsCheck: true, bind(root, ctl) { return wireBoxes(root, ctl); } };
+  }
+
+  // ---------- the keyboard ----------
+  // kb = { keys, boxes, given, octaveLabels }; mode 'tap' toggles keys; 'boxes' puts a box on each boxed key
+  V.keyboard = function (kb, o) {
+    o = o || {};
+    const keys = kb.keys, N = keys.length;
+    const width = o.width || Math.min((document.documentElement.clientWidth || 800) - 56, 1100);
+    const minKey = o.minKey || 24;
+    let rows = 1;
+    while (rows < 8 && width / Math.ceil(N / rows) < minKey) rows *= 2;
+    const per = Math.ceil(N / rows);
+    let html = '';
+    for (let r = 0; r < rows; r++) {
+      const a = r * per, b = Math.min(N, a + per), n = b - a;
+      if (n <= 0) continue;
+      let whites = '', blacks = '';
+      for (let i = a; i < b; i++) {
+        const k = keys[i], j = i - a;
+        const boxed = (kb.boxes || []).includes(i);
+        const given = kb.given && kb.given[i];
+        const label = given ? '<span class="klab hand' + (given === 'C4' ? ' b' : '') + '">' + esc(given) + '</span>' :
+          (kb.octaveLabels && k.letter === 'C' ? '<span class="klab oct">' + esc(TA.noteName(k)) + '</span>' : (o.letters ? '<span class="klab">' + esc(k.letter) + '</span>' : ''));
+        whites += '<div class="wk' + (o.mode === 'tap' ? ' tapkey' : '') + (boxed ? ' boxed' : '') + '" data-i="' + i + '"' + (o.mode === 'tap' ? ' tabindex="0" role="button" aria-label="Key ' + (i + 1) + '"' : '') + '>' +
+          (boxed ? '<div class="kb-bx">' + box(i, { max: kb.octaveLabels ? 2 : 1, cls: kb.octaveLabels ? 'wide' : '', label: 'Key ' + (i + 1), value: o.values ? o.values[i] : '' }) + '</div>' : label) + '<span class="mark hand"></span></div>';
+        if (TA.hasBlackRight(k.letter) && j < n - 1) blacks += '<div class="bk" style="left:calc(' + ((j + 1) / n * 100) + '% - ' + (0.3 / n * 100) + '%);width:' + (0.6 / n * 100) + '%"></div>';
+      }
+      html += '<div class="kbrow" style="--n:' + n + ';aspect-ratio:' + n + '/' + (n < 9 ? 4.2 : 4.6) + '">' + whites + blacks + '</div>';
+    }
+    return '<div class="kb' + (o.cls ? ' ' + o.cls : '') + '" role="group" aria-label="Keyboard">' + html + '</div>';
+  };
+
+  function keyFamily(item, task, o) {
+    const kb = item.show.keyboard, ex = o.mode === 'example';
+    const tap = item.input.kind === 'keys';
+    const vals = {};
+    if (ex && !tap) (kb.boxes || []).forEach((i, k) => { vals[i] = item.answer[k]; });
+    const html = V.keyboard(kb, { mode: tap ? 'tap' : 'boxes', minKey: tap ? 14 : kb.octaveLabels ? 40 : 24, values: vals });
+    return {
+      html, needsCheck: true,
+      bind(root, ctl) {
+        const keysEl = [...root.querySelectorAll('.wk')];
+        if (tap) {
+          const on = new Set();
+          let locked = false;
+          const toggle = (el) => {
+            if (locked) return;
+            const i = Number(el.dataset.i);
+            if (on.has(i)) { on.delete(i); el.classList.remove('on'); el.querySelector('.mark').textContent = ''; }
+            else { on.add(i); el.classList.add('on'); el.querySelector('.mark').textContent = 'C'; }
+            ctl.change();
+          };
+          keysEl.forEach((el) => { el.addEventListener('click', () => toggle(el)); el.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(el); } }); });
+          return {
+            get: () => [...on].sort((a, b) => a - b), ready: () => on.size > 0, lock: (v) => { locked = !!v; }, clear: () => { on.clear(); keysEl.forEach((el) => { el.classList.remove('on', 'ans'); el.querySelector('.mark').textContent = ''; }); },
+            reveal: () => item.answer.forEach((i) => { keysEl[i].classList.add('ans'); })
+          };
+        }
+        return wireBoxes(root, ctl);
+      }
+    };
+  }
+  // the example for find-key colours the Cs
+  V.markKeys = function (root, item) { root.querySelectorAll('.wk').forEach((el) => { if (item.answer.includes(Number(el.dataset.i))) { el.classList.add('on'); el.querySelector('.mark').textContent = 'C'; } }); };
+
+  // ---------- clear-note: tick or cross ----------
+  function tickFamily(item, task, o) {
+    const n = item.show.stave.notes[0], g = V.staveGeom(null, 1, { W: 8 });
+    const s = V.staveBase(null, g) + V.noteShape(n, g.xs[0], g);
+    const ex = o.mode === 'example';
+    return {
+      html: D.svg(g.W, g.H, s, { label: 'A stave with a note drawn in pencil' }) + '<div class="opts">' +
+        '<button type="button" class="btn opt mark-btn' + (ex && item.answer === 'tick' ? ' pen' : '') + '" data-v="tick" aria-label="Tick">' + markSvg('tick') + '</button>' +
+        '<button type="button" class="btn opt mark-btn' + (ex && item.answer === 'cross' ? ' pen' : '') + '" data-v="cross" aria-label="Cross">' + markSvg('cross') + '</button></div>',
+      bind(root, ctl) {
+        let locked = false;
+        root.querySelectorAll('button.opt').forEach((b) => b.addEventListener('click', () => {
+          if (locked) return;
+          root.querySelectorAll('button.opt').forEach((x) => x.classList.toggle('chosen', x === b));
+          ctl.answer(b.dataset.v);
+        }));
+        return { get: () => null, ready: () => false, lock: (on) => { locked = !!on; root.querySelectorAll('button.opt').forEach((b) => { b.disabled = !!on; }); },
+          clear: () => root.querySelectorAll('button.opt').forEach((b) => b.classList.remove('chosen')),
+          reveal: () => root.querySelectorAll('button.opt').forEach((b) => b.classList.toggle('pen', b.dataset.v === item.answer)) };
+      }
+    };
+  }
+
+  // ---------- note-to-key (Lesson 12): the stave and a name box here, one shared keyboard for the task ----------
+  function noteKeyFamily(item, task, o) {
+    const st = item.show.stave, g = V.staveGeom(st.clef, 1, { W: 8 });
+    const s = V.staveBase(st.clef, g) + V.noteShape(st.notes[0], g.xs[0], g);
+    const ex = o.mode === 'example';
+    const kbFor = ex ? V.keyboard({ keys: TA.whiteKeysBetween(item.show.keyboard.from, item.show.keyboard.to), octaveLabels: true }, { mode: 'static', minKey: 14 }) : '';
+    return {
+      html: '<div class="stavebox" style="max-width:calc(var(--sp,26px) * ' + g.W + ')">' + D.svg(g.W, g.H, s, { label: 'Stave with a note' }) + '<div class="boxrow"><div class="bx" style="left:' + pct(g.xs[0], g.W) + '">' + box(0, { max: 2, cls: 'wide', label: 'Note name', value: ex ? item.answer.name : '' }) + '</div></div></div>' +
+        '<div class="keypick">' + (ex ? '<span class="hand">' + esc(item.answer.name) + '</span>' : '<span class="keyhint">Key: <b class="keychosen">none yet</b></span>') + '</div>' + kbFor,
+      needsCheck: true, sharedKeyboard: true,
+      bind(root, ctl) {
+        const w = wireBoxes(root, ctl);
+        let key = null;
+        const label = root.querySelector('.keychosen');
+        return {
+          get: () => ({ name: (w.get()[0] || ''), key }), ready: () => !!(w.get()[0] && key !== null),
+          setKey: (k) => { key = k; if (label) label.textContent = k === null ? 'none yet' : 'chosen'; ctl.change(); },
+          lock: w.lock, clear: () => { w.clear(); key = null; if (label) label.textContent = 'none yet'; },
+          reveal: () => w.reveal([item.answer.name])
+        };
+      }
+    };
+  }
+
+  V.family = function (item) {
+    switch (item.input.kind) {
+      case 'choice': case 'number': return choiceFamily;
+      case 'tap-note': return tapFamily;
+      case 'boxes':
+        if (item.show.letters) return lettersFamily;
+        if (item.show.keyboard) return keyFamily;
+        return boxFamily;
+      case 'keys': return keyFamily;
+      case 'tick': return tickFamily;
+      case 'note-and-key': return noteKeyFamily;
+      default: return TA.pieces.family(item);
+    }
+  };
+  V.build = (item, task, o) => V.family(item)(item, task, o || { mode: 'practise' });
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+/* ---- ui/25-pieces.js ---- */
+/* Theory Practice: drag, move and resize (RULES 4.6, 4.7, 5.3, 5.4). The student pulls a pencil oval or a hand-drawn
+ * clef out of a bank under the stave, moves it, and drags a corner handle to change its size. Nothing snaps and
+ * nothing marks where the answer goes. Pointer events cover mouse, touch and pen; the arrow keys and + and - do the
+ * same for a keyboard user. */
+(function (G) {
+  'use strict';
+  const TA = G.TA;
+  const D = TA.draw, C = TA.STYLE, V = TA.view;
+  const P = (TA.pieces = {});
+  const n2 = (x) => Math.round(x * 100) / 100;
+  const W = 26;                                              // draw staves are wide: a note has room to move
+  const NOTE = { rx: 0.82, ry: 0.5 };
+
+  // where everything sits for one kind of drawing item
+  function layout(item) {
+    const k = item.input.kind;
+    const clef = item.clef || (item.show.stave && item.show.stave.clef);
+    if (k === 'grand-place') {
+      const t1 = 2.4, t2 = t1 + 4 + 5.2;
+      return { W, kind: 'grand', tops: [t1, t2], names: ['treble', 'bass'], bankY: t2 + 4 + 2.4, H: t2 + 4 + 4.6, lineX0: 0.2, lineX1: W - 0.2, cap: 1, bankX: 3 };
+    }
+    if (k === 'place-clef') {
+      const top = 4.2;
+      return { W, kind: 'clef', tops: [top], names: [item.clef], bankY: top + 2, bankX: 22.2, H: 12.4, lineX0: 0.3, lineX1: 18.2, cap: 1, noBankBelow: true };
+    }
+    const top = 2.4;
+    const cap = k === 'place-notes' ? item.answer.length : 1;
+    return { W, kind: 'note', tops: [top], names: [clef], bankY: top + 4 + 2.5, bankX: 3.2, H: top + 4 + 4.8, lineX0: 0.2, lineX1: W - 0.2, cap, clef };
+  }
+  // x of the slot of each letter of a spelled word (a hint of order, not of height)
+  const slotX = (L, n) => { const a = 7, b = L.lineX1 - 2; return Array.from({ length: n }, (_, i) => n === 1 ? (a + b) / 2 : a + (b - a) * (i / (n - 1))); };
+
+  const notePiece = (p, sel, ghost) => {
+    const hr = Math.max(p.rx, 1.0) + 0.35, hh = Math.max(p.ry, 1.0) + 0.3;
+    return '<g class="piece' + (sel ? ' sel' : '') + (ghost ? ' ghost' : '') + '" data-piece="' + p.id + '"' + (ghost ? '' : ' tabindex="0" role="img" aria-label="Pencil note. Arrow keys move it. Plus and minus change its size."') + '>' +
+      (ghost ? '' : D.tag('ellipse', { cx: p.x, cy: p.y, rx: hr, ry: hh, fill: 'transparent', class: 'hit' })) +
+      D.oval(p.x, p.y, p.rx, p.ry, { color: ghost ? C.pencil : C.pencil, w: 0.12, dash: ghost ? '0.3 0.25' : undefined }) +
+      (sel ? D.tag('rect', { x: p.x - p.rx - 0.15, y: p.y - p.ry - 0.15, width: p.rx * 2 + 0.3, height: p.ry * 2 + 0.3, fill: 'none', stroke: C.base, 'stroke-width': 0.06, 'stroke-dasharray': '0.25 0.2' }) +
+        D.tag('circle', { cx: p.x + p.rx + 0.15, cy: p.y + p.ry + 0.15, r: 0.4, fill: C.base, class: 'handle', 'data-handle': 1 }) +
+        D.tag('circle', { cx: p.x + p.rx + 0.15, cy: p.y + p.ry + 0.15, r: 1.0, fill: 'transparent', 'data-handle': 1 }) : '') + '</g>';
+  };
+  const clefPiece = (p, kind, sel, ghost) => {
+    const b = D.clefBox(kind, p.scale);
+    const x0 = p.x + b.x0, x1 = p.x + b.x1, yTop = p.y - b.yUp1, yBot = p.y - b.yUp0;
+    return '<g class="piece' + (sel ? ' sel' : '') + (ghost ? ' ghost' : '') + '" data-piece="' + p.id + '"' + (ghost ? '' : ' tabindex="0" role="img" aria-label="Pencil clef. Arrow keys move it. Plus and minus change its size."') + '>' +
+      (ghost ? '' : D.tag('rect', { x: x0 - 0.3, y: yTop - 0.2, width: x1 - x0 + 0.6, height: yBot - yTop + 0.4, fill: 'transparent', class: 'hit' })) +
+      D.clefHand(kind, p.x, 4 - (p.y - p.top) , p.scale, p.top, { opacity: ghost ? 0.55 : 1 }) +
+      (sel ? D.tag('rect', { x: x0 - 0.1, y: yTop - 0.1, width: x1 - x0 + 0.2, height: yBot - yTop + 0.2, fill: 'none', stroke: C.base, 'stroke-width': 0.06, 'stroke-dasharray': '0.25 0.2' }) +
+        D.tag('circle', { cx: x1 + 0.1, cy: yBot + 0.1, r: 0.4, fill: C.base, class: 'handle', 'data-handle': 1 }) +
+        D.tag('circle', { cx: x1 + 0.1, cy: yBot + 0.1, r: 1.0, fill: 'transparent', 'data-handle': 1 }) : '') + '</g>';
+  };
+
+  P.family = function () { return builder; };
+
+  function builder(item, task, o) {
+    const L = layout(item);
+    const ex = o.mode === 'example';
+    const stv = item.show.stave, k = item.input.kind;
+    let s = '';
+    L.tops.forEach((top, i) => {
+      s += D.lines(L.lineX0, L.lineX1, top);
+      if (L.kind === 'note' && L.clef) s += D.clefPrinted(L.clef, L.lineX0 + 0.35, top);
+      if (L.kind === 'grand') s += D.clefPrinted(L.names[i], L.lineX0 + 0.35, top);
+    });
+    if (L.kind === 'grand') s += D.barLine(L.lineX0, L.tops[0], { w: 0.1 }) + D.tag('line', { x1: L.lineX0, x2: L.lineX0, y1: L.tops[0] + 4, y2: L.tops[1], stroke: C.ink, 'stroke-width': 0.1 });
+    // things already on the stave
+    if (stv && stv.notes) stv.notes.forEach((n) => { s += V.noteShape(n, 11, { top: L.tops[0] }); });
+    if (k === 'place-clef' && item.show.trace) {
+      const a = TA.STROKES[item.clef].anchor;
+      s += D.clefHand(item.clef, L.lineX0 + 0.3 + a[0], item.clef === 'treble' ? 1 : 3, 1, L.tops[0], { color: C.light, w: 0.16 });
+    }
+    if (k === 'place-notes') slotX(L, item.answer.length).forEach((x, i) => { s += D.text(item.word[i], x, L.tops[0] + 4 + 1.6, { size: 1.0, color: C.ink, weight: 700 }); });
+    // the bank (practise only)
+    if (!ex) s += D.tag('rect', { x: L.bankX - 2.4, y: L.bankY - (L.kind === 'clef' ? 5.4 : 1.6), width: L.kind === 'clef' ? 5.6 : 14, height: L.kind === 'clef' ? 10.8 : 3.2, rx: 0.4, fill: 'none', stroke: C.light, 'stroke-width': 0.08, 'stroke-dasharray': '0.3 0.25', class: 'bankbox' }) +
+      D.text(TA.STRINGS.drag.bank, L.kind === 'clef' ? L.bankX : L.bankX + 5.6, L.kind === 'clef' ? L.bankY + 6.5 : L.bankY + 0.3, { size: 0.8, color: C.grey, anchor: L.kind === 'clef' ? 'middle' : 'start', cls: 'banklab' });
+    s += '<g class="answer"></g><g class="pieces"></g>';
+    if (ex) s += '<g class="ans">' + answerGhost(item, L, true) + '</g>';
+    const prompt = item.prompt ? '<div class="prompt">' + (item.type === 'place-note-named' ? '<b>' + V.pencilLabel('') + '</b>' : '') + D.esc(item.prompt) + '</div>' : '';
+    return {
+      html: prompt + D.svg(L.W, L.H, s, { cls: 'draw', label: 'Stave. Drag a piece from the bank onto it.' }) +
+        (ex ? '' : '<div class="drawbar"><button type="button" class="btn small undo">' + D.esc(TA.STRINGS.drag.undo) + '</button><span class="hint">' + D.esc(TA.STRINGS.drag.resize) + '</span></div>'),
+      needsCheck: true,
+      bind(root, ctl) { return attach(root, item, L, ctl); }
+    };
+  }
+
+  // the answer drawn in pencil: where the note or clef belongs
+  function answerGhost(item, L, withRed) {
+    const k = item.input.kind;
+    let s = '';
+    if (k === 'place-note') {
+      const pos = item.answer, top = L.tops[0], y = D.y(top, pos), x = 15;
+      s += D.oval(x, y, NOTE.rx, NOTE.ry, { color: C.pencil });
+      if (withRed) { s += item.type === 'place-note-letter' || item.type === 'place-note-named' ? countRed(item, L, x) : ''; }
+    } else if (k === 'place-notes') {
+      const xs = slotX(L, item.answer.length);
+      item.answer.forEach((places, i) => { s += D.oval(xs[i], D.y(L.tops[0], places[0]), NOTE.rx, NOTE.ry, { color: C.pencil }); });
+    } else if (k === 'place-clef') {
+      const a = TA.STROKES[item.clef].anchor;
+      s += D.clefHand(item.clef, L.lineX0 + 0.3 + a[0], item.clef === 'treble' ? 1 : 3, 1, L.tops[0], {});
+    } else if (k === 'grand-place') {
+      const i = item.answer.stave === 'treble' ? 0 : 1;
+      s += D.oval(15, D.y(L.tops[i], item.answer.pos), NOTE.rx, NOTE.ry, { color: C.pencil });
+    }
+    return s;
+  }
+  function countRed(item, L, x) {
+    const top = L.tops[0], p = item.answer;
+    let s = '';
+    const ps = TA.isLine(p) ? [0, 2, 4, 6, 8] : [1, 3, 5, 7];
+    ps.filter((q) => q <= p).forEach((q, i) => { s += D.text(String(i + 1), x - 2.2, D.y(top, q) + 0.3, { size: 0.9, color: C.red, weight: 700 }); });
+    return s;
+  }
+
+  // ---------- the interactive part ----------
+  function attach(root, item, L, ctl) {
+    const svg = root.querySelector('svg.draw');
+    const gP = svg.querySelector('.pieces'), gA = svg.querySelector('.answer');
+    const k = item.input.kind;
+    const isClef = k === 'place-clef';
+    const rngSeed = [...item.id].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7);
+    let made = 0, sel = null, drag = null, locked = false;
+    let pieces = [];
+    let bankStart = item.bank;
+    const topOf = (y) => (L.kind === 'grand' ? (Math.abs(y - (L.tops[0] + 2)) <= Math.abs(y - (L.tops[1] + 2)) ? 0 : 1) : 0);
+
+    const bankPiece = () => {
+      const b = bankStart;
+      if (isClef) return { id: 'bank', x: L.bankX - 0.6, y: L.bankY + 0.3, scale: b.scale, top: L.tops[0] };
+      const ry = NOTE.ry * b.scale;
+      return { id: 'bank', x: L.bankX + 0.6, y: L.bankY, rx: ry * b.ratio, ry };
+    };
+    const nextStart = () => { made++; bankStart = isClef ? TA.gx.bankClef(TA.rng(rngSeed + made)) : TA.gx.bankNote(TA.rng(rngSeed + made)); };
+
+    function draw() {
+      let s = '';
+      if (pieces.length < L.cap) { const b = bankPiece(); s += isClef ? clefPiece(b, item.clef, false, false).replace('tabindex="0"', 'tabindex="-1"') : notePiece(b, false, false).replace('tabindex="0"', 'tabindex="-1"'); }
+      pieces.forEach((p) => { s += isClef ? clefPiece(p, item.clef, p.id === sel, false) : notePiece(p, p.id === sel, false); });
+      gP.innerHTML = s;
+      const want = svg.dataset.focus;
+      if (want) { const el = gP.querySelector('[data-piece="' + want + '"]'); if (el) el.focus({ preventScroll: true }); svg.dataset.focus = ''; }
+      ctl.change();
+    }
+    const toSvg = (e) => {
+      const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+      const m = svg.getScreenCTM();
+      return m ? pt.matrixTransform(m.inverse()) : { x: 0, y: 0 };
+    };
+    const clamp = (p) => { p.x = Math.max(0.4, Math.min(W - 0.4, p.x)); p.y = Math.max(0.4, Math.min(L.H - 0.4, p.y)); };
+    const inBank = (p) => (L.kind === 'clef' ? p.x > L.lineX1 + 0.5 : p.y > L.tops[L.tops.length - 1] + 4 + 1.5);
+
+    svg.addEventListener('pointerdown', (e) => {
+      if (locked) return;
+      const h = e.target.closest('[data-handle]');
+      const pc = e.target.closest('[data-piece]');
+      const pt = toSvg(e);
+      if (h && sel) {
+        const p = pieces.find((x) => x.id === sel);
+        drag = { mode: 'resize', p, id: e.pointerId, x0: p.x, y0: p.y, rx0: p.rx, ry0: p.ry, scale0: p.scale };
+        if (isClef) { const b0 = D.clefBox(item.clef, 1); drag.d = { x: b0.x1 + 0.1 / p.scale, y: -b0.yUp0 + 0.1 / p.scale }; }
+      } else if (pc && pc.dataset.piece === 'bank') {
+        if (pieces.length >= L.cap) return;
+        const b = bankPiece();
+        const p = Object.assign({}, b, { id: 'p' + (made + 1), top: L.tops[0] });
+        pieces.push(p); sel = p.id; nextStart();
+        drag = { mode: 'move', p, id: e.pointerId, dx: pt.x - p.x, dy: pt.y - p.y };
+        draw();
+      } else if (pc) {
+        const p = pieces.find((x) => x.id === pc.dataset.piece);
+        if (!p) return;
+        sel = p.id; drag = { mode: 'move', p, id: e.pointerId, dx: pt.x - p.x, dy: pt.y - p.y };
+        draw();
+      } else { sel = null; draw(); return; }
+      svg.setPointerCapture(e.pointerId);
+      e.preventDefault();
+    });
+    svg.addEventListener('pointermove', (e) => {
+      if (!drag || e.pointerId !== drag.id) return;
+      const pt = toSvg(e), p = drag.p;
+      if (drag.mode === 'move') { p.x = pt.x - drag.dx; p.y = pt.y - drag.dy; clamp(p); }
+      else if (isClef) {
+        const dx = pt.x - p.x, dy = pt.y - p.y, d = drag.d;
+        p.scale = Math.max(0.3, Math.min(2.2, (dx * d.x + dy * d.y) / (d.x * d.x + d.y * d.y)));
+      } else { p.rx = Math.max(0.2, Math.min(5, pt.x - p.x - 0.15)); p.ry = Math.max(0.12, Math.min(3, pt.y - p.y - 0.15)); }
+      draw();
+    });
+    const end = (e) => {
+      if (!drag || e.pointerId !== drag.id) return;
+      const p = drag.p;
+      drag = null;
+      if (inBank(p)) { pieces = pieces.filter((x) => x !== p); sel = null; }
+      draw();
+    };
+    svg.addEventListener('pointerup', end);
+    svg.addEventListener('pointercancel', end);
+    svg.addEventListener('keydown', (e) => {
+      if (locked) return;
+      const pc = e.target.closest('[data-piece]');
+      if (!pc || pc.dataset.piece === 'bank') return;
+      const p = pieces.find((x) => x.id === pc.dataset.piece);
+      if (!p) return;
+      const step = e.shiftKey ? 0.5 : 0.1, f = e.key === '+' || e.key === '=' ? 1.05 : e.key === '-' || e.key === '_' ? 1 / 1.05 : 0;
+      let used = true;
+      if (e.altKey && !isClef && e.key.startsWith('Arrow')) {
+        if (e.key === 'ArrowRight') p.rx *= 1.05; else if (e.key === 'ArrowLeft') p.rx /= 1.05; else if (e.key === 'ArrowUp') p.ry *= 1.05; else p.ry /= 1.05;
+      } else if (e.key === 'ArrowLeft') p.x -= step; else if (e.key === 'ArrowRight') p.x += step;
+      else if (e.key === 'ArrowUp') p.y -= step; else if (e.key === 'ArrowDown') p.y += step;
+      else if (f) { if (isClef) p.scale = Math.max(0.3, Math.min(2.2, p.scale * f)); else { p.rx *= f; p.ry *= f; } }
+      else if (e.key === 'Delete' || e.key === 'Backspace') { pieces = pieces.filter((x) => x !== p); sel = null; }
+      else used = false;
+      if (!used) return;
+      e.preventDefault(); clamp(p);
+      svg.dataset.focus = sel || '';
+      draw();
+    });
+    root.querySelector('.undo').addEventListener('click', () => { if (locked) return; pieces.pop(); sel = null; draw(); });
+    svg.addEventListener('focusin', (e) => { const pc = e.target.closest && e.target.closest('[data-piece]'); if (pc && pc.dataset.piece !== 'bank' && pc.dataset.piece !== sel) { sel = pc.dataset.piece; svg.dataset.focus = sel; draw(); } });
+    draw();
+
+    const response = (p) => {
+      const si = topOf(p.y), top = L.tops[si];
+      if (isClef) return { x: p.x - L.lineX0, ay: top + 4 - p.y, scale: p.scale };
+      const r = { cy: top + 4 - p.y, rx: p.rx, ry: p.ry };
+      if (k === 'grand-place') r.stave = L.names[si];
+      return r;
+    };
+    return {
+      get() {
+        if (k === 'place-notes') return pieces.slice().sort((a, b) => a.x - b.x).map(response);
+        return pieces[0] ? response(pieces[0]) : null;
+      },
+      ready: () => pieces.length === L.cap,
+      lock: (on) => { locked = !!on; svg.classList.toggle('locked', !!on); },
+      clear: () => { pieces = []; sel = null; gA.innerHTML = ''; draw(); },
+      reveal: () => { gA.innerHTML = answerGhost(item, L, false); }
+    };
+  }
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+/* ---- ui/28-diagrams.js ---- */
+/* Theory Practice: the "What we're learning" diagram of each lesson, drawn like the page's info diagram.
+ * Each function returns an SVG string (staff-space units). Lessons 3 and 4 have no notation, so their arrows and
+ * marks are indigo (RULES 6.4). Every label is its own text element so no line of text starts with "A ". */
+(function (G) {
+  'use strict';
+  const TA = G.TA;
+  const D = TA.draw, C = TA.STYLE;
+  const Dg = (TA.diagrams = {});
+  const t = (s, x, y, o) => D.text(s, x, y, o);
+  const fig = (W, H, inner, label) => D.svg(W, H, inner, { cls: 'fig', label });
+  const miniLines = (x0, x1, top, color, w) => D.lines(x0, x1, top, { color: color || C.ink, w: w || 0.07 });
+  const bold = { weight: 700, color: C.shade, size: 0.95 };
+  const lines2 = (arr, x, y, o) => arr.map((s, i) => t(s, x, y + i * 1.15, o)).join('');
+
+  // ---- keyboard in SVG (Lessons 4 and 11) ----
+  // keys: [{letter, octave}], kw: width of a white key. returns {svg, x(i): centre of white key i}
+  Dg.keyboard = function (keys, x0, y0, kw, kh, o) {
+    o = o || {};
+    let s = '';
+    keys.forEach((k, i) => {
+      const hi = o.tint && o.tint.includes(i);
+      s += D.tag('rect', { x: x0 + i * kw, y: y0, width: kw, height: kh, fill: hi ? C.light : '#fff', stroke: C.ink, 'stroke-width': 0.07 });
+    });
+    keys.forEach((k, i) => {
+      if (TA.hasBlackRight(k.letter) && i < keys.length - 1) s += D.tag('rect', { x: x0 + (i + 1) * kw - kw * 0.3, y: y0, width: kw * 0.6, height: kh * 0.62, fill: C.ink });
+    });
+    return { svg: s, x: (i) => x0 + (i + 0.5) * kw };
+  };
+
+  // ---- Lesson 1 ----
+  Dg[1] = function () {
+    let s = '';
+    const x0 = 7.5, x1 = 19.5;
+    for (let k = 0; k < 5; k++) { const y = 1.4 + (4 - k) * 1.6; s += D.tag('line', { x1: x0, x2: x1, y1: y, y2: y, stroke: C.base, 'stroke-width': 0.2 }); s += t('Line ' + (k + 1), x0 - 0.6, y + 0.3, { anchor: 'end', ...bold }); }
+    for (let k = 0; k < 4; k++) s += t('Space ' + (k + 1), x1 + 0.8, 1.4 + (3 - k) * 1.6 + 0.8 + 0.3, { anchor: 'start', ...bold });
+    s += D.arrow(0.8, 7.9, 0.8, 1.2, { head: 0.7, w: 0.2 });
+    s += t('count up from the bottom', 4, 9.8, { color: C.grey, size: 0.95, anchor: 'start' });
+    const sx = (x, noteY, label) => miniLines(x, x + 7, 1.4, C.ink) + D.notePrinted(x + 3.5, noteY, C.ink) + t(label, x + 3.5, 9.8, bold);
+    s += sx(28, 1.4 + 2, 'Line note') + sx(36.5, 1.4 + 1.5, 'Space note');
+    return fig(45, 10.8, s, 'Diagram: a stave with its lines and spaces numbered from the bottom, and a line note and a space note');
+  };
+
+  // ---- Lesson 2 ----
+  Dg[2] = function () {
+    let s = '';
+    const panel = (x, kind) => {
+      const top = 3.2, lineY = kind === 'treble' ? top + 3 : top + 1;
+      let p = miniLines(x, x + 10, top) + D.tag('line', { x1: x, x2: x + 10, y1: lineY, y2: lineY, stroke: C.base, 'stroke-width': 0.2 });
+      p += D.clefPrinted(kind, x + 0.4, top) + D.notePrinted(x + 6.2, lineY, C.ink) + t(kind === 'treble' ? 'G' : 'F', x + 8.3, lineY + 0.35, { size: 1.1, weight: 700, color: C.shade });
+      p += t(kind === 'treble' ? 'Treble clef' : 'Bass clef', x + 12, 3.1, { anchor: 'start', size: 1.3, weight: 700, color: C.shade });
+      p += lines2(kind === 'treble' ? ['The curl wraps around line 2,', 'so line 2 is G.', 'For higher sounds.'] : ['The dots sit either side of line 4,', 'so line 4 is F.', 'For lower sounds.'], x + 12, 4.9, { anchor: 'start', size: 0.9 });
+      return p;
+    };
+    s += panel(0.3, 'treble') + panel(27.3, 'bass');
+    return fig(58, 9.4, s, 'Diagram: the treble clef wraps around line 2, which is G. The bass clef has its dots either side of line 4, which is F.');
+  };
+
+  // ---- Lesson 3 ----
+  Dg[3] = function () {
+    let s = '';
+    const row = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'A'], x0 = 1, w = 3.6;
+    row.forEach((l, i) => { s += D.tag('rect', { x: x0 + i * w, y: 4, width: w - 0.4, height: 3, fill: '#fff', stroke: C.base, 'stroke-width': 0.12, rx: 0.2 }) + t(l, x0 + i * w + (w - 0.4) / 2, 6.05, { size: 1.6, weight: 700, color: C.shade }); });
+    s += D.arrow(x0, 2.8, x0 + 8 * w - 0.6, 2.8, { color: C.base, head: 0.6, w: 0.16 });
+    s += t('Going up: the letters go forwards', x0 + 4 * w, 1.9, { ...bold, size: 1.0 });
+    s += D.arrow(x0 + 7 * w, 8.4, x0, 8.4, { color: C.base, head: 0.6, w: 0.16 });
+    s += t('Going down: the letters go backwards', x0 + 4 * w, 9.9, { ...bold, size: 1.0 });
+    s += t('back to A, but higher', x0 + 7 * w + 1.6, 11.3, { size: 0.95, color: C.base, weight: 700, anchor: 'end' });
+    s += D.tag('path', { d: 'M' + (x0 + 7 * w + 1.5) + ' 10.8 L' + (x0 + 7 * w + 1.5) + ' 7.3', stroke: C.base, 'stroke-width': 0.12, fill: 'none', 'stroke-dasharray': '0.3 0.25' });
+    return fig(31, 12, s, 'Diagram: the letters A to G in a row, then A again. Going up the letters go forwards. Going down they go backwards.');
+  };
+
+  // ---- Lesson 4 ----
+  Dg[4] = function () {
+    const keys = TA.whiteKeys('C', 15), kw = 2.4, x0 = 1, y0 = 1.6, kh = 7.2;
+    const K = Dg.keyboard(keys, x0, y0, kw, kh);
+    let s = K.svg;
+    keys.forEach((k, i) => { s += t(k.letter, K.x(i), y0 + kh - 0.7, { size: 1.0, weight: 700, color: C.shade }); });
+    // outline each group of two black keys
+    keys.forEach((k, i) => { if (k.letter === 'C' && i < keys.length - 1) s += D.tag('rect', { x: x0 + (i + 1) * kw - kw * 0.45, y: y0 - 0.25, width: kw * 2 + kw * 0.9 - kw * 0.0 - kw * 1.0, height: kh * 0.62 + 0.5, rx: 0.25, fill: 'none', stroke: C.base, 'stroke-width': 0.16 }); });
+    const a = x0 + 0.1, b = x0 + 8 * kw - 0.1;
+    s += D.tag('path', { d: 'M' + a + ' ' + (y0 + kh + 0.6) + ' L' + a + ' ' + (y0 + kh + 1.4) + ' L' + b + ' ' + (y0 + kh + 1.4) + ' L' + b + ' ' + (y0 + kh + 0.6), fill: 'none', stroke: C.base, 'stroke-width': 0.16 });
+    s += t('one octave: 8 letters from C up to the next C', (a + b) / 2, y0 + kh + 3.0, { ...bold, size: 1.0 });
+    s += D.arrow(a + 0.5, y0 + kh + 4.2, b - 0.5, y0 + kh + 4.2, { color: C.base, head: 0.5, w: 0.14 });
+    s += t('going up: the letters go forwards', (a + b) / 2, y0 + kh + 5.5, { size: 0.95, color: C.shade });
+    s += t('C is always the white key just to the left of a group of two black keys (outlined).', 1, 0.8, { anchor: 'start', size: 0.95, color: C.shade });
+    return fig(38, 17.4, s, 'Diagram: a keyboard with every white key lettered. C is the white key just left of each group of two black keys. One octave runs from C up to the next C.');
+  };
+
+  // ---- Lesson 5 ----
+  Dg[5] = function () {
+    const top = 3.2, pos = [0, 1, 2, 4, 5, 7, 8], x0 = 5;
+    let s = miniLines(1, 38, top);
+    pos.forEach((p, i) => { s += D.notePrinted(x0 + i * 4.6, D.y(top, p), C.ink); });
+    s += D.arrow(5, 2.3, 33, 0.6, { head: 0.7, w: 0.2 });
+    s += t('lower sound', 3.4, 2.1, { anchor: 'end', size: 0.9, color: C.shade, weight: 700 }) + t('higher sound', 35, 1.1, { anchor: 'start', size: 0.9, color: C.shade, weight: 700 });
+    s += t('higher on the stave = higher sound', 19, 0.5, { size: 1.0, weight: 700, color: C.red });
+    const bracket = (xa, xb, y, label) => D.tag('path', { d: 'M' + xa + ' ' + (y - 0.5) + ' L' + xa + ' ' + y + ' L' + xb + ' ' + y + ' L' + xb + ' ' + (y - 0.5), fill: 'none', stroke: C.red, 'stroke-width': 0.14 }) + t(label, (xa + xb) / 2, y + 1.3, { size: 0.9, weight: 700, color: C.shade });
+    s += bracket(x0, x0 + 4.6, top + 5.4, 'step: to the next line or space');
+    s += bracket(x0 + 2 * 4.6, x0 + 3 * 4.6, top + 5.4, 'leap: skips a line or space');
+    return fig(40, 11.6, s, 'Diagram: notes climbing a stave. A step goes to the next line or space. A leap skips a line or space. Higher on the stave is a higher sound.');
+  };
+
+  // ---- Lessons 6 and 9 ----
+  function readDiagram(clef) {
+    const top = 3.4, x0 = 8, dx = 4.2;
+    let s = miniLines(0.5, x0 + 9 * dx - 1, top) + D.clefPrinted(clef, 1, top);
+    const names = TA.POSITIONS.map((p) => TA.letterAt(clef, p));
+    TA.POSITIONS.forEach((p) => {
+      const x = x0 + p * dx;
+      s += D.notePrinted(x, D.y(top, p), C.ink);
+      s += t(names[p], x, top + 4 + (TA.isLine(p) ? 1.9 : 3.3), { size: 1.1, weight: 700, color: C.shade });
+    });
+    s += t('Lines', 5.2, top + 4 + 1.9, { anchor: 'end', ...bold }) + t('Spaces', 5.2, top + 4 + 3.3, { anchor: 'end', ...bold });
+    s += D.arrow(8, 1.7, x0 + 8 * dx + 1.4, 1.2, { head: 0.7, w: 0.18 });
+    s += t('going up the stave, the letters go forwards: ' + names.join(' '), 8, 0.7, { anchor: 'start', size: 1.0, weight: 700, color: C.shade });
+    return fig(x0 + 9 * dx, top + 4 + 4.6, s, 'Diagram: the nine notes of the ' + clef + ' clef stave, from the bottom line up, with their letter names. Lines and spaces are named in two rows.');
+  }
+  Dg[6] = () => readDiagram('treble');
+  Dg[9] = () => readDiagram('bass');
+
+  // ---- Lesson 7 ----
+  Dg[7] = function () {
+    const K = TA.DATA.lessons.find((l) => l.n === 7).noteKinds;
+    const order = ['line', 'space', 'circle', 'big', 'half'];
+    const titles = { line: 'line note', space: 'space note', circle: 'a circle', big: 'too big', half: 'half on a line' };
+    let s = '';
+    order.forEach((k, i) => {
+      const x = 0.5 + i * 9.6, top = 3.2, kk = K[k];
+      s += miniLines(x, x + 8.4, top);
+      const pos = k === 'line' ? 4 : k === 'space' ? 3 : k === 'circle' ? 5 : k === 'big' ? 3 : 4;
+      s += D.oval(x + 4.2, D.y(top, pos) - (kk.offset || 0), kk.rx, kk.ry, { color: C.pencil });
+      s += kk.clear ? D.tick(x + 0.9, 1.2, 1.1, C.base) : D.cross(x + 0.9, 1.2, 1.1, C.red);
+      s += t(titles[k], x + 1.9, 1.5, { anchor: 'start', ...bold });
+      s += t(kk.caption[0], x + 4.2, top + 4 + 1.5, { size: 0.82, color: C.ink }) + t(kk.caption[1], x + 4.2, top + 4 + 2.55, { size: 0.82, color: C.ink });
+    });
+    return fig(48.4, 11.4, s, 'Diagram: five pencil notes on staves. A line note and a space note are clear. A circle, a note that is too big and a note half on a line are not clear.');
+  };
+
+  // ---- Lessons 8 and 10 ----
+  function aidDiagram(clef) {
+    const aid = TA.AIDS[clef];
+    const top = 3.0, dx = 4.1;
+    let s = '';
+    const stave = (x, label, cap1, cap2, positions, words) => {
+      let p = miniLines(x, x + positions.length * dx + 1.6, top) + D.clefPrinted(clef, x + 0.3, top);
+      positions.forEach((pos, i) => {
+        const nx = x + 4.4 + i * dx;
+        p += D.notePrinted(nx, D.y(top, pos), C.ink) + t(words[i], nx, top + 4 + 1.8, { size: 0.95, weight: 700, color: C.shade });
+      });
+      p += t(cap1, x, 0.9, { anchor: 'start', ...bold, size: 1.0 });
+      if (cap2) p += t(cap2, x + 4.4 + (positions.length - 1) * dx / 2, top + 4 + 3.2, { size: 0.95, color: C.shade });
+      return p;
+    };
+    s += stave(0.5, 'Lines', 'Lines: say the words from the bottom line up', null, [0, 2, 4, 6, 8], aid.lines);
+    const spaceWords = clef === 'treble' ? aid.spaces : aid.spaces;
+    s += stave(27, 'Spaces', clef === 'treble' ? 'Spaces: FACE, bottom up' : 'Spaces: bottom space up', clef === 'treble' ? 'the spaces spell FACE' : null, [1, 3, 5, 7], spaceWords);
+    return fig(52, 11.6, s, 'Diagram: the ' + clef + ' clef with a note on each line and each space, and the memory aid under each note.');
+  }
+  Dg[8] = () => aidDiagram('treble');
+  Dg[10] = () => aidDiagram('bass');
+
+  // ---- Lesson 11 ----
+  Dg[11] = function () {
+    const keys = TA.whiteKeysBetween('C2', 'B5'), kw = 1.9, x0 = 1, y0 = 12.4, kh = 6.4;
+    const K = Dg.keyboard(keys, x0, y0, kw, kh, { tint: [14] });
+    let s = K.svg;
+    keys.forEach((k, i) => { if (k.letter === 'C') s += t(TA.noteName(k), x0 + i * kw + 0.15, y0 + kh - 0.5, { anchor: 'start', size: 0.9, color: C.shade, weight: i === 14 ? 700 : 400 }); });
+    const titles = ['octave 2', 'octave 3', 'octave 4: starts at Middle C', 'octave 5'];
+    for (let o = 0; o < 4; o++) {
+      const a = x0 + o * 7 * kw + 0.1, b = x0 + (o + 1) * 7 * kw - 0.1;
+      s += D.tag('path', { d: 'M' + a + ' ' + (y0 + kh + 0.4) + ' L' + a + ' ' + (y0 + kh + 1.0) + ' L' + b + ' ' + (y0 + kh + 1.0) + ' L' + b + ' ' + (y0 + kh + 0.4), fill: 'none', stroke: C.base, 'stroke-width': 0.14 });
+      s += t(titles[o], (a + b) / 2, y0 + kh + 2.4, { size: 0.95, weight: 700, color: C.shade });
+    }
+    const staveOver = (clef, firstKey, tops) => {
+      const top = 5.2, xa = x0 + firstKey * kw;
+      let p = miniLines(xa - 4, xa + 9 * kw + 1, top) + D.clefPrinted(clef, xa - 3.7, top);
+      TA.POSITIONS.forEach((pos) => {
+        const nm = TA.noteAt(clef, pos), ki = keys.findIndex((k) => k.letter === nm.letter && k.octave === nm.octave);
+        const nx = K.x(ki), ny = D.y(top, pos);
+        p += D.notePrinted(nx, ny, C.ink) + D.tag('line', { x1: nx, x2: nx, y1: ny + 0.6, y2: y0, stroke: C.grey, 'stroke-width': 0.07, 'stroke-dasharray': '0.18 0.22' });
+      });
+      const bx = xa + 9 * kw + 1.4;
+      const rb = (ya, yb, n) => D.tag('path', { d: 'M' + (bx - 0.45) + ' ' + ya + ' L' + bx + ' ' + ya + ' L' + bx + ' ' + yb + ' L' + (bx - 0.45) + ' ' + yb, fill: 'none', stroke: C.red, 'stroke-width': 0.14 }) +
+        t(n, bx + 0.9, (ya + yb) / 2 + 0.35, { size: 1.0, weight: 700, color: C.red });
+      (clef === 'treble' ? [[0, 4, '4'], [5, 8, '5']] : [[0, 2, '2'], [3, 8, '3']]).forEach((r) => { p += rb(D.y(top, r[0]) + 0.35, D.y(top, r[1]) - 0.35, r[2]); });
+      return p;
+    };
+    s += staveOver('bass', 4) + staveOver('treble', 16);
+    return fig(x0 * 2 + 28 * kw, y0 + kh + 3.4, s, 'Diagram: a keyboard from C2 to B5 with the octaves marked. A bass stave sits over the low keys and a treble stave over the high keys. Each note is joined to its key.');
+  };
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+/* ---- ui/30-learn.js ---- */
+/* Theory Practice: the Learn screens (RULES 1.4). Step 1 is What we're learning (the text and its diagram). Then one
+ * step for each What to do worked example: the question and the book's hint, then the answer appearing in pencil.
+ * Lesson 2 draws each clef one stroke at a time, the new stroke in red. Learn has to make sense with no teacher. */
+(function (G) {
+  'use strict';
+  const TA = G.TA;
+  const D = TA.draw, C = TA.STYLE, V = TA.view;
+  const Ln = (TA.learn = {});
+  const lessonOf = (n) => TA.DATA.lessons.find((l) => l.n === n);
+
+  Ln.steps = function (n) {
+    const L = lessonOf(n);
+    if (!L.learn) return [];
+    const out = [{ kind: 'info' }];
+    L.learn.worked.forEach((w) => {
+      if (w.steps) w.steps.forEach((cap, i) => out.push({ kind: 'stroke', clef: w.task === 't1' ? 'treble' : 'bass', k: i + 1, total: w.steps.length, caption: cap, head: w.head }));
+      else out.push({ kind: 'example', task: w.task });
+    });
+    return out;
+  };
+
+  function strokeStep(L, st) {
+    const clef = st.clef, top = 4.4;
+    const a = TA.STROKES[clef].anchor, ay = clef === 'treble' ? 1 : 3;
+    const ax = 1.4 + a[0] - 0.0;
+    let s = D.lines(0.3, 15.7, top);
+    s += D.tag('line', { x1: 0.3, x2: 15.7, y1: top + (clef === 'treble' ? 3 : 1), y2: top + (clef === 'treble' ? 3 : 1), stroke: C.base, 'stroke-width': 0.2 });
+    s += D.clefHand(clef, 1.2 + a[0], ay, 1, top, { upTo: st.k, redLast: true, w: 0.14 });
+    const dots = Array.from({ length: st.total }, (_, i) => '<span class="dot' + (i < st.k ? ' on' : '') + '"></span>').join('');
+    return '<div class="todo"><p class="label">' + D.esc(TA.STRINGS.lesson.whatToDo) + '</p><h2 class="wtd">' + D.esc(st.head) + '</h2>' +
+      '<div class="figwrap">' + D.svg(16, 12.4, s, { cls: 'fig', label: 'The ' + clef + ' clef after stroke ' + st.k + ' of ' + st.total }) + '</div>' +
+      '<p class="stroke-cap"><span class="strokeno">' + st.k + '</span> ' + D.esc(st.caption) + '</p><div class="dots" aria-hidden="true">' + dots + '</div></div>';
+  }
+
+  Ln.example = function (L, taskId) {
+    const idx = L.tasks.findIndex((t) => t.id === taskId), task = L.tasks[idx];
+    const set = TA.GEN[L.n][taskId].make(TA.rng(L.n * 101 + idx * 7 + 3), task, L);
+    return { task, item: set.example };
+  };
+
+  // the HTML of one step, and a function that finishes it once it is on the page
+  Ln.render = function (n, step) {
+    const L = lessonOf(n), st = Ln.steps(n)[step];
+    if (st.kind === 'info') {
+      return { html: '<div class="info"><p class="label">' + D.esc(TA.STRINGS.lesson.learnTitle) + '</p><p class="infotext">' + D.rich(L.learn.text) + '</p><div class="figwrap">' + TA.diagrams[n]() + '</div></div>', mount() {} };
+    }
+    if (st.kind === 'stroke') return { html: strokeStep(L, st), mount() {} };
+    const w = L.learn.worked.find((x) => x.task === st.task);
+    const { task, item } = Ln.example(L, st.task);
+    const built = V.build(item, task, { mode: 'example', lesson: L });
+    return {
+      html: '<div class="todo example"><p class="label">' + D.esc(TA.STRINGS.lesson.whatToDo) + '</p><h2 class="wtd">' + D.esc(w.head) + '</h2><p class="hint">' + D.esc(w.hint) + '</p>' +
+        (task.instruction ? '<p class="instr">' + D.rich(task.instruction) + '</p>' : '') +
+        '<div class="exwrap ex-' + item.type + '">' + built.html + '</div><button type="button" class="btn small replay">Show it again</button></div>',
+      mount(root) {
+        if (item.input.kind === 'keys') V.markKeys(root, item);
+        const r = root.querySelector('.replay');
+        if (r) r.addEventListener('click', () => { root.querySelector('.example').classList.toggle('again'); });
+      }
+    };
+  };
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+/* ---- ui/40-practise.js ---- */
+/* Theory Practice: the Practise screen. Tasks in order, each headed "Task N — heading", its items under it, dashed
+ * dividers between tasks. Marking follows RULES 5.1: marked as soon as it is answered; wrong once gets "Not this time."
+ * plus the book's hint and one more try; wrong twice shows the answer in pencil and the student copies it in. The
+ * score counts first tries only. */
+(function (G) {
+  'use strict';
+  const TA = G.TA;
+  const D = TA.draw, V = TA.view;
+  const S = () => TA.STRINGS;
+  const Pr = (TA.practise = {});
+  const lessonOf = (n) => TA.DATA.lessons.find((l) => l.n === n);
+  const INDIGO_MARKS = new Set([3, 4]);                     // no notation on these pages: indigo marks (RULES 6.4)
+
+  Pr.seedOf = (seed, n, ti) => (((seed * 131 + n * 17 + ti * 29 + 7) >>> 0) || 1);
+
+  // "(See Lessons 6 and 9)" in a revision heading links to those Learn screens (RULES 1.7)
+  function headingHtml(text) {
+    const m = /\(See (Lessons?) (\d+)(?: and (\d+))?\)/.exec(text);
+    let h = D.esc(text);
+    if (m) {
+      const link = (n, label) => '<a href="#/lesson/' + n + '/learn/1">' + label + '</a>';
+      const repl = '(See ' + (m[3] ? link(m[2], m[1] + ' ' + m[2]) + ' and ' + link(m[3], m[3]) : link(m[2], m[1] + ' ' + m[2])) + ')';
+      h = h.replace(D.esc(m[0]), repl);
+    }
+    return h;
+  }
+  const hintFor = (L, task) => {
+    const w = L.learn && L.learn.worked.find((x) => x.task === task.id);
+    return w ? w.hint : S().marking.tryAgain;
+  };
+
+  Pr.render = function (n, seed) {
+    const L = lessonOf(n);
+    const sets = L.tasks.map((task, ti) => ({ task, ti, items: TA.GEN[n][task.id].make(TA.rng(Pr.seedOf(seed, n, ti)), task, L).items }));
+    let html = '';
+    if (L.beforeTasks) html += '<p class="before">' + D.rich(L.beforeTasks) + '</p>';
+    sets.forEach((set, si) => {
+      const t = set.task, heading = t.appHeading || t.heading;
+      html += (si ? '<hr class="divide">' : '') + '<section class="task" data-task="' + t.id + '" data-type="' + t.type + '">' +
+        '<h3 class="th" data-task-heading="' + D.esc(heading) + '"><span class="tn">Task ' + t.number + '</span> — ' + headingHtml(heading) + '</h3>' +
+        (t.instruction ? '<p class="instr">' + D.rich(t.instruction) + '</p>' : '') + '<div class="items">';
+      set.items.forEach((it, i) => {
+        html += '<article class="item" data-id="' + it.id + '"><span class="num" aria-hidden="true">' + (i + 1) + '</span><div class="body"></div>' +
+          '<div class="actions"><button type="button" class="btn solid check" disabled>' + D.esc(S().marking.check) + '</button></div><div class="fb" aria-live="polite"></div></article>';
+      });
+      html += '</div>' + (t.type === 'note-to-key' ? '<div class="sharedkb"></div>' : '') + '</section>';
+    });
+    html += '<section class="finish" hidden></section>';
+    return { html, mount: (root, ctx) => mount(root, ctx, n, seed, L, sets) };
+  };
+
+  function mount(root, ctx, n, seed, L, sets) {
+    const state = {};                  // item id -> { tries, first, done }
+    const views = {};
+    let active = null;
+    const scored = [];
+    const setScore = () => {
+      const total = scored.length, got = scored.filter((id) => state[id].first === true).length;
+      if (ctx.score) ctx.score(got, total);
+      return { got, total };
+    };
+
+    sets.forEach((set) => {
+      const sec = root.querySelector('section.task[data-task="' + set.task.id + '"]');
+      set.items.forEach((item) => {
+        const card = sec.querySelector('.item[data-id="' + item.id + '"]');
+        const body = card.querySelector('.body'), fb = card.querySelector('.fb'), checkBtn = card.querySelector('.check');
+        const st = (state[item.id] = { tries: 0, first: null, done: false });
+        if (!item.model) scored.push(item.id);
+        const built = V.build(item, set.task, { mode: 'practise', lesson: L });
+        body.innerHTML = built.html;
+        const indigo = INDIGO_MARKS.has(n);
+        const say = (ok, text) => {
+          fb.innerHTML = '<span class="fbicon">' + V.markSvg(ok ? 'tick' : 'cross', indigo) + '</span><span class="fbtext">' + D.esc(text) + '</span>';
+          card.classList.toggle('right', !!ok); card.classList.toggle('wrong', !ok);
+        };
+        let view;
+        const ctl = {
+          answer: (resp) => handle(resp),
+          change: () => { if (view) checkBtn.disabled = st.done || !view.ready(); },
+          submit: () => { if (view && view.ready() && !st.done) handle(view.get()); }
+        };
+        view = built.bind(body, ctl);
+        views[item.id] = { view, built, item };
+        if (!built.needsCheck) card.classList.add('instant');
+        if (built.needsCheck) checkBtn.addEventListener('click', ctl.submit); else card.querySelector('.actions').hidden = true;
+        card.addEventListener('focusin', () => { active = item.id; });
+        card.addEventListener('pointerdown', () => { active = item.id; });
+
+        if (item.model) {                                           // Lesson 12 Task 2: the first item is shown done, in pencil
+          st.done = true; view.reveal(item.answer); view.lock(true);
+          fb.innerHTML = '<span class="fbtext">' + D.esc(S().marking.model) + '</span>'; card.classList.add('model'); checkBtn.hidden = true;
+        }
+
+        function handle(resp) {
+          if (st.done) return;
+          const gen = TA.GEN[n][set.task.id];
+          const m = gen.mark(item, resp);
+          st.tries++;
+          if (m.correct) {
+            st.done = true; if (st.tries === 1) st.first = true; else if (st.first === null) st.first = false;
+            say(true, m.feedback); view.lock(true); checkBtn.hidden = true;
+          } else {
+            if (!built.needsCheck && view.clear) view.clear();           // a tap or a choice: pick again
+            if (st.tries === 1) { st.first = false; say(false, firstWrong(item, m, hintFor(L, set.task))); }
+            else { say(false, m.feedback + ' ' + S().marking.copyIn); if (view.reveal) view.reveal(item.answer); }
+          }
+          ctl.change();
+          const sc = setScore();
+          if (sc && all()) finish();
+        }
+      });
+    });
+
+    // Lesson 12 Task 3: one keyboard for all the items, used for whichever item the student is on
+    const kbHost = root.querySelector('.sharedkb');
+    if (kbHost) {
+      const task = sets.find((s) => s.task.type === 'note-to-key').task;
+      kbHost.innerHTML = V.keyboard({ keys: TA.whiteKeysBetween(task.from, task.to), octaveLabels: true }, { mode: 'tap', minKey: 18 });
+      kbHost.querySelectorAll('.wk').forEach((k) => {
+        const tap = () => {
+          const v = active && views[active];
+          if (!v || state[active].done || !v.view.setKey) return;
+          kbHost.querySelectorAll('.wk.pick').forEach((x) => x.classList.remove('pick'));
+          k.classList.add('pick');
+          v.view.setKey(Number(k.dataset.i));
+        };
+        k.addEventListener('click', tap);
+        k.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); tap(); } });
+      });
+      root.addEventListener('focusin', () => { kbHost.querySelectorAll('.wk.pick').forEach((x) => x.classList.remove('pick')); });
+    }
+
+    function firstWrong(item, m, hint) {
+      let specific = '';
+      const kind = item.input.kind;
+      if (['place-note', 'place-notes', 'place-clef', 'grand-place'].includes(kind) && m.feedback) {
+        specific = m.feedback.replace(/^Not this time\.\s*/, '').replace(/\s*Put it .*$/, '');
+        if (m.detail && m.detail.why === 'stave') specific = S().placed.grandStave;
+      }
+      return S().marking.wrong + ' ' + (specific ? specific + ' ' : '') + hint;
+    }
+    const all = () => Object.values(state).every((s) => s.done);
+    function finish() {
+      const sc = setScore();
+      const host = root.querySelector('.finish');
+      host.hidden = false;
+      host.innerHTML = '<h3 class="th">' + D.esc(S().marking.done) + '</h3><p class="bigscore">' + D.esc(S().marking.score) + ' <b>' + sc.got + ' / ' + sc.total + '</b></p>' +
+        '<div class="row"><button type="button" class="btn solid again">' + D.esc(S().marking.again) + '</button><a class="btn" href="#/">' + D.esc(S().lesson.back) + '</a></div>';
+      host.querySelector('.again').addEventListener('click', () => ctx.again());
+      if (ctx.finished) ctx.finished(sc.got, sc.total);
+      host.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    }
+    setScore();
+    return { state, views };
+  }
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+/* ---- ui/50-progress.js ---- */
+/* Theory Practice: progress (RULES 5.5). Each lesson's best and latest first-try score and the date are kept in the
+ * browser (localStorage, always inside try/catch: it can be empty or blocked). Send my results opens Isaac's Google
+ * Form pre-filled, the way Sight Singer's Send my progress does. Nothing is sent unless the student presses Submit. */
+(function (G) {
+  'use strict';
+  const TA = G.TA;
+  const KEY = 'tawa-theory-practice-v1';
+  const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+  // The form address and its entry ids go here, in one place. Until Isaac makes the form this stays null and the
+  // Send my results button is hidden. Form: a "Results" paragraph question and an "App version" short-answer
+  // question, with "Collect email addresses: Verified" on. Example:
+  //   { url: 'https://docs.google.com/forms/d/e/FORM_ID/viewform', results: 'entry.1111111111', version: 'entry.2222222222' }
+  TA.RESULTS_FORM = null;
+  TA.APP_VERSION = 'Theory Practice 1.0, Lessons 1 to 12, 2 Nov 2026';
+
+  let memory = { lessons: {} };                              // used when the browser will not store anything
+  const read = () => {
+    try { const raw = G.localStorage.getItem(KEY); if (raw) { const d = JSON.parse(raw); if (d && d.lessons) return d; } } catch (e) { /* blocked or empty */ }
+    return memory;
+  };
+  const write = (d) => { memory = d; try { G.localStorage.setItem(KEY, JSON.stringify(d)); return true; } catch (e) { return false; } };
+
+  const P = (TA.progress = {});
+  const today = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+  P.dateText = (iso) => { const m = /^(\d+)-(\d+)-(\d+)$/.exec(iso || ''); return m ? Number(m[3]) + ' ' + MONTHS[Number(m[2]) - 1] : ''; };
+  P.get = (n) => read().lessons[n] || null;
+  P.record = function (n, got, total) {
+    const d = read();
+    const prev = d.lessons[n] || {};
+    const now = { got, total, date: today() };
+    const better = !prev.best || got / total >= prev.best.got / prev.best.total;
+    d.lessons[n] = { latest: now, best: better ? now : prev.best };
+    return write(d);
+  };
+  P.line = function (n) {
+    const r = P.get(n);
+    return r ? 'Latest ' + r.latest.got + '/' + r.latest.total + ', best ' + r.best.got + '/' + r.best.total : '';
+  };
+  // one line for each lesson that has a score: "Lesson 6 Treble clef notes: best 15/16, last 13/16, 2 Nov"
+  P.resultsText = function () {
+    const out = [];
+    TA.DATA.lessons.forEach((L) => {
+      const r = P.get(L.n);
+      if (r) out.push('Lesson ' + L.n + ' ' + L.title + ': best ' + r.best.got + '/' + r.best.total + ', last ' + r.latest.got + '/' + r.latest.total + ', ' + P.dateText(r.latest.date));
+    });
+    return out.join('\n');
+  };
+  P.canSend = () => !!TA.RESULTS_FORM && !!P.resultsText();
+  P.send = function () {
+    const F = TA.RESULTS_FORM;
+    if (!F) return false;
+    const q = 'usp=pp_url&' + encodeURIComponent(F.results) + '=' + encodeURIComponent(P.resultsText()) + '&' + encodeURIComponent(F.version) + '=' + encodeURIComponent(TA.APP_VERSION);
+    G.open(F.url + '?' + q, '_blank', 'noopener');
+    return true;
+  };
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+/* ---- ui/90-app.js ---- */
+/* Theory Practice: the app shell. Home, Lesson, Learn and Practise screens, and TA.ui for the tests. */
+(function (G) {
+  'use strict';
+  const TA = G.TA;
+  const D = TA.draw;
+  const S = () => TA.STRINGS;
+  const UI = (TA.ui = {});
+  let app, cur = { screen: 'home' };
+  const lessonOf = (n) => TA.DATA.lessons.find((l) => l.n === n);
+  const E = D.esc;
+
+  const banner = (eyebrow, title, corner) => '<header class="banner"><div><div class="eyebrow">' + E(eyebrow) + '</div><h1>' + E(title) + '</h1></div>' + (corner || '') + '</header>';
+  const footer = () => '<footer>' + E(S().app.school) + ' &nbsp;|&nbsp; Music Theory &nbsp;|&nbsp; <b>' + E(S().app.name) + '</b></footer>';
+
+  UI.learnSteps = (n) => TA.learn.steps(n).length;
+
+  // ---------- screens ----------
+  function home() {
+    let list = '';
+    TA.DATA.lessons.forEach((L) => {
+      list += '<li><a class="lrow" href="#/lesson/' + L.n + '"><span class="ln">' + L.n + '</span><span class="lt">' + E(L.title) + '</span><span class="ls">' + E(TA.progress.line(L.n)) + '</span></a></li>';
+    });
+    const send = TA.progress.canSend() ? '<button type="button" class="btn solid send">' + E(S().results.send) + '</button>' : '';
+    return {
+      html: '<div class="sheet">' + banner(S().app.school, S().app.name) + '<section class="frame home"><p class="label">' + E(S().home.part1) + '</p><h2 class="lessonshead">' + E(S().home.lessons) + '</h2><ol class="lessons">' + list + '</ol>' + send + '</section>' + footer() + '</div>',
+      mount() { const b = app.querySelector('.send'); if (b) b.addEventListener('click', () => TA.progress.send()); }
+    };
+  }
+  function lesson(n) {
+    const L = lessonOf(n), prog = TA.progress.line(n);
+    const learn = L.learn ? '<a class="bigbtn" href="#/lesson/' + n + '/learn/1"><span class="bt">' + E(S().lesson.learn) + '</span><span class="bs">' + E(L.learn.worked.length + 1 + ' steps') + '</span></a>' : '';
+    return {
+      html: '<div class="sheet">' + banner('Music theory · Lesson ' + n, L.title, '<a class="corner" href="#/">' + E(S().home.lessons) + '</a>') +
+        '<section class="frame lessonmenu"><div class="bigbtns">' + learn + '<a class="bigbtn solid" href="#/lesson/' + n + '/practise"><span class="bt">' + E(S().lesson.practise) + '</span><span class="bs">' + E(L.revision ? S().lesson.revision : L.tasks.length + ' tasks') + '</span></a></div>' +
+        (prog ? '<p class="progline">' + E(prog) + '</p>' : '') + '</section>' + footer() + '</div>',
+      mount() {}
+    };
+  }
+  function learn(n, step) {
+    const total = TA.learn.steps(n).length, s = Math.max(0, Math.min(total - 1, step));
+    const L = lessonOf(n), r = TA.learn.render(n, s);
+    const last = s === total - 1;
+    const nav = '<nav class="learnnav"><button type="button" class="btn prev"' + (s === 0 ? ' disabled' : '') + '>' + E(S().lesson.previous) + '</button>' +
+      '<span class="count">' + (s + 1) + ' / ' + total + '</span>' +
+      (last ? '<a class="btn solid" href="#/lesson/' + n + '/practise">' + E(S().lesson.start) + '</a>' : '<button type="button" class="btn solid next">' + E(S().lesson.next) + '</button>') + '</nav>';
+    return {
+      html: '<div class="sheet learnsheet">' + banner('Music theory · Lesson ' + n, L.title, '<a class="corner" href="#/lesson/' + n + '">' + E('Lesson ' + n) + '</a>') + '<section class="frame">' + r.html + '</section>' + nav + footer() + '</div>',
+      mount(root) {
+        r.mount(root);
+        const go = (d) => UI.go('#/lesson/' + n + '/learn/' + (s + 1 + d));
+        const p = root.querySelector('.prev'), x = root.querySelector('.next');
+        if (p) p.addEventListener('click', () => go(-1));
+        if (x) x.addEventListener('click', () => go(1));
+        cur.keys = (e) => {
+          if (e.target && /^(input|textarea|select)$/i.test(e.target.tagName)) return;
+          if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); if (s < total - 1) go(1); else UI.go('#/lesson/' + n + '/practise'); }
+          else if (e.key === 'ArrowLeft') { e.preventDefault(); if (s > 0) go(-1); }
+        };
+      }
+    };
+  }
+  function practise(n, seed) {
+    const L = lessonOf(n), r = TA.practise.render(n, seed);
+    return {
+      html: '<div class="sheet practisesheet">' + banner('Music theory · Lesson ' + n, L.title, '<div class="corner scorebox"><span class="slab">' + E(S().marking.score) + '</span><b class="sc">0 / 0</b><a href="#/lesson/' + n + '">' + E('Lesson ' + n) + '</a></div>') +
+        '<section class="frame practise">' + r.html + '</section>' + footer() + '</div>',
+      mount(root) {
+        r.mount(root, {
+          score: (g, t) => { const el = root.querySelector('.sc'); if (el) el.textContent = g + ' / ' + t; },
+          finished: (g, t) => TA.progress.record(n, g, t),
+          again: () => UI.go('#/lesson/' + n + '/practise/' + (seed + 1))
+        });
+      }
+    };
+  }
+
+  // ---------- routing ----------
+  const parse = (hash) => {
+    const m = String(hash || '').replace(/^#\/?/, '').split('/').filter(Boolean);
+    if (m[0] !== 'lesson' || !lessonOf(Number(m[1]))) return { screen: 'home' };
+    const n = Number(m[1]);
+    if (m[2] === 'learn' && lessonOf(n).learn) return { screen: 'learn', lesson: n, step: Math.max(0, Number(m[3] || 1) - 1) };
+    if (m[2] === 'practise') return { screen: 'practise', lesson: n, seed: Number(m[3]) || Math.floor(Date.now() / 1000) % 100000 };
+    return { screen: 'lesson', lesson: n };
+  };
+  async function draw(route) {
+    const root = app;
+    if (cur.keys) { document.removeEventListener('keydown', cur.keys); cur.keys = null; }
+    const view = route.screen === 'learn' ? learn(route.lesson, route.step) : route.screen === 'practise' ? practise(route.lesson, route.seed)
+      : route.screen === 'lesson' ? lesson(route.lesson) : home();
+    cur = Object.assign({}, route);
+    root.innerHTML = view.html;
+    view.mount(root);
+    if (cur.keys) document.addEventListener('keydown', cur.keys);
+    document.documentElement.dataset.screen = route.screen;
+    await settle();
+  }
+  async function settle() {
+    try { await Promise.all(['400 16px "Fira Sans"', '700 16px "Fira Sans"', '700 16px "Lexend"', '16px "Kalam"', '16px "Bravura"'].map((f) => document.fonts.load(f))); await document.fonts.ready; } catch (e) { /* no font loading API */ }
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+  }
+  UI.go = (hash) => { if (G.location.hash === hash) return draw(parse(hash)); G.location.hash = hash; return Promise.resolve(); };
+
+  // for tests and for the first screen: show({ lesson, screen: 'learn' | 'practise', step, seed })
+  UI.show = function (o) {
+    o = o || {};
+    if (!o.lesson) return draw({ screen: 'home' });
+    if (o.screen === 'learn') return draw({ screen: 'learn', lesson: o.lesson, step: o.step || 0 });
+    if (o.screen === 'practise') return draw({ screen: 'practise', lesson: o.lesson, seed: o.seed || 1 });
+    return draw({ screen: 'lesson', lesson: o.lesson });
+  };
+
+  UI.start = function () {
+    app = document.getElementById('app');
+    try { if (G.navigator && G.navigator.webdriver) document.documentElement.classList.add('still'); } catch (e) {}
+    G.addEventListener('hashchange', () => draw(parse(G.location.hash)));
+    draw(parse(G.location.hash));
+  };
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+TA.ui.start();
+</script>
+</body>
+</html>
