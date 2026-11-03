@@ -298,6 +298,58 @@ footer b { white-space: nowrap; }
 .drawtip { color: var(--grey); font-size: .9rem; }
 .drawbar { flex-wrap: wrap; }
 
+/* ---- fit the Learn and Practise screens in the window (Isaac, 4 November 2026). ui/95-fit.js shrinks the diagrams
+   when the page is still too tall. ---- */
+html[data-screen="learn"] footer, html[data-screen="practise"] footer { display: none; }
+:is(.learnsheet, .practisesheet) { padding-top: 10px; padding-bottom: 10px; }
+:is(.learnsheet, .practisesheet) > * + * { margin-top: 10px; }
+:is(.learnsheet, .practisesheet) .banner { min-height: 0; padding: 10px 22px 10px; margin-bottom: -10px; }
+:is(.learnsheet, .practisesheet) .banner .eyebrow { font-size: .62rem; }
+:is(.learnsheet, .practisesheet) .banner h1 { font-size: 1.5rem; margin-top: .3rem; }
+:is(.learnsheet, .practisesheet) .banner .corner { padding: 6px 12px; min-width: 0; }
+.practisesheet .scorebox { flex-direction: row; align-items: baseline; gap: .5rem; }
+.practisesheet .scorebox b { font-size: 1.15rem; white-space: nowrap; }
+.practisesheet .helpbtn { min-height: 2.5rem; padding: .45rem .9rem; }
+.learnsheet .info, .learnsheet .todo { padding: 12px 22px 14px; }
+.learnsheet .label { margin-bottom: 6px; }
+.learnsheet .figwrap { margin-top: .4rem; }
+.learnsheet .exwrap { margin: .4rem auto .2rem; }
+.learnsheet .replay { margin-top: .2rem; }
+.learnnav .btn { min-height: 2.6rem; padding-top: .55rem; padding-bottom: .55rem; }
+.practise { padding: 12px 22px 14px; }
+.single .practise .prog { margin-bottom: .5rem; }
+.single .practise .th { font-size: 1.2rem; margin-bottom: .25rem; }
+.single .practise .instr { margin-bottom: .3rem; }
+.single .practise .before { margin-bottom: .4rem; }
+/* one question: Check and Next share one place, and room is kept for the feedback, so nothing moves down when the
+   question is marked */
+.single .practise .item { display: grid; grid-template-areas: "num" "body" "ctl" "fb"; padding: .3rem .5rem .4rem; gap: .35rem; justify-items: stretch; }
+.single .practise .item > .num { grid-area: num; }
+.single .practise .item > .body { grid-area: body; gap: .35rem; }
+.single .practise .item > .actions, .single .practise .item > .nextrow { grid-area: ctl; margin: 0; }
+.single .practise .item > .fb { grid-area: fb; min-height: 2.9em; }
+.single .practise .item > .actions[hidden] { display: none !important; }
+.single .practise .drawbar { gap: .5rem; font-size: .85rem; }
+.single .practise .stavebox { padding-bottom: 3rem; }
+.finish { margin-top: .8rem; padding-top: .6rem; }
+.finish .bigscore { margin: .1rem 0 .6rem; }
+@media (max-width: 600px) {
+  :is(.learnsheet, .practisesheet) { padding-top: 6px; }
+  :is(.learnsheet, .practisesheet) .banner { padding: 8px 14px 18px; }
+  :is(.learnsheet, .practisesheet) .banner h1 { font-size: 1.25rem; }
+  .practisesheet .banner { row-gap: 6px; }
+  .practise, .learnsheet .info, .learnsheet .todo { padding-left: 12px; padding-right: 12px; }
+}
+/* four picture options in one row when there is room (half the height of two rows) */
+@media (min-width: 700px) {
+  .opts.pics { flex-wrap: nowrap; }
+  .opts.pics .opt.pick.pic { flex: 1 1 22%; max-width: 24%; }
+}
+@media (max-width: 600px) { .single .practise .drawbar .hint { display: none; } }    /* the handles show what to do */
+/* Check and Next share one place: the empty one must not catch clicks meant for the other */
+.single .practise .item > .nextrow, .single .practise .item > .actions { pointer-events: none; }
+.single .practise .item > .nextrow > .btn, .single .practise .item > .actions > .btn { pointer-events: auto; }
+
 </style>
 </head>
 <body>
@@ -633,7 +685,7 @@ footer b { white-space: nowrap; }
       copyIn: 'Copy the answer in to move on.', copied: 'You copied it in.', extra: 'Extra practice', fillAll: 'Fill in every box first.', model: 'This one is done for you.' },
     results: { send: 'Send my results', sent: 'Your results are ready to send. Press Submit on the form.', saved: 'Saved on this device.' },
     help: { open: 'Help', close: 'Close', title: 'Help' },
-    drag: { bank: 'Drag from here', resize: 'Drag the piece or its four-way arrow to move it. Drag the corner arrow to change its size.', undo: 'Undo' },
+    drag: { bank: 'Drag from here', resize: 'Drag to move. Drag the corner arrow to change the size.', undo: 'Undo' },
     // sentences the generators put together (src/09-gen-shared.js TA.fmt fills the {gaps})
     explain: {
       run: 'The letters go {dir}: {run}.',
@@ -3100,6 +3152,7 @@ footer b { white-space: nowrap; }
           else { say(false, m.feedback + ' ' + (m.copyIn || S().marking.copyIn)); if (view.reveal) view.reveal(item.answer); st.revealed = true; }
         }
         ctl.change();
+        if (TA.fit) TA.fit.soon();
         const sc = setScore();
         if (sc && all()) finish();
       }
@@ -3143,6 +3196,7 @@ footer b { white-space: nowrap; }
       root.querySelectorAll('section.task').forEach((sec) => { sec.hidden = single && sec !== cur.sec; });
       root.querySelectorAll('hr.divide').forEach((h) => { h.hidden = single; });
       progress();
+      if (TA.fit) TA.fit.run();
       if (ctx.onTask) ctx.onTask(cur.task.id);
       if (state[cur.id].done && i < order.length - 1) show(i + 1);      // a model item that is already done
     }
@@ -3370,6 +3424,7 @@ footer b { white-space: nowrap; }
   async function settle() {
     try { await Promise.all(['400 16px "Fira Sans"', '700 16px "Fira Sans"', '700 16px "Lexend"', '16px "Kalam"', '16px "Bravura"'].map((f) => document.fonts.load(f))); await document.fonts.ready; } catch (e) { /* no font loading API */ }
     await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+    if (TA.fit) TA.fit.run();
   }
   UI.go = (hash) => { if (G.location.hash === hash) return draw(parse(hash)); G.location.hash = hash; return Promise.resolve(); };
 
@@ -3388,6 +3443,70 @@ footer b { white-space: nowrap; }
     G.addEventListener('hashchange', () => draw(parse(G.location.hash)));
     draw(parse(G.location.hash));
   };
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+/* ---- ui/95-fit.js ---- */
+/* Theory Practice: fit the screen to the window (Isaac, 4 November 2026: "the entire interface, as much as possible,
+ * can be seen without scrolling"). On the Learn screens and on Practise (one question at a time), when the page runs
+ * past the bottom of the window, the diagrams of what is showing (staves, keyboards, pictures) are made narrower, and so
+ * shorter, until it fits. They never go below MIN of their natural size, so a stave stays big enough to tap; past that
+ * the page scrolls. Runs after a screen is drawn, after each question appears or is marked, and when the window
+ * changes size. */
+(function (G) {
+  'use strict';
+  const TA = G.TA;
+  const F = (TA.fit = {});
+  const MIN = 0.4;                       // a diagram is never made smaller than this share of its natural width
+  // ... and never smaller than a staff space of 12 px (RULES 6.7), or 14 px on a stave you drag pieces onto, so a
+  // tap or a drag can still land on a line or a space
+  const minWidth = (el, natural) => {
+    const sp = el.matches && el.matches('svg.draw') ? 14 : 12, w = Number(el.getAttribute && el.getAttribute('data-w')) || 0;
+    return Math.min(natural, Math.max(natural * MIN, w * sp));
+  };
+
+  const visible = (el) => !!(el.offsetParent || el.getClientRects().length) && !el.closest('[hidden], dialog');
+  // the diagrams to shrink: on Practise only the question showing, on Learn the whole frame
+  function figures() {
+    const scr = document.documentElement.dataset.screen;
+    let host;
+    if (scr === 'learn') host = document.querySelector('.learnsheet .frame');
+    else if (scr === 'practise') {
+      if (!document.querySelector('#app.single, .single')) return [];
+      host = [...document.querySelectorAll('.practise .item')].find((c) => !c.hidden && visible(c));
+    }
+    if (!host) return [];
+    // the outermost figures only (a stave inside a picture option is shrunk with the option)
+    const shared = host.closest && host.closest('section.task') && host.closest('section.task').querySelector('.sharedkb .kb');   // Lesson 12 Task 3's keyboard
+    const all = [...host.querySelectorAll('svg.st, .kb, .opts.pics')].concat(shared ? [shared] : []).filter(visible);
+    return all.filter((el) => !all.some((o) => o !== el && o.contains(el)));
+  }
+  const over = () => document.documentElement.scrollHeight - G.innerHeight;
+
+  F.run = function () {
+    const figs = figures();
+    figs.forEach((el) => {                                // start from the natural size each time (keeping the diagram's own limit)
+      if (!('fitMax' in el.dataset)) el.dataset.fitMax = el.style.maxWidth || '';
+      el.style.maxWidth = el.dataset.fitMax;
+    });
+    if (!figs.length || over() <= 0) return;
+    const natural = figs.map((el) => el.getBoundingClientRect().width);
+    let f = 1;
+    for (let i = 0; i < 6; i++) {
+      const o = over();
+      if (o <= 0) break;
+      // the figures' combined height, counted once for figures side by side
+      const rows = new Map();
+      figs.forEach((el) => { const r = el.getBoundingClientRect(); const k = Math.round(r.top); rows.set(k, Math.max(rows.get(k) || 0, r.height)); });
+      const tall = [...rows.values()].reduce((a, b) => a + b, 0);
+      if (tall <= 0) break;
+      f = Math.max(MIN, f * Math.max(0.5, (tall - o - 4) / tall));
+      figs.forEach((el, k) => { el.style.maxWidth = Math.floor(Math.max(natural[k] * f, minWidth(el, natural[k]))) + 'px'; });
+      if (f === MIN) break;
+    }
+  };
+  let t = null;
+  F.soon = () => { clearTimeout(t); t = setTimeout(F.run, 30); };
+  G.addEventListener && G.addEventListener('resize', F.soon);
 })(typeof globalThis !== 'undefined' ? globalThis : this);
 
 TA.ui.start();
