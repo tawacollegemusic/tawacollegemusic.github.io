@@ -459,6 +459,48 @@ html[data-screen="learn"] footer, html[data-screen="practise"] footer { display:
   .cardsheet .frame.practise { padding-top: 4vh; }
 }
 
+/* ---- 6 November 2026 (2): what a student puts in is handwriting (Kalam), and the selected box is clear ---- */
+.box:not([readonly]), .box:disabled:not([readonly]) { font-family: "Kalam", cursive; font-weight: 400; color: var(--pencil); }
+.letterpad .lp, .cardsheet .practise .letterpad .lp { font-family: "Kalam", cursive; font-weight: 400; padding-top: .2rem; }
+.box { caret-color: transparent; cursor: pointer; }
+.box::selection { background: transparent; }
+.cell.sel { box-shadow: 0 0 0 3px var(--base); background: #EEEDF6; }
+.cell.sel .box { background: #EEEDF6; }
+.box.sel:not(.cell .box) { box-shadow: 0 0 0 3px var(--base); background: #EEEDF6; }
+.box:focus-visible { outline: none; }
+/* the card animations (ui/32-anim.js) */
+.anim { display: flex; flex-direction: column; align-items: center; gap: .3rem; margin: .5rem 0 .6rem; padding: .6rem .5rem .8rem; background: #F4F4FA; border-radius: 12px; }
+.acap { font: 700 1.05rem/1.3 "Lexend", sans-serif; color: var(--shade); margin: 0; min-height: 1.4em; text-align: center; }
+.astage { position: relative; padding-top: 1.1rem; }
+.arow { position: relative; height: 2.9rem; margin: 0 auto; }
+.acell { position: absolute; top: 0; width: 2.9rem; height: 2.9rem; border: 2px solid var(--base); border-radius: 6px; background: #fff; display: grid; place-items: center;
+  font: 400 1.4rem/1 "Fira Sans", sans-serif; color: var(--ink); opacity: 0; transform: scale(.7); transition: left .9s cubic-bezier(.5,.1,.3,1), opacity .25s, transform .25s, background-color .08s; }
+.acell.in { opacity: 1; transform: none; }
+.acell.lit { background: var(--base); color: #fff; }
+.acell.ghost.in { opacity: .85; }
+.acell.lift { transform: translateY(-.9rem); box-shadow: 0 6px 12px rgba(40, 40, 90, .2); }
+.acell.high { border-width: 3px; }
+.aarrow { position: absolute; left: 0; width: 100%; height: .8rem; transition: opacity .4s; }
+.aarrow.fw { top: 0; }
+.aarrow.bw { top: 0; opacity: 0; }
+.anim.down .aarrow.fw { opacity: 0; }
+.anim.down .aarrow.bw { opacity: 1; }
+/* Task 3: the worked example builds itself */
+.excap { margin: .2rem 0 .1rem; }
+.example.hold .ans, .example.hold .cell input[readonly], .example.hold .opt.pen { animation: none; opacity: 0; }
+.example.hold .cell.shown input[readonly] { opacity: 1; transition: opacity .3s; }
+.example.hold .rowhead { opacity: 0; transition: opacity .4s; }
+.example.hold .rowhead.shown { opacity: 1; }
+.cell.pairmark { box-shadow: 0 0 0 3px var(--light); }
+.cell.lit.pairmark, .cell.fixed.lit { box-shadow: none; }
+@media (max-width: 600px) {
+  .acell { width: 2.3rem; height: 2.3rem; font-size: 1.1rem; }
+  .arow { height: 2.3rem; }
+  .acap { font-size: .92rem; }
+}
+.anim { --slot: 3.3rem; }
+@media (max-width: 600px) { .anim { --slot: 2.5rem; } .acell { width: 2.2rem; height: 2.2rem; } .arow { height: 2.2rem; } }
+
 </style>
 </head>
 <body>
@@ -801,12 +843,20 @@ html[data-screen="learn"] footer, html[data-screen="practise"] footer { display:
     listen: { notThis: 'Play it again and listen to each note after the first.', play: 'Play the notes', again: 'Play again',
       wait: 'Listen to all the notes first.' },
     sound: { on: 'Sound on', off: 'Sound off' },
+    // the card animations (ui/32-anim.js)
+    anim: { upForwards: 'Going up, the alphabet goes forwards.', afterG: 'After G, the alphabet starts again at A.',
+      backToA: 'Back to A, but it sounds higher.', turnRound: 'Now turn it round.', downBackwards: 'Going down, the alphabet goes backwards.',
+      whichWay: 'Which way does this row go?', pair: 'Look at {a} and {b}: the letters go {dir}.', again: 'Watch again',
+      wrapLabel: 'Animation: the letters go up from A to G, then the alphabet starts again at the A above.',
+      reverseLabel: 'Animation: the letters go up from A to G, then turn round. Going down, the alphabet goes backwards.' },
     l3: { next: 'Going {dir} from {prev}, the next letter is not {mine}.', gap: 'The letter {mine} in box {n} does not fit the row.',
       notLetter: 'Only the letters from the musical alphabet can go in the boxes.' },
     drag: { bank: 'Drag from here', resize: 'Drag to move. Drag the corner arrow to change the size.', undo: 'Undo' },
     // sentences the generators put together (src/09-gen-shared.js TA.fmt fills the {gaps})
     explain: {
       run: 'The letters go {dir}: {run}.',
+      runUp: 'Going up, the alphabet goes forwards: {run}.',
+      runDown: 'Going down, the alphabet goes backwards: {run}.',
       listen: 'Each note sounded {way} than the one before, so the notes went {dir}. The letters go {letters}: {run}.',
       octave: 'An octave has eight letters. This one goes up from {start} to the next {start}: {run}.',
       findC: 'Every C is the white key just to the left of a group of two black keys.',
@@ -1284,7 +1334,7 @@ html[data-screen="learn"] footer, html[data-screen="practise"] footer { display:
           return {
             type: task.type, key: start, direction: dir, show: { letters: row.slice(0, task.shown).concat(new Array(task.blanks).fill(null)) },
             input: { kind: 'boxes' }, answer: row.slice(task.shown),
-            explain: TA.fmt(TA.STRINGS.explain.run, { dir: dir === 1 ? 'forwards' : 'backwards', run: runText(row) })
+            explain: TA.fmt(dir === 1 ? TA.STRINGS.explain.runUp : TA.STRINGS.explain.runDown, { run: runText(row) })   // Isaac: say the alphabet goes backwards
           };
         };
         // the book's hint is "after G comes A" (or before A comes G), so one row in each set goes round the end
@@ -1315,7 +1365,7 @@ html[data-screen="learn"] footer, html[data-screen="practise"] footer { display:
           type: task.type, key: start + (dir === 1 ? 'f' : 'b') + gaps.join(''), direction: dir,
           show: { letters: row.map((l, k) => (gaps.includes(k) ? null : l)) }, input: { kind: 'boxes' },
           answer: gaps.map((k) => row[k]),
-          explain: TA.fmt(TA.STRINGS.explain.run, { dir: dir === 1 ? 'forwards' : 'backwards', run: runText(row) })
+          explain: TA.fmt(dir === 1 ? TA.STRINGS.explain.runUp : TA.STRINGS.explain.runDown, { run: runText(row) })   // Isaac: say the alphabet goes backwards
         };
       };
       return TA.drawSet(rng, task.items, one, (items) => {
@@ -2254,27 +2304,63 @@ html[data-screen="learn"] footer, html[data-screen="practise"] footer { display:
   const pct = (x, W) => n2(x / W * 100) + '%';
   const n2 = (x) => Math.round(x * 100) / 100;
 
-  // wire a row of single-letter boxes: type to fill, move on, Enter checks
-  function wireBoxes(root, ctl, state) {
+  // wire a row of boxes (Isaac, 6 November 2026: changing an answer has to be easy, however it was put in).
+  // Clicking a box, or moving to it, selects it: it is highlighted and whatever is in it is replaced by the next
+  // letter typed or selected. Backspace empties the selected box, or, if it is empty already, selects the one before
+  // it. Letters move on to the next box. Enter checks. o.pad: there are letter buttons as well (see lettersFamily).
+  function wireBoxes(root, ctl, o) {
+    o = o || {};
     const boxes = [...root.querySelectorAll('input.box:not([readonly])')];
+    let sel = null;
+    const select = (b, focus) => {
+      boxes.forEach((x) => { x.classList.toggle('sel', x === b); const c = x.closest('.cell'); if (c) c.classList.toggle('sel', x === b); });
+      sel = b;
+      if (b && focus !== false && document.activeElement !== b) b.focus({ preventScroll: true });
+      if (b && b.value) { try { b.select(); } catch (e) { /* not selectable */ } }
+    };
+    const put = (b, v) => {
+      b.value = v;
+      const i = boxes.indexOf(b);
+      // on to the next empty box after this one (or the next box, if they are all full)
+      const next = boxes.slice(i + 1).find((x) => !x.value) || null;
+      ctl.change();
+      select(next, !!next);
+      if (!next) { boxes.forEach((x) => x.classList.remove('sel')); root.querySelectorAll('.cell.sel').forEach((c) => c.classList.remove('sel')); sel = null; }
+    };
     boxes.forEach((b, i) => {
-      b.addEventListener('input', () => {
-        b.value = b.value.toUpperCase();
-        if (b.value.length >= b.maxLength && boxes[i + 1]) boxes[i + 1].focus();
-        ctl.change();
+      b.addEventListener('focus', () => select(b, false));
+      b.addEventListener('pointerdown', () => { if (!b.disabled) setTimeout(() => select(b), 0); });
+      b.addEventListener('input', () => {                       // a phone keyboard, or a paste
+        const v = b.value.toUpperCase().replace(/\s/g, '').slice(-b.maxLength);
+        if (b.maxLength === 1) { if (v) put(b, v); else { b.value = ''; ctl.change(); } }
+        else { b.value = v; ctl.change(); }
       });
       b.addEventListener('keydown', (e) => {
-        if (e.key === 'Backspace' && !b.value && boxes[i - 1]) boxes[i - 1].focus();
-        if (e.key === 'ArrowLeft' && boxes[i - 1]) boxes[i - 1].focus();
-        if (e.key === 'ArrowRight' && boxes[i + 1]) boxes[i + 1].focus();
-        if (e.key === 'Enter') ctl.submit();
+        if (b.disabled) return;
+        if (e.key === 'Enter') { e.preventDefault(); ctl.submit(); return; }
+        if (e.key === 'ArrowLeft' && boxes[i - 1]) { e.preventDefault(); select(boxes[i - 1]); return; }
+        if (e.key === 'ArrowRight' && boxes[i + 1]) { e.preventDefault(); select(boxes[i + 1]); return; }
+        if (e.key === 'Backspace' || e.key === 'Delete') {
+          if (b.maxLength > 1 && b.selectionStart !== b.selectionEnd) return;      // a two-character box: as normal
+          e.preventDefault();
+          if (b.value) { b.value = ''; ctl.change(); select(b); }
+          else if (boxes[i - 1]) { select(boxes[i - 1]); }
+          return;
+        }
+        if (b.maxLength === 1 && /^[a-z]$/i.test(e.key) && !e.ctrlKey && !e.metaKey && !e.altKey) { e.preventDefault(); put(b, e.key.toUpperCase()); }
       });
     });
     return {
       get: () => boxes.map((b) => b.value.trim()),
       ready: () => boxes.length > 0 && boxes.every((b) => b.value.trim().length >= 1),
-      lock: (on) => boxes.forEach((b) => { b.disabled = !!on; }),
-      clear: () => { boxes.forEach((b) => { b.value = ''; }); if (boxes[0]) boxes[0].focus(); },
+      lock: (on) => { boxes.forEach((b) => { b.disabled = !!on; }); if (on) select(null, false); },
+      clear: () => { boxes.forEach((b) => { b.value = ''; }); if (boxes[0]) select(boxes[0]); },
+      // the letter buttons: the letter goes in the selected box (replacing what is there), or the first empty one
+      pad: (v) => {
+        const b = (sel && !sel.disabled ? sel : null) || boxes.find((x) => !x.value && !x.disabled);
+        if (b) put(b, v);
+      },
+      select: (k) => select(boxes[k]),
       reveal: (answer) => {
         root.querySelectorAll('.model').forEach((m) => m.remove());
         boxes.forEach((b, i) => {
@@ -2440,20 +2526,13 @@ html[data-screen="learn"] footer, html[data-screen="practise"] footer { display:
     return {
       html: '<div class="rowwrap">' + arrow + '<div class="letters">' + cells + '</div></div>' + pad, needsCheck: true,
       bind(root, ctl) {
-        const w = wireBoxes(root, ctl);
-        const boxes = [...root.querySelectorAll('input.box:not([readonly])')];
-        let last = null;
-        boxes.forEach((b) => b.addEventListener('focus', () => { last = b; }));
-        root.querySelectorAll('.lp').forEach((b) => b.addEventListener('click', () => {
-          if (b.disabled) return;
-          // the box the student was on, if it is still empty; otherwise the first empty one
-          const target = (last && !last.value && !last.disabled ? last : null) || boxes.find((x) => !x.value && !x.disabled);
-          if (!target) return;
-          target.value = b.dataset.l;
-          const i = boxes.indexOf(target);
-          last = boxes.slice(i + 1).find((x) => !x.value) || null;
-          ctl.change();
-        }));
+        const w = wireBoxes(root, ctl, { pad: true });
+        // on a phone the letter buttons are the keyboard, so the phone's own keyboard stays down
+        if (!ex) root.querySelectorAll('input.box:not([readonly])').forEach((b) => b.setAttribute('inputmode', 'none'));
+        root.querySelectorAll('.lp').forEach((b) => {
+          b.addEventListener('pointerdown', (e) => e.preventDefault());      // keep the box selected
+          b.addEventListener('click', () => { if (!b.disabled) w.pad(b.dataset.l); });
+        });
         const lock = w.lock;
         w.lock = (on) => { lock(on); root.querySelectorAll('.lp').forEach((b) => { b.disabled = !!on; }); };
         return w;
@@ -3425,30 +3504,179 @@ html[data-screen="learn"] footer, html[data-screen="practise"] footer { display:
     const task = L.tasks[k - 1], w = L.learn.worked.find((x) => x.task === task.id);
     const { item } = Ln.example(L, task.id);
     const built = V.build(item, task, { mode: 'example', lesson: L });
+    const an = TA.anim && TA.anim[n] && TA.anim[n][task.id];          // the card's animation, if it has one
+    const sep = an && !an.onExample;
     return {
       title: taskHead(task),
-      html: '<div class="tcard todo example"><h2 class="cardhead">' + D.esc(taskHead(task)) + '</h2>' +
+      html: '<div class="tcard todo example' + (an ? ' animated' : '') + '"><h2 class="cardhead">' + D.esc(taskHead(task)) + '</h2>' +
         '<p class="label">' + D.esc(S.lesson.whatToDo) + '</p><p class="hint">' + D.esc(w.hint) + '</p>' +
+        (sep ? an.html() : '') +
         ((task.appInstruction || task.instruction) ? '<p class="instr">' + D.rich(task.appInstruction || task.instruction) + '</p>' : '') +
+        (an && an.onExample ? '<p class="acap excap" aria-live="polite"></p>' : '') +
         '<div class="exwrap ex-' + item.type + '">' + built.html + '</div>' +
-        (item.show.listen ? '' : '<div class="cardplay"><button type="button" class="btn small replay">' + D.esc(S.card.play) + '</button></div>') + '</div>',
+        (item.show.listen ? '' : '<div class="cardplay"><button type="button" class="btn small replay">' + D.esc(an ? S.anim.again : S.card.play) + '</button></div>') + '</div>',
       mount(root) {
         const ex = root.querySelector('.example');
-        let tm = null;
-        // the answer appears in pencil (CSS, after 1.2 s), then it is played with each box lit
+        let tm = null, run = null;
+        const stop = () => { clearTimeout(tm); if (run) run.stop(); run = null; TA.sound.stop(); };
+        // with an animation: it plays first, then the worked example's answer appears in pencil and is played.
+        // Without: the answer appears (CSS, after 1.2 s), then it is played with each box lit.
         const play = () => {
-          clearTimeout(tm);
+          stop();
           const still = document.documentElement.classList.contains('still');
+          if (an && an.onExample) { run = an.run(root, item); return run.done; }
+          if (an) {
+            ex.classList.add('hold');
+            run = an.run(root, item);
+            return run.done.then(() => {
+              if (!run) return;
+              ex.classList.remove('hold'); ex.classList.toggle('again');
+              return new Promise((res) => { tm = setTimeout(() => res(built.sound ? TA.sound.play(built.sound(ex.querySelector('.exwrap'))) : true), still ? 0 : 2100); });
+            });
+          }
           return new Promise((res) => { tm = setTimeout(() => res(built.sound ? TA.sound.play(built.sound(ex)) : true), still ? 0 : 2100); });
         };
-        if (item.show.listen) root.querySelectorAll('.ll').forEach((x) => x.classList.add('later'));
         const r = root.querySelector('.replay');
-        if (r) r.addEventListener('click', () => { TA.sound.unlock(); ex.classList.toggle('again'); play(); });
+        if (r) r.addEventListener('click', () => { TA.sound.unlock(); if (!an) ex.classList.toggle('again'); play(); });
         const pb = root.querySelector('.listen .playbtn');
         if (pb) pb.addEventListener('click', () => { TA.sound.unlock(); TA.sound.play(built.sound(ex)); });
-        return { play, stop: () => { clearTimeout(tm); TA.sound.stop(); } };
+        // under test, or with nothing playing yet, show the last frame
+        if (an && document.documentElement.classList.contains('still')) an.run(root, item);
+        return { play, stop };
       }
     };
+  };
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+/* ---- ui/32-anim.js ---- */
+/* Theory Practice: little animations on the task cards (Isaac, 6 November 2026: "do more of this sort of thing,
+ * little animations, because the book version can't"). Each one shows the idea of its task moving, with the sound,
+ * before the book's worked example. Lesson 3:
+ *   t1  the alphabet goes up to G, then the A comes round again after G, and sounds higher
+ *   t2  the alphabet goes up, then the letters turn round: going down, the alphabet goes backwards
+ *   t3  (on the worked example itself) two printed letters side by side show which way the row goes
+ * Every animation shows its last frame at once when the page is under test (the "still" class). */
+(function (G) {
+  'use strict';
+  const TA = G.TA;
+  const D = TA.draw;
+  const A = (TA.anim = {});
+  const S = () => TA.STRINGS.anim;
+  const still = () => document.documentElement.classList.contains('still');
+
+  // a run that can be stopped: wait(ms) rejects once stop() has been called
+  function runner() {
+    let dead = false;
+    const timers = [];
+    return {
+      wait: (ms) => new Promise((res, rej) => { if (dead) return rej(0); timers.push(setTimeout(() => (dead ? rej(0) : res()), ms)); }),
+      alive: () => !dead,
+      stop: () => { dead = true; timers.forEach(clearTimeout); TA.sound.stop(); }
+    };
+  }
+  const note = (midi, el, ms) => TA.sound.play([{ midi, el }], { dur: (ms || 450) / 1000 * 0.85 });
+
+  // a row of boxes laid out by slot, so they can move
+  function rowHtml(letters, slots, cls) {
+    return '<div class="arow ' + (cls || '') + '" style="width:calc(var(--slot) * ' + slots + ' - .4rem)">' +
+      letters.map((l, i) => '<div class="acell" data-i="' + i + '" style="left:calc(var(--slot) * ' + i + ')">' + D.esc(l) + '</div>').join('') + '</div>';
+  }
+  const arrowSvg = (dir) => '<svg class="aarrow ' + (dir === 1 ? 'fw' : 'bw') + '" viewBox="0 0 100 6" preserveAspectRatio="none" aria-hidden="true"><line x1="' + (dir === 1 ? 2 : 98) + '" x2="' + (dir === 1 ? 95 : 5) + '" y1="3" y2="3" stroke="' + TA.STYLE.base + '" stroke-width="1.1"/>' +
+    '<path d="' + (dir === 1 ? 'M99 3 L93 0.4 L93 5.6 Z' : 'M1 3 L7 0.4 L7 5.6 Z') + '" fill="' + TA.STYLE.base + '"/></svg>';
+  const frame = (inner, caption, label) => '<div class="anim" role="img" aria-label="' + D.esc(label) + '"><p class="acap" aria-live="polite">' + D.esc(caption) + '</p>' + inner + '</div>';
+
+  const UP7 = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
+
+  A[3] = {
+    // t1: after G you go back to A, but higher
+    t1: {
+      html: () => frame('<div class="astage">' + arrowSvg(1) + rowHtml(UP7.concat(['A']), 8) + '</div>', S().upForwards, S().wrapLabel),
+      run(root) {
+        const r = runner(), cells = [...root.querySelectorAll('.acell')], cap = root.querySelector('.acap');
+        const pitches = TA.letterPitches(UP7.concat(['A']), 1), last = cells[7];
+        const end = () => { cells.forEach((c) => c.classList.add('in')); last.classList.add('high'); cap.textContent = S().backToA; root.querySelector('.anim').classList.add('done'); };
+        if (still()) { end(); return { done: Promise.resolve(), stop: r.stop }; }
+        const done = (async () => {
+          cells.forEach((c) => c.classList.remove('in', 'high', 'lift'));
+          cap.textContent = S().upForwards;
+          // the copy of A waits on top of the first A
+          last.style.left = '0px'; last.classList.add('ghost');
+          await r.wait(300);
+          for (let i = 0; i < 7; i++) { cells[i].classList.add('in'); note(pitches[i], cells[i], 450); await r.wait(480); }
+          await r.wait(350);
+          cap.textContent = S().afterG;
+          last.classList.add('in', 'lift');
+          await r.wait(500);
+          last.style.left = 'calc(var(--slot) * 7)';
+          await r.wait(950);
+          last.classList.remove('lift', 'ghost'); last.classList.add('high');
+          cap.textContent = S().backToA;
+          note(pitches[6], cells[6], 450); await r.wait(500);
+          note(pitches[7], last, 700); await r.wait(800);
+        })().catch(() => {});
+        return { done, stop: r.stop };
+      }
+    },
+    // t2: the alphabet goes up, then the letters turn round: going down, the alphabet goes backwards
+    t2: {
+      html: () => frame('<div class="astage">' + arrowSvg(1) + arrowSvg(-1) + rowHtml(UP7, 7) + '</div>', S().upForwards, S().reverseLabel),
+      run(root) {
+        const r = runner(), cells = [...root.querySelectorAll('.acell')], cap = root.querySelector('.acap'), an = root.querySelector('.anim');
+        const up = TA.letterPitches(UP7, 1);                       // A3 up to G4
+        const flip = () => cells.forEach((c, i) => { c.style.left = 'calc(var(--slot) * ' + (6 - i) + ')'; });
+        if (still()) { cells.forEach((c) => c.classList.add('in')); flip(); an.classList.add('down'); cap.textContent = S().downBackwards; return { done: Promise.resolve(), stop: r.stop }; }
+        const done = (async () => {
+          an.classList.remove('down');
+          cells.forEach((c, i) => { c.classList.remove('in'); c.style.left = 'calc(var(--slot) * ' + i + ')'; });
+          cap.textContent = S().upForwards;
+          await r.wait(300);
+          for (let i = 0; i < 7; i++) { cells[i].classList.add('in'); note(up[i], cells[i], 420); await r.wait(450); }
+          await r.wait(700);
+          cap.textContent = S().turnRound;
+          an.classList.add('down');
+          flip();                                                  // the letters swap places: G F E D C B A
+          await r.wait(1300);
+          cap.textContent = S().downBackwards;
+          for (let i = 6; i >= 0; i--) { note(up[i], cells[i], 420); await r.wait(450); }
+        })().catch(() => {});
+        return { done, stop: r.stop };
+      }
+    },
+    // t3: works on the worked example: two printed letters side by side show the way, then the gaps fill in
+    t3: {
+      onExample: true,
+      run(root, item) {
+        const r = runner(), ex = root.querySelector('.example');
+        const cells = [...ex.querySelectorAll('.letters .cell')], row = item.show.letters;
+        let k2 = 0;
+        const full = row.map((l) => l || item.answer[k2++]);
+        const pitches = TA.letterPitches(full, item.direction);
+        const pair = row.findIndex((l, i) => l && row[i + 1]);
+        const cap = ex.querySelector('.excap'), arrow = ex.querySelector('.rowhead');
+        const say = (t) => { if (cap) cap.textContent = t; };
+        const dirWord = item.direction === 1 ? 'forwards' : 'backwards';
+        const hint = TA.fmt(S().pair, { a: row[pair], b: row[pair + 1], dir: dirWord });
+        const gaps = cells.filter((c, i) => !row[i]);
+        const end = () => { ex.classList.remove('hold'); gaps.forEach((g) => g.classList.add('shown')); if (arrow) arrow.classList.add('shown'); cells[pair].classList.add('pairmark'); cells[pair + 1].classList.add('pairmark'); say(hint); };
+        if (still()) { end(); return { done: Promise.resolve(), stop: r.stop }; }
+        const done = (async () => {
+          ex.classList.add('hold');
+          gaps.forEach((g) => g.classList.remove('shown')); if (arrow) arrow.classList.remove('shown');
+          cells.forEach((c) => c.classList.remove('pairmark'));
+          say(S().whichWay);
+          await r.wait(900);
+          cells[pair].classList.add('pairmark'); note(pitches[pair], cells[pair], 500); await r.wait(650);
+          cells[pair + 1].classList.add('pairmark'); note(pitches[pair + 1], cells[pair + 1], 500); await r.wait(700);
+          say(hint); if (arrow) arrow.classList.add('shown');
+          await r.wait(1100);
+          for (let i = 0; i < cells.length; i++) {
+            if (!row[i]) cells[i].classList.add('shown');
+            note(pitches[i], cells[i], 420); await r.wait(460);
+          }
+        })().catch(() => {});
+        return { done, stop: r.stop };
+      }
+    }
   };
 })(typeof globalThis !== 'undefined' ? globalThis : this);
 
