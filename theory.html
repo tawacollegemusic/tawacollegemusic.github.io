@@ -350,12 +350,121 @@ html[data-screen="learn"] footer, html[data-screen="practise"] footer { display:
 .single .practise .item > .nextrow, .single .practise .item > .actions { pointer-events: none; }
 .single .practise .item > .nextrow > .btn, .single .practise .item > .actions > .btn { pointer-events: auto; }
 
+/* ---- 6 November 2026: centred questions, task cards, sound, listening (Lesson 3 first) ---- */
+/* one question at a time: the question sits in the middle of the frame, not in the first grid column */
+.single .practise .items { display: flex; justify-content: center; }
+.single .practise .item { width: min(100%, var(--qw, 46rem)); }
+/* a card lesson: everything in one centred column */
+.cardsheet .practise > :is(section.task, .prog, .cardstage, .finish, .before) { max-width: 52rem; margin-left: auto; margin-right: auto; }
+.cardsheet .single .practise .item, .single .cardsheet .practise .item { --qw: 100%; }
+.cardsheet .practise { padding-top: 14px; }
+.single .practise :is([data-type="next-letter"], [data-type="fill-gaps"], [data-type="listen-direction"]) .item { --qw: 100%; }
+.single .practise :is([data-type="next-letter"], [data-type="fill-gaps"], [data-type="listen-direction"]) .body { gap: 1rem; padding-top: .6rem; }
+.single .practise :is([data-type="next-letter"], [data-type="fill-gaps"], [data-type="listen-direction"]) .cell { width: 4rem; height: 4rem; border-radius: 8px; }
+.single .practise :is([data-type="next-letter"], [data-type="fill-gaps"], [data-type="listen-direction"]) :is(.cell.fixed, .cell .box, .ll) { font-size: 2rem; }
+.single .practise :is([data-type="next-letter"], [data-type="fill-gaps"]) .letters { gap: .6rem; }
+.single .practise .th { text-align: left; }
+.rowwrap { display: inline-flex; flex-direction: column; align-items: stretch; max-width: 100%; }
+.rowhead { display: flex; align-items: center; gap: .6rem; }
+.rowhead .rowarrow { flex: 1; margin: 0; max-width: none; width: auto; min-width: 6rem; }
+.rowlab { font: 700 .95rem "Lexend", sans-serif; color: var(--base); white-space: nowrap; }
+.letterpad { display: flex; flex-wrap: wrap; justify-content: center; gap: .45rem; }
+.letterpad .lp { width: 3.1rem; height: 3.1rem; min-height: 0; padding: 0; font: 700 1.35rem/1 "Fira Sans", sans-serif; }
+/* a box lights up while its letter sounds */
+.cell { transition: background-color .08s, transform .08s; }
+.cell.lit, .cell.fixed.lit { background: var(--base); color: #fff; transform: translateY(-3px); }
+.cell.lit .box, .cell.lit .ll, .cell.lit .model { color: #fff; background: transparent; }
+.lb rect { transition: fill .08s; }
+.lb.lit rect { fill: var(--light); }
+/* listening */
+.listen { display: flex; flex-direction: column; align-items: center; gap: .9rem; }
+.playbtn { gap: .5rem; }
+.playbtn .spk { display: inline-flex; }
+.lcell .ll { font: 400 1.5rem/1 "Kalam", cursive; color: var(--pencil); }
+.single .practise [data-type="listen-direction"] .opts .opt { min-width: 9rem; font-size: 1.1rem; }
+/* the task card */
+.cardstage { padding: .4rem 0 .2rem; }
+.tcard .cardhead { font: 700 1.4rem/1.3 "Lexend", sans-serif; color: var(--shade); margin: 0 0 .6rem; }
+.tcard .label { font: 700 .75rem "Lexend", sans-serif; letter-spacing: .2em; text-transform: uppercase; color: var(--shade); margin: .2rem 0 .3rem; }
+.tcard .hint { font-size: 1.1rem; }
+.tcard.info { background: var(--tint); border-radius: 14px; padding: 14px 20px 16px; }
+.tcard .exwrap { margin: .6rem auto .4rem; }
+.tcard .cell { width: 3.4rem; height: 3.4rem; }
+.tcard :is(.cell.fixed, .cell .box) { font-size: 1.6rem; }
+.cardplay { display: flex; justify-content: center; margin-top: .4rem; }
+.cardnav { display: flex; justify-content: center; margin-top: 1rem; }
+.cardnav .go { min-width: 12rem; font-size: 1.1rem; }
+.rushed { background: var(--tint); border-left: 0; border-radius: 10px; padding: .6rem .9rem; font-weight: 700; color: var(--shade); margin: 0 0 .8rem; }
+.linkbtn { background: none; border: 0; padding: 0 0 0 .2rem; font: inherit; font-weight: 700; color: var(--base); text-decoration: underline; cursor: pointer; }
+.linkbtn:focus-visible { outline: 3px solid var(--base); outline-offset: 2px; }
+.example .ll { animation: appear .8s ease 1.2s both; }
+.example.again .ll { animation-name: appear2; }
+.sndbtn[aria-pressed="false"] { opacity: .75; }
+.single .practise .fb { justify-content: center; }
+.cardsheet .single .practise .fb, .single .cardsheet .practise .fb { max-width: 40rem; margin: 0 auto; }
+@media (min-width: 1500px) {
+  .cardsheet .practise > :is(section.task, .prog, .cardstage, .finish, .before) { max-width: 60rem; }
+  .single .practise :is([data-type="next-letter"], [data-type="fill-gaps"], [data-type="listen-direction"]) .cell { width: 4.4rem; height: 4.4rem; }
+}
+@media (max-width: 600px) {
+  .single .practise :is([data-type="next-letter"], [data-type="fill-gaps"], [data-type="listen-direction"]) .cell { width: 2.55rem; height: 2.55rem; }
+  .single .practise :is([data-type="next-letter"], [data-type="fill-gaps"], [data-type="listen-direction"]) :is(.cell.fixed, .cell .box, .ll) { font-size: 1.35rem; }
+  .single .practise :is([data-type="next-letter"], [data-type="fill-gaps"]) .letters { gap: .3rem; }
+  .letterpad { gap: .35rem; }
+  .letterpad .lp { width: 2.6rem; height: 2.8rem; font-size: 1.2rem; }
+  .tcard .cell { width: 2.5rem; height: 2.5rem; }
+  .tcard :is(.cell.fixed, .cell .box) { font-size: 1.25rem; }
+  .tcard.info { padding: 10px 12px 12px; }
+  .cornerrow .sndbtn { font-size: .8rem; padding: .4rem .55rem; }
+}
+/* the arrow spans the row of boxes; its label sits just past its end, as on the page */
+.rowhead { position: relative; padding-right: 0; }
+.rowhead .rowlab { position: absolute; left: calc(100% + .5rem); top: 50%; transform: translateY(-50%); }
+.tcard .rowwrap:has(.rowlab), .practise .rowwrap:has(.rowlab) { margin-right: 5.5rem; margin-left: 5.5rem; }
+@media (max-width: 600px) { .tcard .rowwrap:has(.rowlab), .practise .rowwrap:has(.rowlab) { margin-left: 0; margin-right: 4.6rem; } .rowlab { font-size: .8rem; } }
+/* the frame fills the window, so the question isn't a small box at the top of a big screen */
+.cardsheet .frame.practise { min-height: calc(100vh - 104px); }
+@media (min-width: 1500px) and (min-height: 900px) {
+  .cardsheet .practise { font-size: 1.2rem; }
+  .cardsheet .practise > :is(section.task, .prog, .cardstage, .finish, .before) { max-width: 70rem; }
+  .cardsheet .practise .th, .cardsheet .tcard .cardhead { font-size: 1.7rem; }
+  .single .practise :is([data-type="next-letter"], [data-type="fill-gaps"], [data-type="listen-direction"]) .cell { width: 5.4rem; height: 5.4rem; }
+  .single .practise :is([data-type="next-letter"], [data-type="fill-gaps"], [data-type="listen-direction"]) :is(.cell.fixed, .cell .box, .ll) { font-size: 2.7rem; }
+  .cardsheet .letterpad .lp { width: 4rem; height: 4rem; font-size: 1.7rem; }
+  .cardsheet .practise .btn { font-size: 1.15rem; min-height: 3.3rem; padding: .85rem 1.4rem; }
+  .cardsheet .rowlab { font-size: 1.2rem; }
+  .cardsheet .tcard .cell { width: 4.4rem; height: 4.4rem; }
+  .cardsheet .tcard :is(.cell.fixed, .cell .box) { font-size: 2.1rem; }
+  .cardsheet .practise .fb { font-size: 1.25rem; }
+  .cardsheet .fbicon { width: 2.1rem; height: 2.1rem; }
+  .cardsheet .practise .fig { max-width: 100%; }
+}
+/* the arrow takes the width of the row of boxes, never its own 300 px */
+.rowhead .rowarrow { width: 0; min-width: 100%; flex: none; }
+@media (max-width: 600px) {
+  .letterpad { gap: .3rem; }
+  .letterpad .lp { width: 2.35rem; height: 2.7rem; font-size: 1.15rem; border-radius: 9px; }
+  .cardsheet .cornerrow { gap: .35rem; }
+  .cardsheet .cornerrow .sndbtn { font-size: 0; padding: .4rem .5rem; min-width: 2.6rem; }
+  .cardsheet .cornerrow .sndbtn::before { content: ""; display: block; width: 22px; height: 22px; background: var(--shade);
+    -webkit-mask: var(--spk) center / contain no-repeat; mask: var(--spk) center / contain no-repeat; }
+  .cardsheet .cornerrow .sndbtn[aria-pressed="false"]::before { opacity: .45; }
+  .cardsheet .cornerrow .helpbtn:not(.sndbtn) { font-size: .85rem; padding: .45rem .6rem; white-space: nowrap; }
+  .cardsheet .scorebox { padding: 6px 8px; gap: .35rem; }
+  .cardsheet .scorebox .slab { display: none; }
+}
+:root { --spk: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 9h4l5-4v14l-5-4H4z'/%3E%3Cpath d='M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12' stroke='black' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); }
+@media (min-width: 1500px) and (min-height: 900px) {
+  .cardsheet .practise .letterpad .lp { font-size: 1.7rem; padding: 0; min-height: 0; }
+  .cardsheet .frame.practise { padding-top: 4vh; }
+}
+
 </style>
 </head>
 <body>
 <div id="app" aria-live="polite"></div>
 <script>
-(function () { var G = globalThis; G.TA = G.TA || {}; G.TA.DATA = {"_about": "Lessons 1 to 12 of the Music Theory workbook, for the Theory Practice app. Every student-facing string here is copied from Isaac's lesson files (Source files/lessonNN.json and the captions and hints inside lessonNN.py, 2 November 2026). Do not reword them. A string the app needs that is not here goes in src/strings.js and passes tests/lint. 'introduces' lists the ideas a lesson teaches; a lesson may use only ideas introduced by itself or an earlier lesson (src/00-core.js TA.allowed). 'items' is the number of exercises in one practice set (the book's count, minus its old model answer where it had one). 'appItems' is how many the app gives for that task (Isaac, 2 November 2026: 10 for every task). 'appInstruction' is the instruction with only the verb changed for the app (Select, not Write), like 'appHeading'.", "version": "2026-11-02", "lintExceptions": {"_about": "Book wording that breaks a lint rule. The app keeps the book's words until Isaac decides (asked 2 November 2026). tests/check.js lists these as 'waiting on Isaac' and does not fail on them. Remove a line once he has answered, and change the text in both the book and here if he rewords it.", "A stave has five lines": "Lesson 1 info starts with the article A (the A rule, 12 October)", "A clef at the start": "Lesson 2 info", "A dot either side of line 4": "Lesson 2 bass clef step 4", "A tune moves by": "Lesson 5 info", "A note is an oval": "Lesson 7 info", "A and G can each go in two places": "Lesson 10 Task 3: starts with the note A", "A stem reaches about three": "Isaac's Lesson 14 wording (2 November 2026)", "A flag always goes on the": "Isaac's Lesson 14 wording (2 November 2026)", "A stem can point up or down": "Isaac's Lesson 14 wording (2 November 2026)", "A flag?": "Isaac's Lesson 14 wording (2 November 2026)", "whole note": "Isaac's Lesson 14 wording (2 November 2026)", "half note": "Isaac's Lesson 14 wording (2 November 2026)", "quarter note": "Isaac's Lesson 14 wording (2 November 2026)", "eighth note": "Isaac's Lesson 14 wording (2 November 2026)", "A flag always goes": "Isaac's Lesson 14 wording (2 November 2026)"}, "lessons": [{"n": 1, "title": "The stave", "introduces": ["stave", "line-space", "line-number", "space-number"], "learn": {"text": "A **stave** has **five lines** and **four spaces**, counted from the bottom up. Every note sits either **on a line** or **in a space**.", "diagram": "A stave with no clef. Lines numbered Line 1 to Line 5 and spaces Space 1 to Space 4, counted from the bottom, with the caption 'count up from the bottom'. One line note and one space note labelled 'Line note' and 'Space note'.", "worked": [{"task": "t1", "head": "Task 1: line or space?", "hint": "Is there a line going through it (line) or does it sit between the lines (space)?"}, {"task": "t2", "head": "Task 2: which line?", "hint": "Count up from line 1."}, {"task": "t3", "head": "Task 3: which space?", "hint": "Count up from space 1."}]}, "tasks": [{"id": "t1", "number": 1, "heading": "Line or space?", "instruction": "Write **line** or **space** in the box under each note.", "appInstruction": "Select **line** or **space** for each note.", "type": "line-or-space", "items": 8, "appItems": 10, "clef": null}, {"id": "t2", "number": 2, "heading": "Which line?", "instruction": "Write the line number (1 to 5).", "appInstruction": "Select the line number (1 to 5).", "type": "which-line", "items": 5, "appItems": 10, "clef": null}, {"id": "t3", "number": 3, "heading": "Which space?", "instruction": "Write the space number (1 to 4).", "appInstruction": "Select the space number (1 to 4).", "type": "which-space", "items": 5, "appItems": 10, "clef": null}]}, {"n": 2, "title": "Clefs", "introduces": ["clef-treble", "clef-bass"], "learn": {"text": "A **clef** at the start of every stave tells you which note each line stands for.", "diagram": "Two panels. Treble clef: a printed treble clef with line 2 highlighted, a note on line 2 and the letter G beside the stave; title 'Treble clef'; caption 'The curl wraps around line 2, so line 2 is G. For higher sounds.' Bass clef: a printed bass clef with line 4 highlighted, a note on line 4 and the letter F; title 'Bass clef'; caption 'The dots sit either side of line 4, so line 4 is F. For lower sounds.'", "worked": [{"task": "t1", "head": "Treble clef", "steps": ["Dot just below line 2", "Up to line 3, curve round", "Down to line 1, curve round", "Curl up high and hook over", "Down the middle to a blob"], "note": "Animate the hand-drawn clef one stroke at a time (curriculum/clef-strokes.json), the new stroke in red."}, {"task": "t2", "head": "Bass clef", "steps": ["Big dot on line 4", "Curve up over line 5", "Sweep down past line 2", "A dot either side of line 4"], "note": "As above."}]}, "tasks": [{"id": "t1", "number": 1, "heading": "Trace these two treble clefs, then draw 5 more", "appHeading": "Place and size these treble clefs", "type": "place-clef", "clef": "treble", "items": 7, "appItems": 10, "traced": 2, "note": "Isaac (2 November): students drag a clef from a bank onto the stave and resize it; marked on how close it is to the right place and size. The first 2 items show a faint clef to cover (the 'trace'); the rest have no guide. (Drawing freehand was tried on 2 and 3 November and dropped on 4 November: testers did not enjoy it.)"}, {"id": "t2", "number": 2, "heading": "Trace these two bass clefs, then draw 5 more", "appHeading": "Place and size these bass clefs", "type": "place-clef", "clef": "bass", "items": 7, "appItems": 10, "traced": 2}]}, {"n": 3, "title": "The musical alphabet", "introduces": ["letters", "letters-forwards-up", "letters-backwards-down"], "learn": {"text": "Every note in music has a **letter name**. It tells you which note to play or sing. There are only seven: **A B C D E F G**. After G you go back to A, but it sounds higher.", "diagram": "The letters A B C D E F G then A in boxes, an arrow over them labelled 'Going up: the letters go forwards', an arrow back labelled 'Going down: the letters go backwards', and the last A marked 'back to A, but higher'. No red: this page has no notation, so arrows and labels are indigo.", "worked": [{"task": "t1", "head": "Task 1: what comes next?", "hint": "Go forwards along the line of letters above. After G comes A."}, {"task": "t2", "head": "Task 2: going down", "hint": "Go backwards along the line of letters above. Before A comes G."}, {"task": "t3", "head": "Task 3: fill the gaps", "hint": "First work out which way the letters go. C, D goes forwards."}]}, "tasks": [{"id": "t1", "number": 1, "heading": "What comes next?", "instruction": "Write the next letter.", "type": "next-letter", "items": 4, "shown": 3, "blanks": 1, "direction": "forwards"}, {"id": "t2", "number": 2, "heading": "Going down", "instruction": "Write the next two letters.", "type": "next-letter", "items": 4, "shown": 2, "blanks": 2, "direction": "backwards"}, {"id": "t3", "number": 3, "heading": "Fill the gaps", "instruction": "Work out if each row goes forwards or backwards, then write the missing letters.", "type": "fill-gaps", "items": 4, "length": 7, "gaps": 2, "note": "Rows go forwards or backwards in a mix (never all one way); no arrow shows the direction."}]}, {"n": 4, "title": "Letter names on the keyboard", "introduces": ["keyboard", "keyboard-white-letters", "black-key-groups", "octave-eight-letters"], "learn": {"text": "Every piano and keyboard uses the seven letters of the musical alphabet on its white keys. The black keys come in groups of **two** and **three**, and they help you find your way around.", "diagram": "A keyboard with every white key lettered, the groups of two black keys outlined, the caption 'C is always the white key just to the left of a group of two black keys (outlined).', and a bracket from C to the next C labelled 'one octave: 8 letters from C up to the next C' with 'going up: the letters go forwards'. No red on this page: marks are indigo.", "worked": [{"task": "t1", "head": "Task 1: Find the Cs", "hint": "Find a group of two black keys. Colour the white key on its left and write C."}, {"task": "t2", "head": "Task 2: Name the keys", "hint": "Find the nearest C. Go forwards one white key at a time up to the box."}, {"task": "t3", "head": "Task 3: Up an octave", "hint": "Go forwards through the letters until you reach the same letter again (8 in all)."}]}, "tasks": [{"id": "t1", "number": 1, "heading": "Colour every C and write C on it", "appHeading": "Tap every C", "type": "find-key", "items": 1, "whiteKeys": 22, "target": "C", "note": "One long keyboard starting on a white key that is not C. Marked right only when every C is chosen and nothing else."}, {"id": "t2", "number": 2, "heading": "Name each key with a box", "type": "name-key", "items": 2, "whiteKeys": 11, "boxes": 4, "note": "Two keyboards of 11 white keys, each starting on a different letter, 4 boxed white keys each."}, {"id": "t3", "number": 3, "heading": "Fill in the octave", "type": "fill-octave", "items": 4, "length": 8}]}, {"n": 5, "title": "Higher and lower", "introduces": ["higher-lower", "up-down", "step-leap"], "learn": {"text": "High sounds are like a whistle and low sounds are like a big drum. The higher a note sits on the stave, the higher it sounds. A tune moves by **steps** and **leaps**.", "diagram": "A stave with no clef and notes climbing, a red arrow labelled 'higher on the stave = higher sound', with 'lower sound' and 'higher sound' at its ends; a step labelled 'to the next line or space' and a leap labelled 'skips a line or space'.", "worked": [{"task": "t1", "head": "Task 1: Circle the higher note", "hint": "Find the note in each pair that sits higher on the stave. Draw a circle around it."}, {"task": "t2", "head": "Task 2: Up or down?", "hint": "Is the second note higher or lower than the first one? Write up or down in the box."}, {"task": "t3", "head": "Task 3: Step or leap?", "hint": "Next line or space? Write step. Skips over a line or space? Write leap."}]}, "tasks": [{"id": "t1", "number": 1, "heading": "Which note in each pair sits higher? Circle it.", "appHeading": "Which note in each pair sits higher? Tap it.", "type": "higher-note", "items": 7, "clef": null}, {"id": "t2", "number": 2, "heading": "Do these pairs of notes go up or down?", "type": "up-down", "items": 5, "clef": null}, {"id": "t3", "number": 3, "heading": "Do these pairs of notes move by a step or a leap?", "type": "step-leap", "items": 5, "clef": null}]}, {"n": 6, "title": "Treble clef notes", "introduces": ["read-treble"], "learn": {"text": "In the treble clef, every line and space has its own letter name. The bottom line is **E**. Going up one line or space at a time, the letters follow the musical alphabet.", "diagram": "A treble clef stave with all nine notes E F G A B C D E F, a 'Lines' row of letters (E G B D F) and a 'Spaces' row (F A C E) under them, and a red arrow labelled 'going up the stave, the letters go forwards: E F G A B C D E F'.", "worked": [{"task": "t1", "head": "Task 1: Name the note", "hint": "Start on the bottom line, E. Count up the alphabet, one line or space at a time, to the note."}, {"task": "t2", "head": "Task 2: Find the letter", "hint": "Find the letter in the diagram above. Circle the note that sits on that line or in that space."}, {"task": "t3", "head": "Task 3: Find the word", "hint": "Name each note. Then read the letters from left to right to find the word."}]}, "tasks": [{"id": "t1", "number": 1, "heading": "What is each note called? Write its letter in the box.", "type": "name-note", "items": 8, "clef": "treble"}, {"id": "t2", "number": 2, "heading": "Which note matches the letter? Circle it.", "appHeading": "Which note matches the letter? Tap it.", "type": "find-letter", "items": 4, "clef": "treble", "choices": 3}, {"id": "t3", "number": 3, "heading": "Name each note to find the two hidden words.", "type": "hidden-word", "items": 2, "clef": "treble"}]}, {"n": 7, "title": "Drawing notes", "introduces": ["draw-note"], "learn": {"text": "A note is an oval, a little wider than it is tall. Draw it so anyone can see straight away whether it is **on a line** or **in a space**.", "diagram": "Five pencil notes on a treble clef stave, each with a tick or a red cross and two caption lines: line note ('the line goes through', 'the middle'); space note ('fills the space and', 'just touches both lines'); a circle ('too round:', 'make it an oval'); too big ('it crosses the lines', 'around it'); half on a line ('is it a line or', 'a space? No one can tell').", "worked": [{"task": "t1", "head": "Task 1: Trace, then copy", "hint": "Trace over the light note. Then draw the same note in the gap: the same line or space, and the same size."}, {"task": "t2", "head": "Task 2: Line or space", "hint": "Count up from the bottom to the line or space. Line note: line through the middle. Space note: fill the space."}, {"task": "t3", "head": "Task 3: Is it clear?", "hint": "Look at the right and wrong notes above. Clear? Tick it. Not clear? Cross it."}]}, "tasks": [{"id": "t1", "number": 1, "heading": "Trace each light note, then draw the same note beside it.", "appHeading": "Place a note beside each light note: the same line or space, and the same size.", "type": "copy-note", "items": 6, "clef": "treble"}, {"id": "t2", "number": 2, "heading": "Draw a note on each line or in each space.", "appHeading": "Place a note on each line or in each space.", "type": "place-note-named", "items": 4, "clef": "treble"}, {"id": "t3", "number": 3, "heading": "Is each note drawn clearly? Tick or cross.", "type": "clear-note", "items": 5, "clef": "treble"}], "noteKinds": {"_about": "Sizes in staff spaces, from lesson07.py KINDS (rx, ry are radii; offset is how far the centre sits from its line or space).", "line": {"clear": true, "rx": 0.82, "ry": 0.5, "offset": 0, "caption": ["the line goes through", "the middle"]}, "space": {"clear": true, "rx": 0.82, "ry": 0.5, "offset": 0, "caption": ["fills the space and", "just touches both lines"]}, "circle": {"clear": false, "rx": 0.5, "ry": 0.5, "offset": 0, "title": "a circle", "caption": ["too round:", "make it an oval"]}, "big": {"clear": false, "rx": 1.25, "ry": 0.95, "offset": 0, "title": "too big", "caption": ["it crosses the lines", "around it"]}, "half": {"clear": false, "rx": 0.82, "ry": 0.5, "offset": 0.27, "title": "half on a line", "caption": ["is it a line or", "a space? No one can tell"]}}}, {"n": 8, "title": "Treble clef memory aids", "introduces": ["draw-treble", "aid-treble"], "learn": {"text": "Lines: use **Every Good Boy Deserves Fruit**. Spaces: use **FACE**.", "diagram": "Two treble clef staves. Lines: a note on each line with Every, Good, Boy, Deserves, Fruit under them and the caption 'Lines: say the words from the bottom line up'. Spaces: a note in each space spelling F A C E, caption 'Spaces: FACE, bottom up' and 'the spaces spell FACE'.", "worked": [{"task": "t1", "head": "Task 1: Draw a line note", "hint": "Say Every Good Boy Deserves Fruit from the bottom line up. Stop at the word that starts with the letter. Draw it there."}, {"task": "t2", "head": "Task 2: Draw a space note", "hint": "Say F, A, C, E from the bottom space up. Stop at the letter. Draw the note in that space."}, {"task": "t3", "head": "Task 3: Spell the word", "hint": "Draw a note for each letter. Line word or FACE letter? Use the right memory aid to find where it goes."}]}, "beforeTasks": "**Try to do these by memorising the memory aid rather than looking at the chart with the answers.**", "tasks": [{"id": "t1", "number": 1, "heading": "Draw the line notes.", "appHeading": "Place the line notes.", "type": "place-note-letter", "where": "line", "items": 4, "clef": "treble"}, {"id": "t2", "number": 2, "heading": "Draw the space notes.", "appHeading": "Place the space notes.", "type": "place-note-letter", "where": "space", "items": 4, "clef": "treble"}, {"id": "t3", "number": 3, "heading": "Draw the notes to spell each word.", "appHeading": "Place the notes to spell each word.", "instruction": "**E** and **F** can each go in two places. Either one is right.", "type": "spell-word", "items": 2, "clef": "treble"}]}, {"n": 9, "title": "Bass clef notes", "introduces": ["read-bass"], "learn": {"text": "In the bass clef, every line and space has its own letter name. The bottom line is **G**. Going up one line or space at a time, the letters follow the musical alphabet.", "diagram": "A bass clef stave with all nine notes G A B C D E F G A, a 'Lines' row (G B D F A) and a 'Spaces' row (A C E G), and a red arrow labelled 'going up the stave, the letters go forwards: G A B C D E F G A'.", "worked": [{"task": "t1", "head": "Task 1: Name the note", "hint": "Start on the bottom line, G. Count up the alphabet, one line or space at a time, to the note."}, {"task": "t2", "head": "Task 2: Find the letter", "hint": "Find the letter in the diagram above. Circle the note that sits on that line or in that space."}, {"task": "t3", "head": "Task 3: Find the word", "hint": "Name each note. Then read the letters from left to right to find the word."}]}, "tasks": [{"id": "t1", "number": 1, "heading": "What is each note called? Write its letter in the box.", "type": "name-note", "items": 8, "clef": "bass"}, {"id": "t2", "number": 2, "heading": "Which note matches the letter? Circle it.", "appHeading": "Which note matches the letter? Tap it.", "type": "find-letter", "items": 4, "clef": "bass", "choices": 3}, {"id": "t3", "number": 3, "heading": "Name each note to find the two hidden words.", "type": "hidden-word", "items": 2, "clef": "bass"}]}, {"n": 10, "title": "Bass clef memory aids", "introduces": ["draw-bass", "aid-bass"], "learn": {"text": "Lines: use **Good Burritos Don't Fall Apart**. Spaces: use **All Cows Eat Grass**.", "diagram": "Two bass clef staves. Lines: a note on each line with Good, Burritos, Don't, Fall, Apart under them, caption 'Lines: say the words from the bottom line up'. Spaces: a note in each space with All, Cows, Eat, Grass, caption 'Spaces: bottom space up'.", "worked": [{"task": "t1", "head": "Task 1: Draw a line note", "hint": "Say Good Burritos Don't Fall Apart from the bottom line up. Stop at the word that starts with the letter. Draw it there."}, {"task": "t2", "head": "Task 2: Draw a space note", "hint": "Say All Cows Eat Grass from the bottom space up. Stop at the word that starts with the letter. Draw the note in that space."}, {"task": "t3", "head": "Task 3: Spell the word", "hint": "Draw a note for each letter. Line word or space word? Use the right memory aid to find where it goes."}]}, "beforeTasks": "**Try to do these by memorising the memory aid rather than looking at the chart with the answers.**", "tasks": [{"id": "t1", "number": 1, "heading": "Draw the line notes.", "appHeading": "Place the line notes.", "type": "place-note-letter", "where": "line", "items": 4, "clef": "bass"}, {"id": "t2", "number": 2, "heading": "Draw the space notes.", "appHeading": "Place the space notes.", "type": "place-note-letter", "where": "space", "items": 4, "clef": "bass"}, {"id": "t3", "number": 3, "heading": "Draw the notes to spell each word.", "appHeading": "Place the notes to spell each word.", "instruction": "**A** and **G** can each go in two places. Either one is right.", "type": "spell-word", "items": 2, "clef": "bass"}]}, {"n": 11, "title": "Notes on the keyboard", "introduces": ["octave-numbers", "middle-c"], "learn": {"text": "Every key has a letter name and an **octave number**, which goes up by one at each C. The C in the middle of the piano is **Middle C (C4)**. Each note on a stave sits right above its own key.", "diagram": "A keyboard from C2 to B5 with C2, C3, C4, C5 printed on every C (C4 bold) and octave brackets under the keys ('octave 2' ... 'octave 4: starts at Middle C'); a bass stave over the low keys and a treble stave over the high keys, each note joined to its key by a grey dotted line; red octave brackets beside each stave (treble: 4 from line 1 to line 3, 5 from space 3 to line 5; bass: 2 from line 1 to line 2, 3 from space 2 to line 5).", "worked": [{"task": "t1", "head": "Task 1: Name the key", "hint": "Find the C to the left and read its number. Count forwards to the key. Keep the same number."}, {"task": "t2", "head": "Task 2: Treble clef notes", "hint": "Name the note. Bottom line E up to B is octave 4. C in space 3 up to top line F is octave 5."}, {"task": "t3", "head": "Task 3: Bass clef notes", "hint": "Name the note. Bottom line G up to B is octave 2. C in space 2 up to top line A is octave 3."}]}, "tasks": [{"id": "t1", "number": 1, "heading": "Write the letter and octave number in every box.", "type": "name-key-octave", "items": 1, "from": "C2", "to": "B5", "boxes": 8, "note": "Every C is printed with its number in handwriting, plus a few other given keys (the book gives A3, D4, B4, F5; choose different ones each set). Boxed keys are white keys only."}, {"id": "t2", "number": 2, "heading": "What note and octave?", "type": "name-note-octave", "items": 5, "clef": "treble"}, {"id": "t3", "number": 3, "heading": "What note and octave?", "type": "name-note-octave", "items": 5, "clef": "bass"}]}, {"n": 12, "title": "Revision: reading notes", "revision": true, "introduces": ["grand-staff-choose"], "learn": null, "tasks": [{"id": "t1", "number": 1, "heading": "Name each note to find the hidden word. (See Lessons 6 and 9)", "type": "hidden-word", "items": 6, "clef": "mixed", "note": "Three words in the treble clef and three in the bass, in a mixed order."}, {"id": "t2", "number": 2, "heading": "Draw each note on the right stave, in the right octave.", "appHeading": "Place each note on the right stave, in the right octave.", "instruction": "This is a **grand staff**: treble on top, bass below. The octave number tells you which stave to use.", "type": "grand-staff-place", "items": 9, "newHere": true, "note": "The grand staff is new on this page (its own lesson is 32), so this task keeps an explanation and its first item is a worked model, shown done in pencil."}, {"id": "t3", "number": 3, "heading": "Name each note, then join it to its key. (See Lesson 11)", "appHeading": "Name each note, then tap its key. (See Lesson 11)", "type": "note-to-key", "items": 8, "from": "C2", "to": "B5", "note": "Short staves under the keyboard: bass notes on the left, treble on the right."}]}, {"n": 13, "title": "Note shapes and names", "introduces": ["note-names", "note-parts"], "learn": {"text": "In a tune, some sounds are long and some are short, and each length has its own note shape and name. Look at the **head**, the **stem** and the **flag** to tell them apart. A stem can point up or down. The American names are in brackets.", "diagram": "Four notes side by side with their names and what they look like: semibreve (whole note) hollow head, no stem; minim (half note) hollow head, a stem; crotchet (quarter note) filled-in head, a stem; quaver (eighth note) filled-in head, a stem and a flag. The quaver has red arrows to its flag, stem and head.", "worked": [{"task": "t1", "head": "Task 1: Name the note", "hint": "Is the head hollow or filled in? Is there a stem? A flag? Then write the name in the box."}, {"task": "t2", "head": "Task 2: The parts of a note", "hint": "Follow each line to the part it points to. Write head, stem or flag in the box."}, {"task": "t3", "head": "Task 3: Which note am I?", "hint": "Read the clue. Find the note in the chart above with those parts. Write its name in the box."}]}, "tasks": [{"id": "t1", "number": 1, "heading": "What is each note called? Check its head, stem and flag.", "appHeading": "What is each note called? Check its head, stem and flag. Tap the name.", "type": "name-shape", "items": 6, "clef": "treble"}, {"id": "t2", "number": 2, "heading": "Which part of the note is it?", "appHeading": "Which part of the note does the arrow point to? Tap the name.", "type": "note-part", "items": 6, "clef": null}, {"id": "t3", "number": 3, "heading": "Which note has these parts?", "appHeading": "Which note has these parts? Tap the name.", "type": "note-clue", "items": 3, "clef": null}]}, {"n": 14, "title": "Drawing stems and flags", "introduces": ["stem-rule", "stem-length", "flag-side"], "learn": {"text": "When you add a stem or a flag to a note head, get three things right.", "diagram": "Three panels. Stem side: below the middle line the stem goes up on the right, like a d; on the middle line or above it goes down on the left, like a p; never like a b or a q. Stem length: about three spaces past the head. Flags: always on the right of the stem, curving back towards the head.", "worked": [{"task": "t1", "head": "Task 1: Minims", "hint": "Trace the oval but leave it hollow. Add the stem: up on the right or down on the left."}, {"task": "t2", "head": "Task 2: Crotchets", "hint": "Trace the oval and colour it in. Then add the stem the same way as for a minim."}, {"task": "t3", "head": "Task 3: Quavers", "hint": "Draw a crotchet, then add a flag on the right of the stem, curving back to the head."}]}, "tasks": [{"id": "t1", "number": 1, "heading": "Turn each oval into a minim with the correct stem.", "appHeading": "Which one is the minim with the correct stem? Tap it.", "type": "stem-pick", "items": 6, "clef": "treble", "kind": "minim"}, {"id": "t2", "number": 2, "heading": "Turn each oval into a crotchet with the correct stem.", "appHeading": "Which one is the crotchet with the correct stem? Tap it.", "type": "stem-pick", "items": 6, "clef": "bass", "kind": "crotchet"}, {"id": "t3", "number": 3, "heading": "Turn each oval into a quaver with the correct stem and flag.", "appHeading": "Which one is the quaver with the correct stem and flag? Tap it.", "type": "stem-pick", "items": 6, "clef": "treble", "kind": "quaver"}], "stemFaults": {"side": "The stem is on the wrong side of the head. Below the middle line, the stem goes up on the right, like a d. On the middle line or above, it goes down on the left, like a p. It never looks like a b or a q.", "direction": "The stem points the wrong way. Below the middle line it goes up. On the middle line or above, it goes down.", "short": "The stem is too short. Every stem reaches about three spaces past the head, on a line or in a space.", "flag": "The flag is on the wrong side. Every flag goes on the right of the stem and curves back towards the head."}}, {"n": 15, "title": "How long notes last", "introduces": ["beats", "note-lengths"], "learn": {"text": "Music has a steady **beat**, like the tick of a clock. Each note lasts for a number of beats, so you count the beats to know how long to hold it.", "diagram": "A beat chart with beats 1 to 4 across the top. Semibreve: 4 beats (one long bar). Minim: 2 beats (two bars). Crotchet: 1 beat (four bars). Quaver: half a beat (eight bars). A panel says two quavers make one beat: two quavers equal a crotchet equal two quavers joined by a beam.", "worked": [{"task": "t1", "head": "Task 1: Count the beats", "hint": "Find the note in the chart above. Write how many beats it lasts in the box."}, {"task": "t2", "head": "Task 2: Which is longer?", "hint": "Count the beats for each note. Circle the note that lasts more beats."}, {"task": "t3", "head": "Task 3: Draw the note", "hint": "Work out which note lasts that many beats. Turn the oval into that note."}]}, "tasks": [{"id": "t1", "number": 1, "heading": "How many beats does each note last? Write the number in the box.", "appHeading": "How many beats does each note last? Tap the number.", "type": "count-beats", "items": 7, "clef": "treble"}, {"id": "t2", "number": 2, "heading": "For each pair, circle the longer note.", "appHeading": "For each pair, tap the longer note.", "type": "longer-note", "items": 4, "clef": "bass"}, {"id": "t3", "number": 3, "heading": "Draw the matching note.", "appHeading": "Tap the matching note.", "type": "matching-note", "items": 3, "clef": "treble"}]}, {"n": 16, "title": "Adding note values", "introduces": ["note-sums", "note-tree"], "learn": {"text": "When notes follow each other, their beats add up. The **note tree** shows how the notes fit together.", "diagram": "The note tree: 1 semibreve splits into 2 minims, then 4 crotchets, then 8 quavers (beamed in pairs). A panel, Adding notes: a crotchet plus a minim, with the beats written under each note, 1 + 2 = 3 beats.", "worked": [{"task": "t1", "head": "Task 1: Add the beats", "hint": "Write beats under each note. Add them up. Write the total."}, {"task": "t2", "head": "Task 2: The missing note", "hint": "Work out how many beats are missing. Draw one note for that."}, {"task": "t3", "head": "Task 3: Use the note tree", "hint": "Find the bigger note in the tree. Count the smaller notes under it."}]}, "tasks": [{"id": "t1", "number": 1, "heading": "How many beats altogether? Write the total in the box.", "appHeading": "How many beats altogether? Tap the total.", "type": "add-beats", "items": 5, "clef": null}, {"id": "t2", "number": 2, "heading": "Draw the missing note so the beats add up.", "appHeading": "Tap the missing note so the beats add up.", "type": "missing-note", "items": 4, "clef": null}, {"id": "t3", "number": 3, "heading": "Count with the note tree.", "appHeading": "Count with the note tree. Tap the number.", "type": "note-tree", "items": 4, "clef": null}]}], "words": {"_about": "Hidden-word and spell-word bank: real words made only of A to G, suitable for 13-year-olds. A word is usable in a clef only if every letter has a place on that clef's stave (all seven do in both clefs). Repeated letters are fine. Add words here, never in code.", "short": ["ACE", "ADD", "AGE", "BAD", "BAG", "BED", "BEE", "CAB", "DAB", "DAD", "EGG", "FED", "FEE"], "medium": ["ACED", "AGED", "BEAD", "BEEF", "CAFE", "CAGE", "DEAF", "DEED", "EDGE", "FACE", "FADE", "FEED"], "long": ["ADDED", "BADGE", "CAGED", "EDGED", "FACED", "FADED", "BAGGED", "DECADE", "DEFACE", "FACADE", "BEGGED", "BAGGAGE", "CABBAGE"]}}; G.TA.STROKES = {"_about": "Hand-drawn clefs from Lesson 2 (diagrams.py hclef). Units: staff spaces. x right from the clef's left edge, y UP from line 1 (line 2 = 1, line 4 = 3). Draw 'line' strokes through a Catmull-Rom spline (TA.smooth in src/00-core.js, 8 points per segment). Dot radius: treble 0.2 sp, bass 0.3 sp; the bass pair of dots 0.14 sp. The treble clef's last step also draws a blob of radius 0.2 sp at blob. Pen width about 0.12 sp. Anchor = the point that must sit on its line: treble curl centre on line 2, bass big dot on line 4.", "treble": {"steps": [{"type": "dot", "data": [0.95, 0.8]}, {"type": "line", "data": [[0.95, 0.8], [0.8, 1.15], [0.85, 1.6], [1.15, 1.95], [1.55, 1.98], [1.85, 1.72], [1.97, 1.35]]}, {"type": "line", "data": [[1.97, 1.35], [1.95, 0.9], [1.8, 0.35], [1.3, 0.0], [0.75, 0.05], [0.35, 0.45], [0.2, 1.0], [0.35, 1.6], [0.7, 2.1]]}, {"type": "line", "data": [[0.7, 2.1], [1.25, 2.7], [1.75, 3.4], [2.05, 4.2], [1.95, 4.9], [1.7, 5.4], [1.45, 5.3], [1.3, 4.9], [1.27, 4.4]]}, {"type": "line", "data": [[1.27, 4.4], [1.33, 3.2], [1.42, 2.0], [1.5, 0.8], [1.58, -0.5], [1.6, -1.3], [1.45, -1.7], [1.1, -1.8], [0.85, -1.55]]}], "blob": [0.98, -1.5], "anchor": [1.1, 1.0], "anchorLine": 2, "extent": {"x0": 0.15, "x1": 2.1, "y0": -1.85, "y1": 5.45}, "captions": ["Dot just below line 2", "Up to line 3, curve round", "Down to line 1, curve round", "Curl up high and hook over", "Down the middle to a blob"]}, "bass": {"steps": [{"type": "dot", "data": [0.38, 3.0]}, {"type": "line", "data": [[0.2, 3.1], [0.42, 3.6], [0.85, 3.95], [1.35, 3.97], [1.78, 3.68], [1.98, 3.1]]}, {"type": "line", "data": [[1.98, 3.1], [1.92, 2.4], [1.62, 1.7], [1.12, 1.1], [0.45, 0.55], [0.12, 0.4]]}, {"type": "dots", "data": [[2.45, 3.5], [2.45, 2.5]]}], "anchor": [0.38, 3.0], "anchorLine": 4, "extent": {"x0": 0.05, "x1": 2.6, "y0": 0.35, "y1": 4.05}, "captions": ["Big dot on line 4", "Curve up over line 5", "Sweep down past line 2", "A dot either side of line 4"]}}; })();
+(function () { var G = globalThis; G.TA = G.TA || {}; G.TA.DATA = {"_about": "Lessons 1 to 12 of the Music Theory workbook, for the Theory Practice app. Every student-facing string here is copied from Isaac's lesson files (Source files/lessonNN.json and the captions and hints inside lessonNN.py, 2 November 2026). Do not reword them. A string the app needs that is not here goes in src/strings.js and passes tests/lint. 'introduces' lists the ideas a lesson teaches; a lesson may use only ideas introduced by itself or an earlier lesson (src/00-core.js TA.allowed). 'items' is the number of exercises in one practice set (the book's count, minus its old model answer where it had one). 'appItems' is how many the app gives for that task (Isaac, 2 November 2026: 10 for every task). 'appInstruction' is the instruction with only the verb changed for the app (Select, not Write), like 'appHeading'.", "version": "2026-11-02", "lintExceptions": {"_about": "Book wording that breaks a lint rule. The app keeps the book's words until Isaac decides (asked 2 November 2026). tests/check.js lists these as 'waiting on Isaac' and does not fail on them. Remove a line once he has answered, and change the text in both the book and here if he rewords it.", "A stave has five lines": "Lesson 1 info starts with the article A (the A rule, 12 October)", "A clef at the start": "Lesson 2 info", "A dot either side of line 4": "Lesson 2 bass clef step 4", "A tune moves by": "Lesson 5 info", "A note is an oval": "Lesson 7 info", "A and G can each go in two places": "Lesson 10 Task 3: starts with the note A", "A stem reaches about three": "Isaac's Lesson 14 wording (2 November 2026)", "A flag always goes on the": "Isaac's Lesson 14 wording (2 November 2026)", "A stem can point up or down": "Isaac's Lesson 14 wording (2 November 2026)", "A flag?": "Isaac's Lesson 14 wording (2 November 2026)", "whole note": "Isaac's Lesson 14 wording (2 November 2026)", "half note": "Isaac's Lesson 14 wording (2 November 2026)", "quarter note": "Isaac's Lesson 14 wording (2 November 2026)", "eighth note": "Isaac's Lesson 14 wording (2 November 2026)", "A flag always goes": "Isaac's Lesson 14 wording (2 November 2026)"}, "lessons": [{"n": 1, "title": "The stave", "introduces": ["stave", "line-space", "line-number", "space-number"], "learn": {"text": "A **stave** has **five lines** and **four spaces**, counted from the bottom up. Every note sits either **on a line** or **in a space**.", "diagram": "A stave with no clef. Lines numbered Line 1 to Line 5 and spaces Space 1 to Space 4, counted from the bottom, with the caption 'count up from the bottom'. One line note and one space note labelled 'Line note' and 'Space note'.", "worked": [{"task": "t1", "head": "Task 1: line or space?", "hint": "Is there a line going through it (line) or does it sit between the lines (space)?"}, {"task": "t2", "head": "Task 2: which line?", "hint": "Count up from line 1."}, {"task": "t3", "head": "Task 3: which space?", "hint": "Count up from space 1."}]}, "tasks": [{"id": "t1", "number": 1, "heading": "Line or space?", "instruction": "Write **line** or **space** in the box under each note.", "appInstruction": "Select **line** or **space** for each note.", "type": "line-or-space", "items": 8, "appItems": 10, "clef": null}, {"id": "t2", "number": 2, "heading": "Which line?", "instruction": "Write the line number (1 to 5).", "appInstruction": "Select the line number (1 to 5).", "type": "which-line", "items": 5, "appItems": 10, "clef": null}, {"id": "t3", "number": 3, "heading": "Which space?", "instruction": "Write the space number (1 to 4).", "appInstruction": "Select the space number (1 to 4).", "type": "which-space", "items": 5, "appItems": 10, "clef": null}]}, {"n": 2, "title": "Clefs", "introduces": ["clef-treble", "clef-bass"], "learn": {"text": "A **clef** at the start of every stave tells you which note each line stands for.", "diagram": "Two panels. Treble clef: a printed treble clef with line 2 highlighted, a note on line 2 and the letter G beside the stave; title 'Treble clef'; caption 'The curl wraps around line 2, so line 2 is G. For higher sounds.' Bass clef: a printed bass clef with line 4 highlighted, a note on line 4 and the letter F; title 'Bass clef'; caption 'The dots sit either side of line 4, so line 4 is F. For lower sounds.'", "worked": [{"task": "t1", "head": "Treble clef", "steps": ["Dot just below line 2", "Up to line 3, curve round", "Down to line 1, curve round", "Curl up high and hook over", "Down the middle to a blob"], "note": "Animate the hand-drawn clef one stroke at a time (curriculum/clef-strokes.json), the new stroke in red."}, {"task": "t2", "head": "Bass clef", "steps": ["Big dot on line 4", "Curve up over line 5", "Sweep down past line 2", "A dot either side of line 4"], "note": "As above."}]}, "tasks": [{"id": "t1", "number": 1, "heading": "Trace these two treble clefs, then draw 5 more", "appHeading": "Place and size these treble clefs", "type": "place-clef", "clef": "treble", "items": 7, "appItems": 10, "traced": 2, "note": "Isaac (2 November): students drag a clef from a bank onto the stave and resize it; marked on how close it is to the right place and size. The first 2 items show a faint clef to cover (the 'trace'); the rest have no guide. (Drawing freehand was tried on 2 and 3 November and dropped on 4 November: testers did not enjoy it.)"}, {"id": "t2", "number": 2, "heading": "Trace these two bass clefs, then draw 5 more", "appHeading": "Place and size these bass clefs", "type": "place-clef", "clef": "bass", "items": 7, "appItems": 10, "traced": 2}]}, {"n": 3, "title": "The musical alphabet", "introduces": ["letters", "letters-forwards-up", "letters-backwards-down"], "learn": {"text": "Every note in music has a **letter name**. It tells you which note to play or sing. There are only seven: **A B C D E F G**. After G you go back to A, but it sounds higher.", "diagram": "The letters A B C D E F G then A in boxes, an arrow over them labelled 'Going up: the letters go forwards', an arrow back labelled 'Going down: the letters go backwards', and the last A marked 'back to A, but higher'. No red: this page has no notation, so arrows and labels are indigo.", "worked": [{"task": "t1", "head": "Task 1: what comes next?", "hint": "Go forwards along the line of letters above. After G comes A."}, {"task": "t2", "head": "Task 2: going down", "hint": "Go backwards along the line of letters above. Before A comes G."}, {"task": "t3", "head": "Task 3: fill the gaps", "hint": "First work out which way the letters go. C, D goes forwards."}, {"task": "t4", "head": "Listening: going up or going down?", "hint": "Listen to each note. If each one sounds higher than the one before, the notes go up and the letters go forwards. If each one sounds lower, they go down and the letters go backwards.", "appOnly": true}]}, "tasks": [{"id": "t1", "number": 1, "heading": "What comes next?", "instruction": "Write the next letter.", "type": "next-letter", "items": 4, "shown": 3, "blanks": 1, "direction": "forwards", "appItems": 10, "appInstruction": "Select the next letter."}, {"id": "t2", "number": 2, "heading": "Going down", "instruction": "Write the next two letters.", "type": "next-letter", "items": 4, "shown": 2, "blanks": 2, "direction": "backwards", "appItems": 10, "appInstruction": "Select the next two letters."}, {"id": "t3", "number": 3, "heading": "Fill the gaps", "instruction": "Work out if each row goes forwards or backwards, then write the missing letters.", "type": "fill-gaps", "items": 4, "length": 7, "gaps": 2, "note": "Rows go forwards or backwards in a mix (never all one way); no arrow shows the direction.", "appItems": 10, "appInstruction": "Work out if each row goes forwards or backwards, then select the missing letters."}, {"id": "t4", "number": 4, "listening": true, "heading": "Going up or going down?", "instruction": "Listen to the notes. Select going up or going down.", "type": "listen-direction", "items": 10, "appItems": 10, "notes": 4, "note": "App only (Isaac, 6 November 2026): the Listening Activity at the end of each lesson. Not on the book page, so these words are the app's."}]}, {"n": 4, "title": "Letter names on the keyboard", "introduces": ["keyboard", "keyboard-white-letters", "black-key-groups", "octave-eight-letters"], "learn": {"text": "Every piano and keyboard uses the seven letters of the musical alphabet on its white keys. The black keys come in groups of **two** and **three**, and they help you find your way around.", "diagram": "A keyboard with every white key lettered, the groups of two black keys outlined, the caption 'C is always the white key just to the left of a group of two black keys (outlined).', and a bracket from C to the next C labelled 'one octave: 8 letters from C up to the next C' with 'going up: the letters go forwards'. No red on this page: marks are indigo.", "worked": [{"task": "t1", "head": "Task 1: Find the Cs", "hint": "Find a group of two black keys. Colour the white key on its left and write C."}, {"task": "t2", "head": "Task 2: Name the keys", "hint": "Find the nearest C. Go forwards one white key at a time up to the box."}, {"task": "t3", "head": "Task 3: Up an octave", "hint": "Go forwards through the letters until you reach the same letter again (8 in all)."}]}, "tasks": [{"id": "t1", "number": 1, "heading": "Colour every C and write C on it", "appHeading": "Tap every C", "type": "find-key", "items": 1, "whiteKeys": 22, "target": "C", "note": "One long keyboard starting on a white key that is not C. Marked right only when every C is chosen and nothing else."}, {"id": "t2", "number": 2, "heading": "Name each key with a box", "type": "name-key", "items": 2, "whiteKeys": 11, "boxes": 4, "note": "Two keyboards of 11 white keys, each starting on a different letter, 4 boxed white keys each."}, {"id": "t3", "number": 3, "heading": "Fill in the octave", "type": "fill-octave", "items": 4, "length": 8}]}, {"n": 5, "title": "Higher and lower", "introduces": ["higher-lower", "up-down", "step-leap"], "learn": {"text": "High sounds are like a whistle and low sounds are like a big drum. The higher a note sits on the stave, the higher it sounds. A tune moves by **steps** and **leaps**.", "diagram": "A stave with no clef and notes climbing, a red arrow labelled 'higher on the stave = higher sound', with 'lower sound' and 'higher sound' at its ends; a step labelled 'to the next line or space' and a leap labelled 'skips a line or space'.", "worked": [{"task": "t1", "head": "Task 1: Circle the higher note", "hint": "Find the note in each pair that sits higher on the stave. Draw a circle around it."}, {"task": "t2", "head": "Task 2: Up or down?", "hint": "Is the second note higher or lower than the first one? Write up or down in the box."}, {"task": "t3", "head": "Task 3: Step or leap?", "hint": "Next line or space? Write step. Skips over a line or space? Write leap."}]}, "tasks": [{"id": "t1", "number": 1, "heading": "Which note in each pair sits higher? Circle it.", "appHeading": "Which note in each pair sits higher? Tap it.", "type": "higher-note", "items": 7, "clef": null}, {"id": "t2", "number": 2, "heading": "Do these pairs of notes go up or down?", "type": "up-down", "items": 5, "clef": null}, {"id": "t3", "number": 3, "heading": "Do these pairs of notes move by a step or a leap?", "type": "step-leap", "items": 5, "clef": null}]}, {"n": 6, "title": "Treble clef notes", "introduces": ["read-treble"], "learn": {"text": "In the treble clef, every line and space has its own letter name. The bottom line is **E**. Going up one line or space at a time, the letters follow the musical alphabet.", "diagram": "A treble clef stave with all nine notes E F G A B C D E F, a 'Lines' row of letters (E G B D F) and a 'Spaces' row (F A C E) under them, and a red arrow labelled 'going up the stave, the letters go forwards: E F G A B C D E F'.", "worked": [{"task": "t1", "head": "Task 1: Name the note", "hint": "Start on the bottom line, E. Count up the alphabet, one line or space at a time, to the note."}, {"task": "t2", "head": "Task 2: Find the letter", "hint": "Find the letter in the diagram above. Circle the note that sits on that line or in that space."}, {"task": "t3", "head": "Task 3: Find the word", "hint": "Name each note. Then read the letters from left to right to find the word."}]}, "tasks": [{"id": "t1", "number": 1, "heading": "What is each note called? Write its letter in the box.", "type": "name-note", "items": 8, "clef": "treble"}, {"id": "t2", "number": 2, "heading": "Which note matches the letter? Circle it.", "appHeading": "Which note matches the letter? Tap it.", "type": "find-letter", "items": 4, "clef": "treble", "choices": 3}, {"id": "t3", "number": 3, "heading": "Name each note to find the two hidden words.", "type": "hidden-word", "items": 2, "clef": "treble"}]}, {"n": 7, "title": "Drawing notes", "introduces": ["draw-note"], "learn": {"text": "A note is an oval, a little wider than it is tall. Draw it so anyone can see straight away whether it is **on a line** or **in a space**.", "diagram": "Five pencil notes on a treble clef stave, each with a tick or a red cross and two caption lines: line note ('the line goes through', 'the middle'); space note ('fills the space and', 'just touches both lines'); a circle ('too round:', 'make it an oval'); too big ('it crosses the lines', 'around it'); half on a line ('is it a line or', 'a space? No one can tell').", "worked": [{"task": "t1", "head": "Task 1: Trace, then copy", "hint": "Trace over the light note. Then draw the same note in the gap: the same line or space, and the same size."}, {"task": "t2", "head": "Task 2: Line or space", "hint": "Count up from the bottom to the line or space. Line note: line through the middle. Space note: fill the space."}, {"task": "t3", "head": "Task 3: Is it clear?", "hint": "Look at the right and wrong notes above. Clear? Tick it. Not clear? Cross it."}]}, "tasks": [{"id": "t1", "number": 1, "heading": "Trace each light note, then draw the same note beside it.", "appHeading": "Place a note beside each light note: the same line or space, and the same size.", "type": "copy-note", "items": 6, "clef": "treble"}, {"id": "t2", "number": 2, "heading": "Draw a note on each line or in each space.", "appHeading": "Place a note on each line or in each space.", "type": "place-note-named", "items": 4, "clef": "treble"}, {"id": "t3", "number": 3, "heading": "Is each note drawn clearly? Tick or cross.", "type": "clear-note", "items": 5, "clef": "treble"}], "noteKinds": {"_about": "Sizes in staff spaces, from lesson07.py KINDS (rx, ry are radii; offset is how far the centre sits from its line or space).", "line": {"clear": true, "rx": 0.82, "ry": 0.5, "offset": 0, "caption": ["the line goes through", "the middle"]}, "space": {"clear": true, "rx": 0.82, "ry": 0.5, "offset": 0, "caption": ["fills the space and", "just touches both lines"]}, "circle": {"clear": false, "rx": 0.5, "ry": 0.5, "offset": 0, "title": "a circle", "caption": ["too round:", "make it an oval"]}, "big": {"clear": false, "rx": 1.25, "ry": 0.95, "offset": 0, "title": "too big", "caption": ["it crosses the lines", "around it"]}, "half": {"clear": false, "rx": 0.82, "ry": 0.5, "offset": 0.27, "title": "half on a line", "caption": ["is it a line or", "a space? No one can tell"]}}}, {"n": 8, "title": "Treble clef memory aids", "introduces": ["draw-treble", "aid-treble"], "learn": {"text": "Lines: use **Every Good Boy Deserves Fruit**. Spaces: use **FACE**.", "diagram": "Two treble clef staves. Lines: a note on each line with Every, Good, Boy, Deserves, Fruit under them and the caption 'Lines: say the words from the bottom line up'. Spaces: a note in each space spelling F A C E, caption 'Spaces: FACE, bottom up' and 'the spaces spell FACE'.", "worked": [{"task": "t1", "head": "Task 1: Draw a line note", "hint": "Say Every Good Boy Deserves Fruit from the bottom line up. Stop at the word that starts with the letter. Draw it there."}, {"task": "t2", "head": "Task 2: Draw a space note", "hint": "Say F, A, C, E from the bottom space up. Stop at the letter. Draw the note in that space."}, {"task": "t3", "head": "Task 3: Spell the word", "hint": "Draw a note for each letter. Line word or FACE letter? Use the right memory aid to find where it goes."}]}, "beforeTasks": "**Try to do these by memorising the memory aid rather than looking at the chart with the answers.**", "tasks": [{"id": "t1", "number": 1, "heading": "Draw the line notes.", "appHeading": "Place the line notes.", "type": "place-note-letter", "where": "line", "items": 4, "clef": "treble"}, {"id": "t2", "number": 2, "heading": "Draw the space notes.", "appHeading": "Place the space notes.", "type": "place-note-letter", "where": "space", "items": 4, "clef": "treble"}, {"id": "t3", "number": 3, "heading": "Draw the notes to spell each word.", "appHeading": "Place the notes to spell each word.", "instruction": "**E** and **F** can each go in two places. Either one is right.", "type": "spell-word", "items": 2, "clef": "treble"}]}, {"n": 9, "title": "Bass clef notes", "introduces": ["read-bass"], "learn": {"text": "In the bass clef, every line and space has its own letter name. The bottom line is **G**. Going up one line or space at a time, the letters follow the musical alphabet.", "diagram": "A bass clef stave with all nine notes G A B C D E F G A, a 'Lines' row (G B D F A) and a 'Spaces' row (A C E G), and a red arrow labelled 'going up the stave, the letters go forwards: G A B C D E F G A'.", "worked": [{"task": "t1", "head": "Task 1: Name the note", "hint": "Start on the bottom line, G. Count up the alphabet, one line or space at a time, to the note."}, {"task": "t2", "head": "Task 2: Find the letter", "hint": "Find the letter in the diagram above. Circle the note that sits on that line or in that space."}, {"task": "t3", "head": "Task 3: Find the word", "hint": "Name each note. Then read the letters from left to right to find the word."}]}, "tasks": [{"id": "t1", "number": 1, "heading": "What is each note called? Write its letter in the box.", "type": "name-note", "items": 8, "clef": "bass"}, {"id": "t2", "number": 2, "heading": "Which note matches the letter? Circle it.", "appHeading": "Which note matches the letter? Tap it.", "type": "find-letter", "items": 4, "clef": "bass", "choices": 3}, {"id": "t3", "number": 3, "heading": "Name each note to find the two hidden words.", "type": "hidden-word", "items": 2, "clef": "bass"}]}, {"n": 10, "title": "Bass clef memory aids", "introduces": ["draw-bass", "aid-bass"], "learn": {"text": "Lines: use **Good Burritos Don't Fall Apart**. Spaces: use **All Cows Eat Grass**.", "diagram": "Two bass clef staves. Lines: a note on each line with Good, Burritos, Don't, Fall, Apart under them, caption 'Lines: say the words from the bottom line up'. Spaces: a note in each space with All, Cows, Eat, Grass, caption 'Spaces: bottom space up'.", "worked": [{"task": "t1", "head": "Task 1: Draw a line note", "hint": "Say Good Burritos Don't Fall Apart from the bottom line up. Stop at the word that starts with the letter. Draw it there."}, {"task": "t2", "head": "Task 2: Draw a space note", "hint": "Say All Cows Eat Grass from the bottom space up. Stop at the word that starts with the letter. Draw the note in that space."}, {"task": "t3", "head": "Task 3: Spell the word", "hint": "Draw a note for each letter. Line word or space word? Use the right memory aid to find where it goes."}]}, "beforeTasks": "**Try to do these by memorising the memory aid rather than looking at the chart with the answers.**", "tasks": [{"id": "t1", "number": 1, "heading": "Draw the line notes.", "appHeading": "Place the line notes.", "type": "place-note-letter", "where": "line", "items": 4, "clef": "bass"}, {"id": "t2", "number": 2, "heading": "Draw the space notes.", "appHeading": "Place the space notes.", "type": "place-note-letter", "where": "space", "items": 4, "clef": "bass"}, {"id": "t3", "number": 3, "heading": "Draw the notes to spell each word.", "appHeading": "Place the notes to spell each word.", "instruction": "**A** and **G** can each go in two places. Either one is right.", "type": "spell-word", "items": 2, "clef": "bass"}]}, {"n": 11, "title": "Notes on the keyboard", "introduces": ["octave-numbers", "middle-c"], "learn": {"text": "Every key has a letter name and an **octave number**, which goes up by one at each C. The C in the middle of the piano is **Middle C (C4)**. Each note on a stave sits right above its own key.", "diagram": "A keyboard from C2 to B5 with C2, C3, C4, C5 printed on every C (C4 bold) and octave brackets under the keys ('octave 2' ... 'octave 4: starts at Middle C'); a bass stave over the low keys and a treble stave over the high keys, each note joined to its key by a grey dotted line; red octave brackets beside each stave (treble: 4 from line 1 to line 3, 5 from space 3 to line 5; bass: 2 from line 1 to line 2, 3 from space 2 to line 5).", "worked": [{"task": "t1", "head": "Task 1: Name the key", "hint": "Find the C to the left and read its number. Count forwards to the key. Keep the same number."}, {"task": "t2", "head": "Task 2: Treble clef notes", "hint": "Name the note. Bottom line E up to B is octave 4. C in space 3 up to top line F is octave 5."}, {"task": "t3", "head": "Task 3: Bass clef notes", "hint": "Name the note. Bottom line G up to B is octave 2. C in space 2 up to top line A is octave 3."}]}, "tasks": [{"id": "t1", "number": 1, "heading": "Write the letter and octave number in every box.", "type": "name-key-octave", "items": 1, "from": "C2", "to": "B5", "boxes": 8, "note": "Every C is printed with its number in handwriting, plus a few other given keys (the book gives A3, D4, B4, F5; choose different ones each set). Boxed keys are white keys only."}, {"id": "t2", "number": 2, "heading": "What note and octave?", "type": "name-note-octave", "items": 5, "clef": "treble"}, {"id": "t3", "number": 3, "heading": "What note and octave?", "type": "name-note-octave", "items": 5, "clef": "bass"}]}, {"n": 12, "title": "Revision: reading notes", "revision": true, "introduces": ["grand-staff-choose"], "learn": null, "tasks": [{"id": "t1", "number": 1, "heading": "Name each note to find the hidden word. (See Lessons 6 and 9)", "type": "hidden-word", "items": 6, "clef": "mixed", "note": "Three words in the treble clef and three in the bass, in a mixed order."}, {"id": "t2", "number": 2, "heading": "Draw each note on the right stave, in the right octave.", "appHeading": "Place each note on the right stave, in the right octave.", "instruction": "This is a **grand staff**: treble on top, bass below. The octave number tells you which stave to use.", "type": "grand-staff-place", "items": 9, "newHere": true, "note": "The grand staff is new on this page (its own lesson is 32), so this task keeps an explanation and its first item is a worked model, shown done in pencil."}, {"id": "t3", "number": 3, "heading": "Name each note, then join it to its key. (See Lesson 11)", "appHeading": "Name each note, then tap its key. (See Lesson 11)", "type": "note-to-key", "items": 8, "from": "C2", "to": "B5", "note": "Short staves under the keyboard: bass notes on the left, treble on the right."}]}, {"n": 13, "title": "Note shapes and names", "introduces": ["note-names", "note-parts"], "learn": {"text": "In a tune, some sounds are long and some are short, and each length has its own note shape and name. Look at the **head**, the **stem** and the **flag** to tell them apart. A stem can point up or down. The American names are in brackets.", "diagram": "Four notes side by side with their names and what they look like: semibreve (whole note) hollow head, no stem; minim (half note) hollow head, a stem; crotchet (quarter note) filled-in head, a stem; quaver (eighth note) filled-in head, a stem and a flag. The quaver has red arrows to its flag, stem and head.", "worked": [{"task": "t1", "head": "Task 1: Name the note", "hint": "Is the head hollow or filled in? Is there a stem? A flag? Then write the name in the box."}, {"task": "t2", "head": "Task 2: The parts of a note", "hint": "Follow each line to the part it points to. Write head, stem or flag in the box."}, {"task": "t3", "head": "Task 3: Which note am I?", "hint": "Read the clue. Find the note in the chart above with those parts. Write its name in the box."}]}, "tasks": [{"id": "t1", "number": 1, "heading": "What is each note called? Check its head, stem and flag.", "appHeading": "What is each note called? Check its head, stem and flag. Tap the name.", "type": "name-shape", "items": 6, "clef": "treble"}, {"id": "t2", "number": 2, "heading": "Which part of the note is it?", "appHeading": "Which part of the note does the arrow point to? Tap the name.", "type": "note-part", "items": 6, "clef": null}, {"id": "t3", "number": 3, "heading": "Which note has these parts?", "appHeading": "Which note has these parts? Tap the name.", "type": "note-clue", "items": 3, "clef": null}]}, {"n": 14, "title": "Drawing stems and flags", "introduces": ["stem-rule", "stem-length", "flag-side"], "learn": {"text": "When you add a stem or a flag to a note head, get three things right.", "diagram": "Three panels. Stem side: below the middle line the stem goes up on the right, like a d; on the middle line or above it goes down on the left, like a p; never like a b or a q. Stem length: about three spaces past the head. Flags: always on the right of the stem, curving back towards the head.", "worked": [{"task": "t1", "head": "Task 1: Minims", "hint": "Trace the oval but leave it hollow. Add the stem: up on the right or down on the left."}, {"task": "t2", "head": "Task 2: Crotchets", "hint": "Trace the oval and colour it in. Then add the stem the same way as for a minim."}, {"task": "t3", "head": "Task 3: Quavers", "hint": "Draw a crotchet, then add a flag on the right of the stem, curving back to the head."}]}, "tasks": [{"id": "t1", "number": 1, "heading": "Turn each oval into a minim with the correct stem.", "appHeading": "Which one is the minim with the correct stem? Tap it.", "type": "stem-pick", "items": 6, "clef": "treble", "kind": "minim"}, {"id": "t2", "number": 2, "heading": "Turn each oval into a crotchet with the correct stem.", "appHeading": "Which one is the crotchet with the correct stem? Tap it.", "type": "stem-pick", "items": 6, "clef": "bass", "kind": "crotchet"}, {"id": "t3", "number": 3, "heading": "Turn each oval into a quaver with the correct stem and flag.", "appHeading": "Which one is the quaver with the correct stem and flag? Tap it.", "type": "stem-pick", "items": 6, "clef": "treble", "kind": "quaver"}], "stemFaults": {"side": "The stem is on the wrong side of the head. Below the middle line, the stem goes up on the right, like a d. On the middle line or above, it goes down on the left, like a p. It never looks like a b or a q.", "direction": "The stem points the wrong way. Below the middle line it goes up. On the middle line or above, it goes down.", "short": "The stem is too short. Every stem reaches about three spaces past the head, on a line or in a space.", "flag": "The flag is on the wrong side. Every flag goes on the right of the stem and curves back towards the head."}}, {"n": 15, "title": "How long notes last", "introduces": ["beats", "note-lengths"], "learn": {"text": "Music has a steady **beat**, like the tick of a clock. Each note lasts for a number of beats, so you count the beats to know how long to hold it.", "diagram": "A beat chart with beats 1 to 4 across the top. Semibreve: 4 beats (one long bar). Minim: 2 beats (two bars). Crotchet: 1 beat (four bars). Quaver: half a beat (eight bars). A panel says two quavers make one beat: two quavers equal a crotchet equal two quavers joined by a beam.", "worked": [{"task": "t1", "head": "Task 1: Count the beats", "hint": "Find the note in the chart above. Write how many beats it lasts in the box."}, {"task": "t2", "head": "Task 2: Which is longer?", "hint": "Count the beats for each note. Circle the note that lasts more beats."}, {"task": "t3", "head": "Task 3: Draw the note", "hint": "Work out which note lasts that many beats. Turn the oval into that note."}]}, "tasks": [{"id": "t1", "number": 1, "heading": "How many beats does each note last? Write the number in the box.", "appHeading": "How many beats does each note last? Tap the number.", "type": "count-beats", "items": 7, "clef": "treble"}, {"id": "t2", "number": 2, "heading": "For each pair, circle the longer note.", "appHeading": "For each pair, tap the longer note.", "type": "longer-note", "items": 4, "clef": "bass"}, {"id": "t3", "number": 3, "heading": "Draw the matching note.", "appHeading": "Tap the matching note.", "type": "matching-note", "items": 3, "clef": "treble"}]}, {"n": 16, "title": "Adding note values", "introduces": ["note-sums", "note-tree"], "learn": {"text": "When notes follow each other, their beats add up. The **note tree** shows how the notes fit together.", "diagram": "The note tree: 1 semibreve splits into 2 minims, then 4 crotchets, then 8 quavers (beamed in pairs). A panel, Adding notes: a crotchet plus a minim, with the beats written under each note, 1 + 2 = 3 beats.", "worked": [{"task": "t1", "head": "Task 1: Add the beats", "hint": "Write beats under each note. Add them up. Write the total."}, {"task": "t2", "head": "Task 2: The missing note", "hint": "Work out how many beats are missing. Draw one note for that."}, {"task": "t3", "head": "Task 3: Use the note tree", "hint": "Find the bigger note in the tree. Count the smaller notes under it."}]}, "tasks": [{"id": "t1", "number": 1, "heading": "How many beats altogether? Write the total in the box.", "appHeading": "How many beats altogether? Tap the total.", "type": "add-beats", "items": 5, "clef": null}, {"id": "t2", "number": 2, "heading": "Draw the missing note so the beats add up.", "appHeading": "Tap the missing note so the beats add up.", "type": "missing-note", "items": 4, "clef": null}, {"id": "t3", "number": 3, "heading": "Count with the note tree.", "appHeading": "Count with the note tree. Tap the number.", "type": "note-tree", "items": 4, "clef": null}]}], "words": {"_about": "Hidden-word and spell-word bank: real words made only of A to G, suitable for 13-year-olds. A word is usable in a clef only if every letter has a place on that clef's stave (all seven do in both clefs). Repeated letters are fine. Add words here, never in code.", "short": ["ACE", "ADD", "AGE", "BAD", "BAG", "BED", "BEE", "CAB", "DAB", "DAD", "EGG", "FED", "FEE"], "medium": ["ACED", "AGED", "BEAD", "BEEF", "CAFE", "CAGE", "DEAF", "DEED", "EDGE", "FACE", "FADE", "FEED"], "long": ["ADDED", "BADGE", "CAGED", "EDGED", "FACED", "FADED", "BAGGED", "DECADE", "DEFACE", "FACADE", "BEGGED", "BAGGAGE", "CABBAGE"]}}; G.TA.STROKES = {"_about": "Hand-drawn clefs from Lesson 2 (diagrams.py hclef). Units: staff spaces. x right from the clef's left edge, y UP from line 1 (line 2 = 1, line 4 = 3). Draw 'line' strokes through a Catmull-Rom spline (TA.smooth in src/00-core.js, 8 points per segment). Dot radius: treble 0.2 sp, bass 0.3 sp; the bass pair of dots 0.14 sp. The treble clef's last step also draws a blob of radius 0.2 sp at blob. Pen width about 0.12 sp. Anchor = the point that must sit on its line: treble curl centre on line 2, bass big dot on line 4.", "treble": {"steps": [{"type": "dot", "data": [0.95, 0.8]}, {"type": "line", "data": [[0.95, 0.8], [0.8, 1.15], [0.85, 1.6], [1.15, 1.95], [1.55, 1.98], [1.85, 1.72], [1.97, 1.35]]}, {"type": "line", "data": [[1.97, 1.35], [1.95, 0.9], [1.8, 0.35], [1.3, 0.0], [0.75, 0.05], [0.35, 0.45], [0.2, 1.0], [0.35, 1.6], [0.7, 2.1]]}, {"type": "line", "data": [[0.7, 2.1], [1.25, 2.7], [1.75, 3.4], [2.05, 4.2], [1.95, 4.9], [1.7, 5.4], [1.45, 5.3], [1.3, 4.9], [1.27, 4.4]]}, {"type": "line", "data": [[1.27, 4.4], [1.33, 3.2], [1.42, 2.0], [1.5, 0.8], [1.58, -0.5], [1.6, -1.3], [1.45, -1.7], [1.1, -1.8], [0.85, -1.55]]}], "blob": [0.98, -1.5], "anchor": [1.1, 1.0], "anchorLine": 2, "extent": {"x0": 0.15, "x1": 2.1, "y0": -1.85, "y1": 5.45}, "captions": ["Dot just below line 2", "Up to line 3, curve round", "Down to line 1, curve round", "Curl up high and hook over", "Down the middle to a blob"]}, "bass": {"steps": [{"type": "dot", "data": [0.38, 3.0]}, {"type": "line", "data": [[0.2, 3.1], [0.42, 3.6], [0.85, 3.95], [1.35, 3.97], [1.78, 3.68], [1.98, 3.1]]}, {"type": "line", "data": [[1.98, 3.1], [1.92, 2.4], [1.62, 1.7], [1.12, 1.1], [0.45, 0.55], [0.12, 0.4]]}, {"type": "dots", "data": [[2.45, 3.5], [2.45, 2.5]]}], "anchor": [0.38, 3.0], "anchorLine": 4, "extent": {"x0": 0.05, "x1": 2.6, "y0": 0.35, "y1": 4.05}, "captions": ["Big dot on line 4", "Curve up over line 5", "Sweep down past line 2", "A dot either side of line 4"]}}; })();
 /* ---- src/00-core.js ---- */
 /* Theory Practice: core music model, shared checks and marking helpers.
  *
@@ -685,10 +794,20 @@ html[data-screen="learn"] footer, html[data-screen="practise"] footer { display:
       copyIn: 'Copy the answer in to move on.', copied: 'You copied it in.', extra: 'Extra practice', fillAll: 'Fill in every box first.', model: 'This one is done for you.' },
     results: { send: 'Send my results', sent: 'Your results are ready to send. Press Submit on the form.', saved: 'Saved on this device.' },
     help: { open: 'Help', close: 'Close', title: 'Help' },
+    // the task cards (Isaac, 6 November 2026): one card before each task, opened again with Show me how
+    card: { open: 'Show me how', close: 'Back to the question', start: 'Start Task {n}', startListening: 'Start listening', next: 'Next',
+      listening: 'Listening', title: 'How to do this task', rushed: 'Slow down. Read this first, then have another go.',
+      seeHow: 'Show me how', play: 'Play it again', playing: 'Listen' },
+    listen: { notThis: 'Play it again and listen to each note after the first.', play: 'Play the notes', again: 'Play again',
+      wait: 'Listen to all the notes first.' },
+    sound: { on: 'Sound on', off: 'Sound off' },
+    l3: { next: 'Going {dir} from {prev}, the next letter is not {mine}.', gap: 'The letter {mine} in box {n} does not fit the row.',
+      notLetter: 'Only the letters from the musical alphabet can go in the boxes.' },
     drag: { bank: 'Drag from here', resize: 'Drag to move. Drag the corner arrow to change the size.', undo: 'Undo' },
     // sentences the generators put together (src/09-gen-shared.js TA.fmt fills the {gaps})
     explain: {
       run: 'The letters go {dir}: {run}.',
+      listen: 'Each note sounded {way} than the one before, so the notes went {dir}. The letters go {letters}: {run}.',
       octave: 'An octave has eight letters. This one goes up from {start} to the next {start}: {run}.',
       findC: 'Every C is the white key just to the left of a group of two black keys.',
       keyNames: 'Find the nearest C and go forwards one white key at a time. The boxed keys are {names}.',
@@ -730,6 +849,31 @@ html[data-screen="learn"] footer, html[data-screen="practise"] footer { display:
       grandStave: 'The octave number tells you which stave to use.',
       keyWrong: 'The note and its key do not match yet.'
     }
+  };
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+/* ---- src/06-pitch.js ---- */
+/* Theory Practice: what a row of letters sounds like (Isaac, 6 November 2026: every task that can plays the sound of
+ * what is on screen once it is answered, to start linking a note with its sound). Logic only, so the tests can use it.
+ * A row going forwards goes up in pitch, a row going backwards goes down, and after G it goes on to the A above
+ * (RULES 1.2: the octave number is not shown before Lesson 11, it is only used here to choose the pitch). */
+(function (G) {
+  'use strict';
+  const TA = G.TA;
+  const SEMI = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+  // the MIDI number of a letter in an octave (C4 = 60, Middle C)
+  TA.midiOf = (letter, octave) => 12 * (octave + 1) + SEMI[letter];
+  // one pitch for each letter of a run. Going up it starts between A3 and G4; going down between C5 and B5, so a
+  // row of up to eight letters stays in a comfortable range for a Chromebook speaker.
+  TA.letterPitches = function (row, dir) {
+    const first = row[0];
+    let m = dir === 1 ? TA.midiOf(first, 'AB'.includes(first) ? 3 : 4) : TA.midiOf(first, 5);
+    const out = [m];
+    for (let i = 1; i < row.length; i++) {
+      do { m += dir; } while (!Object.values(SEMI).includes(((m % 12) + 12) % 12));
+      out.push(m);
+    }
+    return out;
   };
 })(typeof globalThis !== 'undefined' ? globalThis : this);
 
@@ -1111,6 +1255,24 @@ html[data-screen="learn"] footer, html[data-screen="practise"] footer { display:
 
   const runText = (row) => row.join(' ');
 
+  // RULES 5.1a: a first wrong try says what is wrong with the student's own letters, without giving the answer away.
+  // Tasks 1 and 2 show the direction, so it is named; Task 3 doesn't (working it out is the task), so it isn't.
+  function markRow(item, response) {
+    const m = gx.markBoxes(item, response);
+    if (m.correct) return m;
+    const row = item.show.letters, gaps = row.map((l, i) => (l ? -1 : i)).filter((i) => i >= 0);
+    const k = response.findIndex((r, i) => String(r || '').toUpperCase() !== item.answer[i]);
+    if (k < 0) return m;
+    const mine = String(response[k] || '').toUpperCase(), at = gaps[k];
+    if (!TA.LETTERS.includes(mine)) { m.first = TA.STRINGS.l3.notLetter; return m; }
+    if (item.type === 'next-letter') {
+      let k2 = 0;
+      const full = row.map((l) => l || item.answer[k2++]);
+      m.first = TA.fmt(TA.STRINGS.l3.next, { dir: item.direction === 1 ? 'forwards' : 'backwards', prev: full[at - 1], mine });
+    } else m.first = TA.fmt(TA.STRINGS.l3.gap, { mine, n: at + 1 });
+    return m;
+  }
+
   // Tasks 1 and 2: the next letter (forwards) or the next two letters (going down)
   function nextLetter() {
     return {
@@ -1130,10 +1292,12 @@ html[data-screen="learn"] footer, html[data-screen="practise"] footer { display:
           const row = TA.letterRun(it.key, task.shown + task.blanks, dir);
           return row.some((l, i) => i > 0 && (dir === 1 ? row[i - 1] === 'G' && l === 'A' : row[i - 1] === 'A' && l === 'G'));
         };
-        return TA.drawSet(rng, task.items, one, (items) => P.distinct(items.map((i) => i.key)) && items.some(wraps),
+        // only seven letters to start on: at 10 a set (Isaac, appItems) a start can come twice, never side by side
+        const spread = (keys) => (keys.length <= 7 ? P.distinct(keys) : P.noRepeatNeighbours(keys) && TA.LETTERS.every((l) => keys.filter((k) => k === l).length <= 2));
+        return TA.drawSet(rng, task.items, one, (items) => spread(items.map((i) => i.key)) && items.some(wraps),
           (ex, items) => gx.okExample(ex, items));
       },
-      mark: gx.markBoxes
+      mark: markRow
     };
   }
   TA.GEN[3].t1 = nextLetter();
@@ -1159,7 +1323,41 @@ html[data-screen="learn"] footer, html[data-screen="practise"] footer { display:
         return P.distinct(items.map((i) => i.key)) && P.maxRun(d) <= 2 && !P.alternates(d) && new Set(d).size === 2;
       }, (ex, items) => gx.okExample(ex, items));
     },
-    mark: gx.markBoxes
+    mark: markRow
+  };
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
+/* Lesson 3 Listening Activity (Isaac, 6 November 2026): a few notes are played going up or going down, and the student
+ * selects which. The letters stay hidden until it is answered (showing them would give the direction away). */
+(function (G) {
+  'use strict';
+  const TA = G.TA;
+  const P = TA.patterns;
+  const gx = TA.gx;
+  const OPTS = ['going up', 'going down'];               // always in this order (RULES 4.6)
+  TA.GEN[3].t4 = {
+    make(rng, task) {
+      const one = (r) => {
+        const dir = r.chance(0.5) ? 1 : -1;
+        const start = r.pick(TA.LETTERS);
+        const row = TA.letterRun(start, task.notes, dir);
+        return {
+          type: task.type, key: start + (dir === 1 ? 'u' : 'd'), direction: dir,
+          show: { listen: { letters: row, pitches: TA.letterPitches(row, dir) } },
+          input: { kind: 'choice', options: OPTS.slice() }, answer: dir === 1 ? OPTS[0] : OPTS[1],
+          explain: TA.fmt(TA.STRINGS.explain.listen, { way: dir === 1 ? 'higher' : 'lower', dir: dir === 1 ? 'up' : 'down', letters: dir === 1 ? 'forwards' : 'backwards', run: row.join(' ') })
+        };
+      };
+      return TA.drawSet(rng, task.items, one, (items) => P.distinct(items.map((i) => i.key)) && P.binaryOk(items.map((i) => i.answer)) &&
+        Math.abs(items.filter((i) => i.direction === 1).length * 2 - items.length) <= 2,   // up and down nearly even
+        (ex, items) => gx.okExample(ex, items));
+    },
+    mark(item, response) {
+      const correct = TA.same(item.answer, response);
+      const m = { correct, feedback: correct ? gx.right(item) : gx.wrong(item) };
+      if (!correct) m.first = TA.STRINGS.listen.notThis;
+      return m;
+    }
   };
 })(typeof globalThis !== 'undefined' ? globalThis : this);
 
@@ -1915,6 +2113,91 @@ html[data-screen="learn"] footer, html[data-screen="practise"] footer { display:
   R.fig = (f, o) => (f.type === 'stave' ? R.stave(f, o) : f.type === 'row' ? R.row(f, o) : R.text(f)).svg;
 })(typeof globalThis !== 'undefined' ? globalThis : this);
 
+/* ---- ui/15-sound.js ---- */
+/* Theory Practice: sound (Isaac, 6 November 2026). Once a question is answered the app plays what is on the screen and
+ * lights up each note (or letter) as it sounds, to start linking a note with its sound. Web Audio only: a soft
+ * piano-like tone made here, so nothing is downloaded (RULES 7.5). Sound can be turned off with the banner button; the
+ * choice is kept on this device. */
+(function (G) {
+  'use strict';
+  const TA = G.TA;
+  const Snd = (TA.sound = {});
+  const KEY = 'theory.sound';
+  let ctx = null, master = null, timers = [], playing = null;
+
+  Snd.on = (function () { try { return G.localStorage.getItem(KEY) !== 'off'; } catch (e) { return true; } })();
+  Snd.set = function (on) {
+    Snd.on = !!on;
+    try { G.localStorage.setItem(KEY, on ? 'on' : 'off'); } catch (e) { /* private window: keep it for this visit */ }
+    if (!on) Snd.stop();
+  };
+  Snd.available = () => !!(G.AudioContext || G.webkitAudioContext);
+
+  function audio() {
+    if (!ctx) {
+      const A = G.AudioContext || G.webkitAudioContext;
+      if (!A) return null;
+      ctx = new A();
+      master = ctx.createGain();
+      master.gain.value = 0.5;
+      const comp = ctx.createDynamicsCompressor();
+      master.connect(comp); comp.connect(ctx.destination);
+    }
+    if (ctx.state === 'suspended') ctx.resume();
+    return ctx;
+  }
+  // call from a click or key press, so the browser lets the page make sound later on
+  Snd.unlock = () => { if (Snd.on) audio(); };
+
+  const hz = (m) => 440 * Math.pow(2, (m - 69) / 12);
+  function tone(m, t, dur) {
+    const f = hz(m);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.9, t + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.25, t + 0.25);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur + 0.35);
+    const lp = ctx.createBiquadFilter();
+    lp.type = 'lowpass'; lp.frequency.value = Math.min(9000, f * 7); lp.Q.value = 0.4;
+    lp.connect(g); g.connect(master);
+    [[1, 'triangle', 0.7], [2, 'sine', 0.22], [3, 'sine', 0.08]].forEach(([k, type, v]) => {
+      const o = ctx.createOscillator(), og = ctx.createGain();
+      o.type = type; o.frequency.value = f * k; og.gain.value = v;
+      o.connect(og); og.connect(lp);
+      o.start(t); o.stop(t + dur + 0.4);
+    });
+  }
+
+  Snd.stop = function () {
+    timers.forEach(clearTimeout); timers = [];
+    if (playing) { playing.els.forEach((el) => el && el.classList.remove('lit')); const r = playing.done; playing = null; r(false); }
+  };
+
+  // seq: [{ midi, el }] played one after another; each el gets the class 'lit' while its note sounds.
+  // Resolves true when it has finished, false if it was stopped (or sound is off: then nothing plays and it resolves
+  // at once, so nothing waits on it).
+  Snd.play = function (seq, o) {
+    o = o || {};
+    Snd.stop();
+    if (!seq || !seq.length) return Promise.resolve(true);
+    const still = document.documentElement.classList.contains('still');     // tests: no waiting
+    if (!Snd.on || still || !audio()) return Promise.resolve(!Snd.on ? false : true);
+    const step = o.step || 0.5, dur = o.dur || 0.42, lead = 0.08;
+    const t0 = ctx.currentTime + lead;
+    return new Promise((resolve) => {
+      playing = { els: seq.map((s) => s.el), done: resolve };
+      seq.forEach((s, i) => {
+        tone(s.midi, t0 + i * step, dur);
+        timers.push(setTimeout(() => { seq.forEach((x) => x.el && x.el.classList.remove('lit')); if (s.el) s.el.classList.add('lit'); }, (lead + i * step) * 1000));
+      });
+      timers.push(setTimeout(() => {
+        seq.forEach((x) => x.el && x.el.classList.remove('lit'));
+        timers = []; playing = null; resolve(true);
+      }, (lead + (seq.length - 1) * step + dur + 0.15) * 1000));
+    });
+  };
+})(typeof globalThis !== 'undefined' ? globalThis : this);
+
 /* ---- ui/20-view.js ---- */
 /* Theory Practice: how every kind of exercise looks and answers. One builder for each family of items.
  * A builder returns { html, bind(root, ctl) }. In practise mode bind() wires the inputs and returns
@@ -1967,7 +2250,7 @@ html[data-screen="learn"] footer, html[data-screen="practise"] footer { display:
   const markSvg = (kind, indigo) => D.svg(1.2, 1.2, kind === 'tick' ? D.tick(0.6, 0.65, 1, C.base) : D.cross(0.6, 0.6, 1, indigo ? C.base : C.red), { cls: 'mk', scale: 1 });
   V.markSvg = markSvg;
   const box = (i, o) => '<input class="box' + (o && o.cls ? ' ' + o.cls : '') + '" data-i="' + i + '" maxlength="' + ((o && o.max) || 1) + '" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="' + esc((o && o.label) || 'Answer') + '"' +
-    (o && o.value ? ' value="' + esc(o.value) + '" readonly' : '') + '>';
+    (o && o.value ? ' value="' + esc(o.value) + '" readonly tabindex="-1"' : '') + '>';
   const pct = (x, W) => n2(x / W * 100) + '%';
   const n2 = (x) => Math.round(x * 100) / 100;
 
@@ -2139,6 +2422,11 @@ html[data-screen="learn"] footer, html[data-screen="practise"] footer { display:
   }
 
   // ---------- rows of letters (Lessons 3 and 4) ----------
+  // The arrow and its label are the book's own, over Tasks 1 and 2 (going up, going down). Fill the gaps has none
+  // in practice, so nothing shows the direction (RULES 4.6). Students can type a letter or select it from the letter
+  // buttons under the row (Isaac, 6 November 2026: Select, not Write).
+  const rowArrow = (dir, label) => '<div class="rowhead"><svg class="rowarrow" viewBox="0 0 100 6" preserveAspectRatio="none" aria-hidden="true"><line x1="' + (dir === 1 ? 4 : 96) + '" x2="' + (dir === 1 ? 94 : 6) + '" y1="3" y2="3" stroke="' + C.base + '" stroke-width="1.2"/>' +
+      '<path d="' + (dir === 1 ? 'M97 3 L92 0.5 L92 5.5 Z' : 'M3 3 L8 0.5 L8 5.5 Z') + '" fill="' + C.base + '"/></svg>' + (label ? '<span class="rowlab">' + esc(label) + '</span>' : '') + '</div>';
   function lettersFamily(item, task, o) {
     const row = item.show.letters, ex = o.mode === 'example';
     let cells = '', k = 0;
@@ -2146,10 +2434,84 @@ html[data-screen="learn"] footer, html[data-screen="practise"] footer { display:
       if (l) cells += '<div class="cell fixed">' + esc(l) + '</div>';
       else cells += '<div class="cell">' + box(k++, { label: 'Letter ' + (i + 1), value: ex ? item.answer[k - 1] : '' }) + '</div>';
     });
-    const arrow = ex ? '<svg class="rowarrow" viewBox="0 0 100 6" preserveAspectRatio="none" aria-hidden="true"><line x1="' + (item.direction === 1 ? 4 : 96) + '" x2="' + (item.direction === 1 ? 94 : 6) + '" y1="3" y2="3" stroke="' + C.base + '" stroke-width="1.2"/>' +
-      '<path d="' + (item.direction === 1 ? 'M97 3 L92 0.5 L92 5.5 Z' : 'M3 3 L8 0.5 L8 5.5 Z') + '" fill="' + C.base + '"/></svg>' : '';
-    return { html: arrow + '<div class="letters">' + cells + '</div>', needsCheck: true, bind(root, ctl) { return wireBoxes(root, ctl); } };
+    const booky = task.type === 'next-letter';
+    const arrow = ex || booky ? rowArrow(item.direction, booky ? (item.direction === 1 ? 'going up' : 'going down') : '') : '';
+    const pad = ex ? '' : '<div class="letterpad" role="group" aria-label="Letters">' + TA.LETTERS.map((l) => '<button type="button" class="btn lp" data-l="' + l + '">' + l + '</button>').join('') + '</div>';
+    return {
+      html: '<div class="rowwrap">' + arrow + '<div class="letters">' + cells + '</div></div>' + pad, needsCheck: true,
+      bind(root, ctl) {
+        const w = wireBoxes(root, ctl);
+        const boxes = [...root.querySelectorAll('input.box:not([readonly])')];
+        let last = null;
+        boxes.forEach((b) => b.addEventListener('focus', () => { last = b; }));
+        root.querySelectorAll('.lp').forEach((b) => b.addEventListener('click', () => {
+          if (b.disabled) return;
+          // the box the student was on, if it is still empty; otherwise the first empty one
+          const target = (last && !last.value && !last.disabled ? last : null) || boxes.find((x) => !x.value && !x.disabled);
+          if (!target) return;
+          target.value = b.dataset.l;
+          const i = boxes.indexOf(target);
+          last = boxes.slice(i + 1).find((x) => !x.value) || null;
+          ctl.change();
+        }));
+        const lock = w.lock;
+        w.lock = (on) => { lock(on); root.querySelectorAll('.lp').forEach((b) => { b.disabled = !!on; }); };
+        return w;
+      },
+      // what it sounds like: the whole row, with the answer in place, each box lit as its letter sounds
+      sound(root) {
+        let k2 = 0;
+        const full = row.map((l) => l || item.answer[k2++]);
+        const els = [...root.querySelectorAll('.letters .cell')];
+        return TA.letterPitches(full, item.direction).map((m, i) => ({ midi: m, el: els[i] }));
+      }
+    };
   }
+
+  // ---------- listening (Isaac, 6 November 2026) ----------
+  // Empty boxes, one for each note, light up as the notes play. The letters appear once it is answered. The answer
+  // buttons wait until the notes have been heard once.
+  function listenFamily(item, task, o) {
+    const L = item.show.listen, ex = o.mode === 'example';
+    const cells = L.letters.map((l) => '<div class="cell lcell"><span class="ll' + (ex ? ' hand' : '') + '">' + (ex ? esc(l) : '') + '</span></div>').join('');
+    const opts = item.input.options.map((v) => btn(v.charAt(0).toUpperCase() + v.slice(1), v, ex && TA.same(v, item.answer) ? 'pen' : '')).join('');
+    const playBtn = '<button type="button" class="btn playbtn"><span class="spk" aria-hidden="true">' + speaker() + '</span><span class="pl">' + esc(ST().listen.play) + '</span></button>';
+    return {
+      html: '<div class="listen">' + playBtn + '<div class="letters">' + cells + '</div></div><div class="opts">' + opts + '</div>',
+      autoplay: true,
+      bind(root, ctl) {
+        let locked = false, heard = !TA.sound.on;
+        const opts2 = [...root.querySelectorAll('button.opt')];
+        const gate = () => opts2.forEach((b) => { b.disabled = locked || !heard; });
+        const play = () => {
+          TA.sound.unlock();
+          root.querySelector('.playbtn .pl').textContent = ST().listen.again;
+          return TA.sound.play(this.sound(root)).then(() => { heard = true; gate(); if (ctl.heard) ctl.heard(); });
+        };
+        root.querySelector('.playbtn').addEventListener('click', play);
+        opts2.forEach((b) => b.addEventListener('click', () => {
+          if (locked || !heard) return;
+          opts2.forEach((x) => x.classList.toggle('chosen', x === b));
+          ctl.answer(b.dataset.v);
+        }));
+        gate();
+        return {
+          get: () => null, ready: () => false, play,
+          lock: (on) => { locked = !!on; gate(); if (on) root.querySelectorAll('.ll').forEach((s, i) => { s.textContent = L.letters[i]; s.classList.add('hand'); }); },
+          clear: () => opts2.forEach((x) => x.classList.remove('chosen')),
+          reveal: () => opts2.forEach((x) => x.classList.toggle('pen', TA.same(x.dataset.v, item.answer)))
+        };
+      },
+      sound(root) {
+        const els = [...root.querySelectorAll('.lcell')];
+        return L.pitches.map((m, i) => ({ midi: m, el: els[i] }));
+      }
+    };
+  }
+  function speaker() {
+    return '<svg viewBox="0 0 24 24" width="22" height="22"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>';
+  }
+  V.speaker = speaker;
 
   // ---------- the keyboard ----------
   // kb = { keys, boxes, given, octaveLabels }; mode 'tap' toggles keys; 'boxes' puts a box on each boxed key
@@ -2263,7 +2625,7 @@ html[data-screen="learn"] footer, html[data-screen="practise"] footer { display:
 
   V.family = function (item) {
     switch (item.input.kind) {
-      case 'choice': case 'number': return choiceFamily;
+      case 'choice': case 'number': return item.show && item.show.listen ? listenFamily : choiceFamily;
       case 'tap-note': return tapFamily;
       case 'boxes':
         if (item.show.letters) return lettersFamily;
@@ -2681,17 +3043,23 @@ html[data-screen="learn"] footer, html[data-screen="practise"] footer { display:
   };
 
   // ---- Lesson 3 ----
+  // As on the page: ten boxes A to C, lower on the left and higher on the right, the arrow over them going up and the
+  // arrow under them going down, and "back to A, but higher" over the second A. Each box is a group with class "lb",
+  // so it can light up while its letter sounds (Isaac, 6 November 2026).
+  Dg.L3_ROW = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'A', 'B', 'C'];
   Dg[3] = function () {
     let s = '';
-    const row = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'A'], x0 = 1, w = 3.6;
-    row.forEach((l, i) => { s += D.tag('rect', { x: x0 + i * w, y: 4, width: w - 0.4, height: 3, fill: '#fff', stroke: C.base, 'stroke-width': 0.12, rx: 0.2 }) + t(l, x0 + i * w + (w - 0.4) / 2, 6.05, { size: 1.6, weight: 700, color: C.shade }); });
-    s += D.arrow(x0, 2.8, x0 + 8 * w - 0.6, 2.8, { color: C.base, head: 0.6, w: 0.16 });
-    s += t('Going up: the letters go forwards', x0 + 4 * w, 1.9, { ...bold, size: 1.0 });
-    s += D.arrow(x0 + 7 * w, 8.4, x0, 8.4, { color: C.base, head: 0.6, w: 0.16 });
-    s += t('Going down: the letters go backwards', x0 + 4 * w, 9.9, { ...bold, size: 1.0 });
-    s += t('back to A, but higher', x0 + 7 * w + 1.6, 11.3, { size: 0.95, color: C.base, weight: 700, anchor: 'end' });
-    s += D.tag('path', { d: 'M' + (x0 + 7 * w + 1.5) + ' 10.8 L' + (x0 + 7 * w + 1.5) + ' 7.3', stroke: C.base, 'stroke-width': 0.12, fill: 'none', 'stroke-dasharray': '0.3 0.25' });
-    return fig(31, 12, s, 'Diagram: the letters A to G in a row, then A again. Going up the letters go forwards. Going down they go backwards.');
+    const row = Dg.L3_ROW, x0 = 5.4, w = 3.3, bw = 2.8;
+    row.forEach((l, i) => { s += '<g class="lb">' + D.tag('rect', { x: x0 + i * w, y: 4.2, width: bw, height: 3, fill: '#fff', stroke: C.base, 'stroke-width': 0.12, rx: 0.15 }) + t(l, x0 + i * w + bw / 2, 6.25, { size: 1.5, color: C.ink }) + '</g>'; });
+    const end = x0 + row.length * w - (w - bw);
+    s += t('Going up: the letters go forwards', x0, 2.0, { ...bold, size: 1.0, anchor: 'start' });
+    s += t('back to A, but higher', x0 + 7 * w + bw / 2, 2.0, { ...bold, size: 0.95 });
+    s += D.arrow(x0, 3.1, end, 3.1, { color: C.base, head: 0.6, w: 0.16 });
+    s += D.arrow(end, 8.4, x0, 8.4, { color: C.base, head: 0.6, w: 0.16 });
+    s += t('Going down: the letters go backwards', x0, 10.0, { ...bold, size: 1.0, anchor: 'start' });
+    s += D.text('lower', x0 - 0.8, 6.15, { size: 1.0, color: C.grey, anchor: 'end' });
+    s += D.text('higher', end + 0.8, 6.15, { size: 1.0, color: C.grey, anchor: 'start' });
+    return fig(end + 5.6, 10.8, s, 'Diagram: the letters A B C D E F G, then A B C again, lower on the left and higher on the right. Going up the letters go forwards. Going down they go backwards. After G you go back to A, but higher.');
   };
 
   // ---- Lesson 4 ----
@@ -3022,6 +3390,66 @@ html[data-screen="learn"] footer, html[data-screen="practise"] footer { display:
       }
     };
   };
+
+  // ---------- task cards (Isaac, 6 November 2026) ----------
+  // In a card lesson there is no separate Learn screen. The lesson opens on a card with What we're learning, then each
+  // task starts with its own card (the book's What to do for that task, with its worked example). The card for the
+  // task a student is on opens again from Show me how, from the feedback after a wrong answer, and by itself after
+  // three wrong answers in a row each given in under two seconds.
+  Ln.CARDS = new Set([3]);
+  Ln.isCards = (n) => Ln.CARDS.has(n);
+  Ln.cardCount = (n) => lessonOf(n).tasks.length + 1;
+  // a listening activity is headed "Listening: ..." (the em dash is only for "Task N — ", RULES 2.3)
+  const taskHead = (t) => (t.listening ? TA.STRINGS.card.listening + ': ' : 'Task ' + t.number + ' — ') + (t.appHeading || t.heading);
+  Ln.taskHead = taskHead;
+
+  // card k: 0 is What we're learning, k >= 1 is the card for task k - 1. Returns { html, mount(root), title }
+  Ln.card = function (n, k) {
+    const L = lessonOf(n), S = TA.STRINGS;
+    if (k === 0) {
+      return {
+        title: S.lesson.learnTitle,
+        html: '<div class="tcard info"><p class="label">' + D.esc(S.lesson.learnTitle) + '</p><p class="infotext">' + D.rich(L.learn.text) + '</p>' +
+          '<div class="figwrap">' + TA.diagrams[n]() + '</div>' +
+          (TA.sound.available() ? '<div class="cardplay"><button type="button" class="btn small playbtn"><span class="spk" aria-hidden="true">' + V.speaker() + '</span>' + D.esc(S.card.playing) + '</button></div>' : '') + '</div>',
+        mount(root, o) {
+          // the diagram's letters, played from the lowest A up, each box lit as it sounds
+          const els = [...root.querySelectorAll('.lb')];
+          const play = () => { TA.sound.unlock(); return TA.sound.play(TA.letterPitches(TA.diagrams.L3_ROW, 1).map((m, i) => ({ midi: m, el: els[i] })), { step: 0.42 }); };
+          const b = root.querySelector('.cardplay .playbtn');
+          if (b) b.addEventListener('click', play);
+          return { play };
+        }
+      };
+    }
+    const task = L.tasks[k - 1], w = L.learn.worked.find((x) => x.task === task.id);
+    const { item } = Ln.example(L, task.id);
+    const built = V.build(item, task, { mode: 'example', lesson: L });
+    return {
+      title: taskHead(task),
+      html: '<div class="tcard todo example"><h2 class="cardhead">' + D.esc(taskHead(task)) + '</h2>' +
+        '<p class="label">' + D.esc(S.lesson.whatToDo) + '</p><p class="hint">' + D.esc(w.hint) + '</p>' +
+        ((task.appInstruction || task.instruction) ? '<p class="instr">' + D.rich(task.appInstruction || task.instruction) + '</p>' : '') +
+        '<div class="exwrap ex-' + item.type + '">' + built.html + '</div>' +
+        (item.show.listen ? '' : '<div class="cardplay"><button type="button" class="btn small replay">' + D.esc(S.card.play) + '</button></div>') + '</div>',
+      mount(root) {
+        const ex = root.querySelector('.example');
+        let tm = null;
+        // the answer appears in pencil (CSS, after 1.2 s), then it is played with each box lit
+        const play = () => {
+          clearTimeout(tm);
+          const still = document.documentElement.classList.contains('still');
+          return new Promise((res) => { tm = setTimeout(() => res(built.sound ? TA.sound.play(built.sound(ex)) : true), still ? 0 : 2100); });
+        };
+        if (item.show.listen) root.querySelectorAll('.ll').forEach((x) => x.classList.add('later'));
+        const r = root.querySelector('.replay');
+        if (r) r.addEventListener('click', () => { TA.sound.unlock(); ex.classList.toggle('again'); play(); });
+        const pb = root.querySelector('.listen .playbtn');
+        if (pb) pb.addEventListener('click', () => { TA.sound.unlock(); TA.sound.play(built.sound(ex)); });
+        return { play, stop: () => { clearTimeout(tm); TA.sound.stop(); } };
+      }
+    };
+  };
 })(typeof globalThis !== 'undefined' ? globalThis : this);
 
 /* ---- ui/40-practise.js ---- */
@@ -3064,17 +3492,20 @@ html[data-screen="learn"] footer, html[data-screen="practise"] footer { display:
     // twice as long under the pattern rules get double the book's count: more drill, same words.
     const longer = (task) => (task.appItems ? { ...task, items: task.appItems } : Pr.DRILL.has(n + '.' + task.id) ? { ...task, items: task.items * 2 } : task);
     const sets = L.tasks.map((task, ti) => ({ task, ti, items: TA.GEN[n][task.id].make(TA.rng(Pr.seedOf(seed, n, ti)), longer(task), L).items }));
+    // two tasks of the same type (Lesson 3 Tasks 1 and 2) gave their questions the same ids, so one task's answers
+    // were scored against the other's (fixed 6 November 2026): every id now starts with its task
+    sets.forEach((set) => set.items.forEach((it) => { it.id = set.task.id + '-' + it.id; }));
     let html = '<div class="prog" aria-live="polite"><span class="pl"></span><span class="bar"><i></i></span></div>';
     if (L.beforeTasks) html += '<p class="before">' + D.rich(L.beforeTasks) + '</p>';
     sets.forEach((set, si) => {
       const t = set.task, heading = t.appHeading || t.heading;
       html += (si ? '<hr class="divide">' : '') + '<section class="task" data-task="' + t.id + '" data-type="' + t.type + '">' +
-        '<h3 class="th" data-task-heading="' + D.esc(heading) + '"><span class="tn">Task ' + t.number + '</span> — ' + headingHtml(heading) + '</h3>' +
+        '<h3 class="th" data-task-heading="' + D.esc(heading) + '">' + (t.listening ? '<span class="tn">' + D.esc(S().card.listening) + ':</span> ' : '<span class="tn">Task ' + t.number + '</span> — ') + headingHtml(heading) + '</h3>' +
         ((t.appInstruction || t.instruction) ? '<p class="instr">' + D.rich(t.appInstruction || t.instruction) + '</p>' : '') + '<div class="items">';
       set.items.forEach((it, i) => { html += cardHtml(it.id, String(i + 1)); });
       html += '</div>' + (t.type === 'note-to-key' ? '<div class="sharedkb"></div>' : '') + '</section>';
     });
-    html += '<section class="finish" hidden></section>';
+    html += '<section class="cardstage" hidden></section><section class="finish" hidden></section>';
     return { html, mount: (root, ctx) => mount(root, ctx, n, seed, L, sets) };
   };
 
@@ -3102,10 +3533,18 @@ html[data-screen="learn"] footer, html[data-screen="practise"] footer { display:
     const indigo = INDIGO_MARKS.has(n);
     const extrasUsed = {};                              // task id -> extra questions added so far
     let xid = 0;
+    // task cards (Isaac, 6 November 2026): a card before each task, Show me how after a wrong answer, and the card
+    // opens by itself after three wrong answers in a row, each given in under two seconds (RUSH_MS)
+    const cards = single && TA.learn.isCards(n);
+    const introduced = new Set();
+    const RUSH_MS = 2000, RUSH_RUN = 3;
+    let fastWrong = 0;
+    const stage = root.querySelector('.cardstage');
+    let stageCtl = null;
 
     // wire one question card; returns its entry in order
     function wire(item, set, card, sec, isExtra) {
-      const entry = { id: item.id, sec, card, task: set.task, item, extra: !!isExtra };
+      const entry = { id: item.id, sec, card, task: set.task, item, extra: !!isExtra, t: 0 };
       const nextBtn = card.querySelector('.next');
       const body = card.querySelector('.body'), fb = card.querySelector('.fb'), checkBtn = card.querySelector('.check');
       const st = (state[item.id] = { tries: 0, first: null, done: false, revealed: false });
@@ -3113,14 +3552,18 @@ html[data-screen="learn"] footer, html[data-screen="practise"] footer { display:
       const built = V.build(item, set.task, { mode: 'practise', lesson: L });
       body.innerHTML = built.html;
       const say = (ok, text) => {
-        fb.innerHTML = '<span class="fbicon">' + V.markSvg(ok ? 'tick' : 'cross', indigo) + '</span><span class="fbtext">' + D.esc(text) + '</span>';
+        fb.innerHTML = '<span class="fbicon">' + V.markSvg(ok ? 'tick' : 'cross', indigo) + '</span><span class="fbtext">' + D.esc(text) +
+          (!ok && cards ? ' <button type="button" class="linkbtn seehow">' + D.esc(S().card.seeHow) + '</button>' : '') + '</span>';
+        const sh = fb.querySelector('.seehow');
+        if (sh) sh.addEventListener('click', () => ctx.openCard && ctx.openCard(set.task.id));
         card.classList.toggle('right', !!ok); card.classList.toggle('wrong', !ok);
       };
       let view;
       const ctl = {
         answer: (resp) => handle(resp),
         change: () => { if (view) checkBtn.disabled = st.done || !view.ready(); },
-        submit: () => { if (view && view.ready() && !st.done) handle(view.get()); }
+        submit: () => { if (view && view.ready() && !st.done) handle(view.get()); },
+        heard: () => { entry.t = Date.now(); }            // a listening question: time from when the notes have played
       };
       view = built.bind(body, ctl);
       views[item.id] = { view, built, item };
@@ -3140,12 +3583,16 @@ html[data-screen="learn"] footer, html[data-screen="practise"] footer { display:
         const gen = TA.GEN[n][set.task.id];
         const m = gen.mark(item, resp);
         st.tries++;
+        const quick = entry.t && Date.now() - entry.t < RUSH_MS;
+        fastWrong = !m.correct && quick ? fastWrong + 1 : 0;
+        entry.t = Date.now();
         if (m.correct) {
           st.done = true; if (st.tries === 1) st.first = true; else if (st.first === null) st.first = false;
           // after the answer was shown and copied in, don't call it "Correct."
           say(true, st.revealed ? (m.copied || S().marking.copied) + ' ' + m.feedback.replace(/^Correct\.\s*/, '') : m.feedback);
           view.lock(true); checkBtn.hidden = true;
           if (single && order[order.length - 1] !== entry) { nextBtn.hidden = false; nextBtn.focus({ preventScroll: true }); }
+          if (built.sound) TA.sound.play(built.sound(body));     // what it sounds like, each box lit as it plays
         } else {
           if (!built.needsCheck && view.clear) view.clear();           // a tap or a choice: pick again
           if (st.tries === 1) { st.first = false; say(false, firstWrong(item, m, hintFor(L, set.task))); addExtra(entry, set); }
@@ -3153,6 +3600,7 @@ html[data-screen="learn"] footer, html[data-screen="practise"] footer { display:
         }
         ctl.change();
         if (TA.fit) TA.fit.soon();
+        if (cards && fastWrong >= RUSH_RUN && ctx.openCard) { fastWrong = 0; ctx.openCard(set.task.id, { rushed: true }); }
         const sc = setScore();
         if (sc && all()) finish();
       }
@@ -3189,7 +3637,37 @@ html[data-screen="learn"] footer, html[data-screen="practise"] footer { display:
 
     // one question at a time: the next one appears when the student presses Next
     const prog = root.querySelector('.prog');
+    // a card on the page itself, in place of the question, before the task starts
+    function showCard(k, then) {
+      TA.sound.stop();
+      order.forEach((q) => { q.card.hidden = true; });
+      root.querySelectorAll('section.task, hr.divide').forEach((x) => { x.hidden = true; });
+      if (prog) prog.hidden = true;
+      const c = TA.learn.card(n, k), task = k ? L.tasks[k - 1] : null;
+      const label = !task ? S().card.next : task.listening ? S().card.startListening : TA.fmt(S().card.start, { n: task.number });
+      stage.innerHTML = c.html + '<div class="cardnav"><button type="button" class="btn solid go">' + D.esc(label) + '</button></div>';
+      stage.hidden = false;
+      root.classList.add('oncard');
+      stageCtl = c.mount(stage) || null;
+      if (stageCtl && stageCtl.play && k) stageCtl.play();
+      const go = stage.querySelector('.go');
+      go.addEventListener('click', () => {
+        TA.sound.unlock();
+        if (stageCtl && stageCtl.stop) stageCtl.stop(); else TA.sound.stop();
+        stage.hidden = true; stage.innerHTML = ''; stageCtl = null; root.classList.remove('oncard');
+        then();
+        if (root.scrollIntoView) root.scrollIntoView({ block: 'start' });
+      });
+      go.focus({ preventScroll: true });
+      if (TA.fit) TA.fit.run();
+      if (ctx.onCard) ctx.onCard(k);
+    }
+    let introSeen = false;
     function show(i) {
+      const want = order[i];
+      if (cards && !introSeen) { introSeen = true; return showCard(0, () => show(i)); }
+      if (cards && !introduced.has(want.task.id)) { introduced.add(want.task.id); return showCard(L.tasks.indexOf(want.task) + 1, () => show(i)); }
+      TA.sound.stop();
       at = i;
       order.forEach((q, k) => { q.card.hidden = single && k !== i; });
       const cur = order[i];
@@ -3198,6 +3676,9 @@ html[data-screen="learn"] footer, html[data-screen="practise"] footer { display:
       progress();
       if (TA.fit) TA.fit.run();
       if (ctx.onTask) ctx.onTask(cur.task.id);
+      cur.t = Date.now();
+      const vv = views[cur.id];
+      if (vv && vv.built.autoplay && !state[cur.id].done && vv.view.play) vv.view.play().then(() => { cur.t = Date.now(); });
       if (state[cur.id].done && i < order.length - 1) show(i + 1);      // a model item that is already done
     }
     function progress() {
@@ -3328,7 +3809,12 @@ html[data-screen="learn"] footer, html[data-screen="practise"] footer { display:
   const banner = (eyebrow, title, corner) => '<header class="banner"><div><div class="eyebrow">' + E(eyebrow) + '</div><h1>' + E(title) + '</h1></div>' + (corner || '') + '</header>';
   const footer = () => '<footer>' + E(S().app.school) + ' &nbsp;|&nbsp; Music Theory &nbsp;|&nbsp; <b>' + E(S().app.name) + '</b></footer>';
 
-  UI.learnSteps = (n) => TA.learn.steps(n).length;
+  UI.learnSteps = (n) => (TA.learn.isCards(n) ? TA.learn.cardCount(n) : TA.learn.steps(n).length);
+  const soundBtn = () => (TA.sound.available() ? '<button type="button" class="helpbtn sndbtn" aria-pressed="' + TA.sound.on + '">' + E(TA.sound.on ? S().sound.on : S().sound.off) + '</button>' : '');
+  function wireSound(root) {
+    const b = root.querySelector('.sndbtn');
+    if (b) b.addEventListener('click', () => { TA.sound.set(!TA.sound.on); if (TA.sound.on) TA.sound.unlock(); b.textContent = TA.sound.on ? S().sound.on : S().sound.off; b.setAttribute('aria-pressed', TA.sound.on); });
+  }
 
   // ---------- screens ----------
   function home() {
@@ -3353,8 +3839,9 @@ html[data-screen="learn"] footer, html[data-screen="practise"] footer { display:
     };
   }
   function learn(n, step) {
-    const total = TA.learn.steps(n).length, s = Math.max(0, Math.min(total - 1, step));
-    const L = lessonOf(n), r = TA.learn.render(n, s);
+    const cardsOn = TA.learn.isCards(n);
+    const total = UI.learnSteps(n), s = Math.max(0, Math.min(total - 1, step));
+    const L = lessonOf(n), r = cardsOn ? TA.learn.card(n, s) : TA.learn.render(n, s);
     const last = s === total - 1;
     const nav = '<nav class="learnnav"><button type="button" class="btn prev"' + (s === 0 ? ' disabled' : '') + '>' + E(S().lesson.previous) + '</button>' +
       '<span class="count">' + (s + 1) + ' / ' + total + '</span>' +
@@ -3362,7 +3849,8 @@ html[data-screen="learn"] footer, html[data-screen="practise"] footer { display:
     return {
       html: '<div class="sheet learnsheet">' + banner('Music theory · Lesson ' + n, L.title, '<a class="corner" href="#/lesson/' + n + '">' + E('Lesson ' + n) + '</a>') + '<section class="frame">' + r.html + '</section>' + nav + footer() + '</div>',
       mount(root) {
-        r.mount(root);
+        const rc = r.mount(root);
+        if (cardsOn && rc && rc.play && s > 0) rc.play();
         const go = (d) => UI.go('#/lesson/' + n + '/learn/' + (s + 1 + d));
         const p = root.querySelector('.prev'), x = root.querySelector('.next');
         if (p) p.addEventListener('click', () => go(-1));
@@ -3378,20 +3866,39 @@ html[data-screen="learn"] footer, html[data-screen="practise"] footer { display:
   function practise(n, seed) {
     const L = lessonOf(n), r = TA.practise.render(n, seed);
     return {
-      html: '<div class="sheet practisesheet">' + banner('Music theory · Lesson ' + n, L.title, '<div class="cornerrow"><button type="button" class="helpbtn">' + E(S().help.open) + '</button><div class="corner scorebox"><span class="slab">' + E(S().marking.score) + '</span><b class="sc">0 / 0</b><a href="#/lesson/' + n + '">' + E('Lesson ' + n) + '</a></div></div>') +
-        '<dialog class="helpdlg" aria-label="' + E(S().help.title) + '"><div class="helpbody"></div><div class="helpfoot"><button type="button" class="btn solid helpclose">' + E(S().help.close) + '</button></div></dialog>' +
+      html: '<div class="sheet practisesheet' + (TA.learn.isCards(n) ? ' cardsheet' : '') + '">' + banner('Music theory · Lesson ' + n, L.title, '<div class="cornerrow">' + (TA.learn.isCards(n) ? soundBtn() : '') + '<button type="button" class="helpbtn">' + E(TA.learn.isCards(n) ? S().card.open : S().help.open) + '</button><div class="corner scorebox"><span class="slab">' + E(S().marking.score) + '</span><b class="sc">0 / 0</b>' + (TA.learn.isCards(n) ? '<a href="#/">' + E(S().home.lessons) + '</a>' : '<a href="#/lesson/' + n + '">' + E('Lesson ' + n) + '</a>') + '</div></div>') +
+        '<dialog class="helpdlg" aria-label="' + E(TA.learn.isCards(n) ? S().card.title : S().help.title) + '"><div class="helpbody"></div><div class="helpfoot"><button type="button" class="btn solid helpclose" autofocus>' + E(TA.learn.isCards(n) ? S().card.close : S().help.close) + '</button></div></dialog>' +
         '<section class="frame practise">' + r.html + '</section>' + footer() + '</div>',
       mount(root) {
-        let task = null;
+        let task = null, onCard = null, dctl = null;
+        const cardsOn = TA.learn.isCards(n);
         const dlg = root.querySelector('.helpdlg'), body = root.querySelector('.helpbody');
-        root.querySelector('.helpbtn').addEventListener('click', () => {
+        wireSound(root);
+        const openDlg = () => { if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', ''); };
+        const closeDlg = () => { if (dlg.close) dlg.close(); else dlg.removeAttribute('open'); };
+        // a card lesson's Show me how opens the card of the task the student is on (or the card showing)
+        const openCard = (id, o) => {
+          o = o || {};
+          TA.sound.unlock();
+          const k = id ? L.tasks.findIndex((t) => t.id === id) + 1 : 0;
+          const c = TA.learn.card(n, k);
+          body.innerHTML = (o.rushed ? '<p class="rushed">' + E(S().card.rushed) + '</p>' : '') + c.html;
+          openDlg();
+          dctl = c.mount(body) || null;
+          if (dctl && dctl.play && k) dctl.play();
+        };
+        root.querySelector('.helpbtn:not(.sndbtn)').addEventListener('click', () => {
+          if (cardsOn) return openCard(onCard === null ? task : (onCard ? L.tasks[onCard - 1].id : null));
           body.innerHTML = TA.learn.help(n, task);
-          if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
+          openDlg();
         });
-        root.querySelector('.helpclose').addEventListener('click', () => { if (dlg.close) dlg.close(); else dlg.removeAttribute('open'); });
+        root.querySelector('.helpclose').addEventListener('click', closeDlg);
         dlg.addEventListener('click', (e) => { if (e.target === dlg && dlg.close) dlg.close(); });
+        dlg.addEventListener('close', () => { if (dctl && dctl.stop) dctl.stop(); else TA.sound.stop(); dctl = null; });
         r.mount(root, {
-          onTask: (id) => { task = id; },
+          openCard,
+          onCard: (k) => { onCard = k; },
+          onTask: (id) => { task = id; onCard = null; },
           score: (g, t) => { const el = root.querySelector('.sc'); if (el) el.textContent = g + ' / ' + t; },
           finished: (g, t) => TA.progress.record(n, g, t),
           again: () => UI.go('#/lesson/' + n + '/practise/' + (seed + 1))
@@ -3407,6 +3914,7 @@ html[data-screen="learn"] footer, html[data-screen="practise"] footer { display:
     const n = Number(m[1]);
     if (m[2] === 'learn' && lessonOf(n).learn) return { screen: 'learn', lesson: n, step: Math.max(0, Number(m[3] || 1) - 1) };
     if (m[2] === 'practise') return { screen: 'practise', lesson: n, seed: Number(m[3]) || Math.floor(Date.now() / 1000) % 100000 };
+    if (TA.learn.isCards(n)) return { screen: 'practise', lesson: n, seed: Math.floor(Date.now() / 1000) % 100000 };
     return { screen: 'lesson', lesson: n };
   };
   async function draw(route) {
@@ -3477,7 +3985,7 @@ html[data-screen="learn"] footer, html[data-screen="practise"] footer { display:
     if (!host) return [];
     // the outermost figures only (a stave inside a picture option is shrunk with the option)
     const shared = host.closest && host.closest('section.task') && host.closest('section.task').querySelector('.sharedkb .kb');   // Lesson 12 Task 3's keyboard
-    const all = [...host.querySelectorAll('svg.st, .kb, .opts.pics')].concat(shared ? [shared] : []).filter(visible);
+    const all = [...host.querySelectorAll('svg.st:not(.mk), .kb, .opts.pics')].concat(shared ? [shared] : []).filter(visible);
     return all.filter((el) => !all.some((o) => o !== el && o.contains(el)));
   }
   const over = () => document.documentElement.scrollHeight - G.innerHeight;
