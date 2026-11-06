@@ -500,6 +500,16 @@ html[data-screen="learn"] footer, html[data-screen="practise"] footer { display:
 }
 .anim { --slot: 3.3rem; }
 @media (max-width: 600px) { .anim { --slot: 2.5rem; } .acell { width: 2.2rem; height: 2.2rem; } .arow { height: 2.2rem; } }
+/* Undo, at the end of the letter buttons: a control, so printed, not handwritten */
+.letterpad .undo { gap: .35rem; height: 3.1rem; min-height: 0; padding: 0 .9rem; font: 700 .95rem "Lexend", sans-serif; margin-left: .5rem; }
+.letterpad .undo:disabled { opacity: .4; }
+.cardsheet .practise .letterpad .undo { font-family: "Lexend", sans-serif; }
+@media (min-width: 1500px) and (min-height: 900px) { .cardsheet .practise .letterpad .undo { height: 4rem; font-size: 1.1rem; } }
+@media (max-width: 600px) {
+  .letterpad .undo { height: 2.7rem; padding: 0 .7rem; margin-left: 0; }
+}
+.letterpad { align-items: center; }
+.letterpad .lpl { display: inline-flex; gap: inherit; flex-wrap: nowrap; }
 
 </style>
 </head>
@@ -843,6 +853,7 @@ html[data-screen="learn"] footer, html[data-screen="practise"] footer { display:
     listen: { notThis: 'Play it again and listen to each note after the first.', play: 'Play the notes', again: 'Play again',
       wait: 'Listen to all the notes first.' },
     sound: { on: 'Sound on', off: 'Sound off' },
+    undo: 'Undo',
     // the card animations (ui/32-anim.js)
     anim: { upForwards: 'Going up, the alphabet goes forwards.', afterG: 'After G, the alphabet starts again at A.',
       backToA: 'Back to A, but it sounds higher.', turnRound: 'Now turn it round.', downBackwards: 'Going down, the alphabet goes backwards.',
@@ -2312,6 +2323,10 @@ html[data-screen="learn"] footer, html[data-screen="practise"] footer { display:
     o = o || {};
     const boxes = [...root.querySelectorAll('input.box:not([readonly])')];
     let sel = null;
+    // Undo (Isaac, 6 November 2026): every change to a box is kept, so Undo can step back through them
+    const history = [];
+    const changed = () => { if (o.onHistory) o.onHistory(history.length > 0); };
+    const record = (b, prev) => { if (prev !== b.value) { history.push({ b, prev }); changed(); } };
     const select = (b, focus) => {
       boxes.forEach((x) => { x.classList.toggle('sel', x === b); const c = x.closest('.cell'); if (c) c.classList.toggle('sel', x === b); });
       sel = b;
@@ -2319,7 +2334,9 @@ html[data-screen="learn"] footer, html[data-screen="practise"] footer { display:
       if (b && b.value) { try { b.select(); } catch (e) { /* not selectable */ } }
     };
     const put = (b, v) => {
+      const prev = b.value;
       b.value = v;
+      record(b, prev);
       const i = boxes.indexOf(b);
       // on to the next empty box after this one (or the next box, if they are all full)
       const next = boxes.slice(i + 1).find((x) => !x.value) || null;
@@ -2343,7 +2360,7 @@ html[data-screen="learn"] footer, html[data-screen="practise"] footer { display:
         if (e.key === 'Backspace' || e.key === 'Delete') {
           if (b.maxLength > 1 && b.selectionStart !== b.selectionEnd) return;      // a two-character box: as normal
           e.preventDefault();
-          if (b.value) { b.value = ''; ctl.change(); select(b); }
+          if (b.value) { const prev = b.value; b.value = ''; record(b, prev); ctl.change(); select(b); }
           else if (boxes[i - 1]) { select(boxes[i - 1]); }
           return;
         }
@@ -2353,7 +2370,14 @@ html[data-screen="learn"] footer, html[data-screen="practise"] footer { display:
     return {
       get: () => boxes.map((b) => b.value.trim()),
       ready: () => boxes.length > 0 && boxes.every((b) => b.value.trim().length >= 1),
-      lock: (on) => { boxes.forEach((b) => { b.disabled = !!on; }); if (on) select(null, false); },
+      lock: (on) => { boxes.forEach((b) => { b.disabled = !!on; }); if (on) { select(null, false); history.length = 0; changed(); } },
+      // back one step: the box goes back to what it held before, and is selected
+      undo: () => {
+        const h = history.pop();
+        if (!h || h.b.disabled) { changed(); return; }
+        h.b.value = h.prev;
+        changed(); ctl.change(); select(h.b);
+      },
       clear: () => { boxes.forEach((b) => { b.value = ''; }); if (boxes[0]) select(boxes[0]); },
       // the letter buttons: the letter goes in the selected box (replacing what is there), or the first empty one
       pad: (v) => {
@@ -2522,11 +2546,17 @@ html[data-screen="learn"] footer, html[data-screen="practise"] footer { display:
     });
     const booky = task.type === 'next-letter';
     const arrow = ex || booky ? rowArrow(item.direction, booky ? (item.direction === 1 ? 'going up' : 'going down') : '') : '';
-    const pad = ex ? '' : '<div class="letterpad" role="group" aria-label="Letters">' + TA.LETTERS.map((l) => '<button type="button" class="btn lp" data-l="' + l + '">' + l + '</button>').join('') + '</div>';
+    const pad = ex ? '' : '<div class="letterpad" role="group" aria-label="Letters"><span class="lpl">' + TA.LETTERS.map((l) => '<button type="button" class="btn lp" data-l="' + l + '">' + l + '</button>').join('') + '</span>' +
+      '<button type="button" class="btn undo" disabled aria-label="' + esc(ST().undo) + '"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M9 14 4 9l5-5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg><span>' + esc(ST().undo) + '</span></button></div>';
     return {
       html: '<div class="rowwrap">' + arrow + '<div class="letters">' + cells + '</div></div>' + pad, needsCheck: true,
       bind(root, ctl) {
-        const w = wireBoxes(root, ctl, { pad: true });
+        const undo = root.querySelector('.letterpad .undo');
+        const w = wireBoxes(root, ctl, { pad: true, onHistory: (any) => { if (undo) undo.disabled = !any; } });
+        if (undo) {
+          undo.addEventListener('pointerdown', (e) => e.preventDefault());
+          undo.addEventListener('click', () => w.undo());
+        }
         // on a phone the letter buttons are the keyboard, so the phone's own keyboard stays down
         if (!ex) root.querySelectorAll('input.box:not([readonly])').forEach((b) => b.setAttribute('inputmode', 'none'));
         root.querySelectorAll('.lp').forEach((b) => {
@@ -2534,7 +2564,7 @@ html[data-screen="learn"] footer, html[data-screen="practise"] footer { display:
           b.addEventListener('click', () => { if (!b.disabled) w.pad(b.dataset.l); });
         });
         const lock = w.lock;
-        w.lock = (on) => { lock(on); root.querySelectorAll('.lp').forEach((b) => { b.disabled = !!on; }); };
+        w.lock = (on) => { lock(on); root.querySelectorAll('.lp, .letterpad .undo').forEach((b) => { b.disabled = !!on; }); if (!on && undo) undo.disabled = true; };
         return w;
       },
       // what it sounds like: the whole row, with the answer in place, each box lit as its letter sounds
