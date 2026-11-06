@@ -2385,14 +2385,11 @@ html[data-screen="learn"] footer, html[data-screen="practise"] footer { display:
         if (b) put(b, v);
       },
       select: (k) => select(boxes[k]),
+      // a second wrong try: the feedback names the answer, so nothing is written beside the boxes (Isaac, 6 November
+      // 2026: the small letter under each box looked like a mistake). The first box to change is selected.
       reveal: (answer) => {
-        root.querySelectorAll('.model').forEach((m) => m.remove());
-        boxes.forEach((b, i) => {
-          const m = document.createElement('span');
-          m.className = 'model hand';
-          m.textContent = answer[i];
-          b.insertAdjacentElement('afterend', m);
-        });
+        const k = boxes.findIndex((b, i) => b.value.trim().toUpperCase() !== String(answer[i]).toUpperCase());
+        if (k >= 0 && !boxes[k].disabled) select(boxes[k], false);
       }
     };
   }
