@@ -232,6 +232,8 @@ svg text { pointer-events: none; }
 .cornerrow { display: flex; align-items: center; gap: .8rem; }
 .helpbtn { font: 700 1rem "Lexend", sans-serif; background: #fff; color: var(--shade); border: 2px solid #fff; border-radius: 12px; padding: .7rem 1.1rem; cursor: pointer; min-height: 2.75rem; }
 .helpbtn:hover { background: var(--tint); }
+/* the Home button in a lesson's top corner, in place of the Lessons link under the score (Isaac, 9 November 2026) */
+a.homebtn { display: inline-flex; align-items: center; text-decoration: none; }
 .helpbtn:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
 .helpdlg { border: 3px solid var(--base); border-radius: 18px; padding: 0; max-width: min(56rem, 94vw); width: 94vw; max-height: 90vh; overflow: auto; color: var(--ink); }
 .helpdlg::backdrop { background: rgba(30, 30, 70, .55); }
@@ -988,7 +990,7 @@ button.opt.lit { background: var(--tint); }
   const TA = G.TA;
   TA.STRINGS = {
     app: { name: 'Theory Practice', school: 'Tawa College Music Department' },
-    home: { lessons: 'Lessons', part1: 'Elements of Music', open: 'Open' },
+    home: { lessons: 'Lessons', home: 'Home', part1: 'Elements of Music', open: 'Open' },
     lesson: { back: 'Back to the lessons', next: 'Next', previous: 'Back', start: 'Start practising',
       learnTitle: "What we're learning", whatToDo: 'What to do' },
     marking: { next: 'Next', check: 'Check', correct: 'Correct.', wrong: 'Not this time.', tryAgain: 'Have another go.', showMe: 'Show me',
@@ -5626,7 +5628,7 @@ button.opt.lit { background: var(--tint); }
   function practise(n, seed) {
     const L = lessonOf(n), r = TA.practise.render(n, seed);
     return {
-      html: '<div class="sheet practisesheet cardsheet">' + banner('Music theory · Lesson ' + n, L.title, '<div class="cornerrow">' + soundBtn() + '<button type="button" class="helpbtn">' + E(S().card.open) + '</button><div class="corner scorebox"><span class="slab">' + E(S().marking.score) + '</span><b class="sc">0 / 0</b><a href="#/">' + E(S().home.lessons) + '</a></div></div>') +
+      html: '<div class="sheet practisesheet cardsheet">' + banner('Music theory · Lesson ' + n, L.title, '<div class="cornerrow"><a class="helpbtn homebtn" href="#/">' + E(S().home.home) + '</a>' + soundBtn() + '<button type="button" class="helpbtn">' + E(S().card.open) + '</button><div class="corner scorebox"><span class="slab">' + E(S().marking.score) + '</span><b class="sc">0 / 0</b></div></div>') +
         '<dialog class="helpdlg" aria-label="' + E(S().card.title) + '"><div class="helpbody"></div><div class="helpfoot"><button type="button" class="btn solid helpclose" autofocus>' + E(S().card.close) + '</button></div></dialog>' +
         '<section class="frame practise">' + r.html + '</section>' + footer() + '</div>',
       mount(root) {
@@ -5646,7 +5648,7 @@ button.opt.lit { background: var(--tint); }
           dctl = c.mount(body) || null;
           if (dctl && dctl.play && k) dctl.play();
         };
-        root.querySelector('.helpbtn:not(.sndbtn)').addEventListener('click', () => openCard(onCard === null ? task : (onCard ? L.tasks[onCard - 1].id : null)));
+        root.querySelector('.helpbtn:not(.sndbtn):not(.homebtn)').addEventListener('click', () => openCard(onCard === null ? task : (onCard ? L.tasks[onCard - 1].id : null)));
         root.querySelector('.helpclose').addEventListener('click', closeDlg);
         dlg.addEventListener('click', (e) => { if (e.target === dlg && dlg.close) dlg.close(); });
         dlg.addEventListener('close', () => { if (dctl && dctl.stop) dctl.stop(); else TA.sound.stop(); dctl = null; });
