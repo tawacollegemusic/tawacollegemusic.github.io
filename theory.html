@@ -636,6 +636,30 @@ button.opt.lit { background: var(--tint); }
 .single .practise [data-type^="listen-"] .opts.pics .opt.pick.pic { flex: 0 0 15rem; max-width: 46%; }
 .tcard.animated:not(.side) .ascene { max-height: clamp(10rem, 36vh, 18rem); }
 @media (max-height: 700px) { .tcard.animated:not(.side) .ascene { max-height: 9rem; } }
+/* the task buttons along the top of the frame (Isaac, 9 November 2026), small so the cards still fit the window */
+.tasknav { display: none; flex-wrap: wrap; justify-content: center; gap: .4rem; margin: 0 auto .35rem; }
+.single .tasknav { display: flex; }
+.tasknav .tnav { min-height: 2rem; padding: .1rem .85rem; font-size: .9rem; border-radius: 999px; }
+.tasknav .tnav.on { background: var(--base); color: #fff; border-color: var(--base); }
+.cardsheet .practise { padding-top: 8px; }
+@media (max-height: 700px) {
+  .tasknav { margin-bottom: .1rem; }
+  .tasknav .tnav { min-height: 1.75rem; font-size: .85rem; }
+  .cardstage { padding-top: 0; }
+  .cardsheet .tcard .cardhead { margin-top: 0; }
+  .tcard .hint { margin-bottom: .2rem; }
+  .cardnav { margin-top: .3rem; }
+}
+@media (max-height: 700px) and (min-width: 900px) { .tcard.side .ascene { max-height: 8.6rem; } .tcard.info .figwrap svg { max-height: 14.5rem; width: auto; max-width: 100%; } }
+@media (max-height: 700px) { .tcard .cardplay { margin-top: 0; } .cardnav { margin-top: .15rem; } .tcard.side .exwrap { margin-bottom: 0; } }
+@media (max-width: 600px) {
+  .tasknav { gap: .3rem; }
+  .tasknav .tnav { padding: .1rem .55rem; font-size: .82rem; }
+  .single .practise [data-type^="listen-"] .opts.pics { flex-direction: row; flex-wrap: nowrap; justify-content: center; }
+  .single .practise [data-type^="listen-"] .opts.pics .opt.pick.pic { flex: none; width: 46%; max-width: 46%; }
+  .single .practise [data-type^="listen-"] .opt.pick.pic .rfig { max-width: none; width: 100%; }
+}
+.single .practise [data-type^="listen-"] .opts.pics, .tcard [class*="ex-listen-"] .opts.pics { width: 100%; justify-content: center; }
 
 </style>
 </head>
@@ -972,7 +996,7 @@ button.opt.lit { background: var(--tint); }
       copyIn: 'Copy the answer in to move on.', copied: 'You copied it in.', extra: 'Extra practice', fillAll: 'Fill in every box first.', model: 'This one is done for you.' },
     results: { send: 'Send my results', sent: 'Your results are ready to send. Press Submit on the form.', saved: 'Saved on this device.' },
     // the task cards (Isaac, 6 November 2026): one card before each task, opened again with Show me how
-    card: { open: 'Show me how', close: 'Back to the question', start: 'Start Task {n}', startListening: 'Start listening', next: 'Next',
+    card: { tasks: 'Tasks', taskN: 'Task {n}', aural: 'Aural Task', open: 'Show me how', close: 'Back to the question', start: 'Start Task {n}', startListening: 'Start listening', next: 'Next',
       listening: 'Listening', title: 'How to do this task', rushed: 'Slow down. Read this first, then have another go.',
       seeHow: 'Show me how', play: 'Play it again', playing: 'Listen' },
     listen: { notThis: 'Play it again and listen to each note after the first.', play: 'Play the notes', again: 'Play again',
@@ -5214,7 +5238,10 @@ button.opt.lit { background: var(--tint); }
     // two tasks of the same type (Lesson 3 Tasks 1 and 2) gave their questions the same ids, so one task's answers
     // were scored against the other's (fixed 6 November 2026): every id now starts with its task
     sets.forEach((set) => set.items.forEach((it) => { it.id = set.task.id + '-' + it.id; }));
-    let html = '<div class="prog" aria-live="polite"><span class="pl"></span><span class="bar"><i></i></span></div>';
+    // buttons to skip to any task (Isaac, 9 November 2026): Task 1, Task 2 ... and Aural Task for the Listening Activity
+    let html = '<nav class="tasknav" aria-label="' + D.esc(S().card.tasks) + '">' + L.tasks.map((t) => '<button type="button" class="btn small tnav" data-task="' + t.id + '">' +
+      D.esc(t.listening ? S().card.aural : TA.fmt(S().card.taskN, { n: t.number })) + '</button>').join('') + '</nav>';
+    html += '<div class="prog" aria-live="polite"><span class="pl"></span><span class="bar"><i></i></span></div>';
     if (L.beforeTasks) html += '<p class="before">' + D.rich(L.beforeTasks) + '</p>';
     sets.forEach((set, si) => {
       const t = set.task, heading = t.appHeading || t.heading;
@@ -5380,7 +5407,27 @@ button.opt.lit { background: var(--tint); }
       go.focus({ preventScroll: true });
       if (TA.fit) TA.fit.run();
       if (ctx.onCard) ctx.onCard(k);
+      navOn(task ? task.id : null);
     }
+    // the task buttons: the one for the task on screen is marked
+    const navOn = (tid) => root.querySelectorAll('.tnav').forEach((b) => { const on = b.dataset.task === tid; b.classList.toggle('on', on); if (on) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current'); });
+    // a task button opens that task's card again, then its first question not yet answered
+    function goTask(tid) {
+      const its = order.filter((e) => e.task.id === tid);
+      if (!its.length) return;
+      const first = its.find((e) => !state[e.id].done) || its[0];
+      introSeen = true;
+      introduced.delete(tid);
+      stage.hidden = true;
+      show(order.indexOf(first));
+    }
+    const navEl = root.querySelector('.tasknav');
+    navEl.querySelectorAll('.tnav').forEach((b) => b.addEventListener('click', () => {
+      if (stageCtl && stageCtl.stop) stageCtl.stop();
+      stageCtl = null; root.classList.remove('oncard');
+      const fin = root.querySelector('.finish'); if (fin) fin.hidden = true;
+      goTask(b.dataset.task);
+    }));
     let introSeen = false;
     function show(i) {
       const want = order[i];
@@ -5393,6 +5440,7 @@ button.opt.lit { background: var(--tint); }
       root.querySelectorAll('section.task').forEach((sec) => { sec.hidden = single && sec !== cur.sec; });
       root.querySelectorAll('hr.divide').forEach((h) => { h.hidden = single; });
       progress();
+      navOn(cur.task.id);
       if (TA.fit) TA.fit.run();
       if (ctx.onTask) ctx.onTask(cur.task.id);
       cur.t = Date.now();
@@ -5409,7 +5457,7 @@ button.opt.lit { background: var(--tint); }
     root.classList.toggle('single', single);
     show(0);
     // for tests/screens.js and hand tests: jump to a task's first question (its card first), or answer the question on screen
-    Pr.test = { goTask: (tid) => show(order.findIndex((e) => e.task.id === tid)), answer: (resp) => order[at].answer(resp), current: () => order[at] };
+    Pr.test = { goTask, answer: (resp) => order[at].answer(resp), current: () => order[at] };
 
     // Lesson 12 Task 3: one keyboard for all the items, used for whichever item the student is on
     const kbHost = root.querySelector('.sharedkb');
@@ -5693,9 +5741,17 @@ button.opt.lit { background: var(--tint); }
     const shared = host.closest && host.closest('section.task') && host.closest('section.task').querySelector('.sharedkb .kb');   // Lesson 12 Task 3's keyboard
     const all = [...host.querySelectorAll('svg.st:not(.mk), .kb, .opts.pics')].concat(shared ? [shared] : []).filter(visible)
       .filter((el) => !(el.matches('.kb') && (el.closest('.tcard') || el.matches('.mini'))));   // keyboards with a set height (style.css) keep their size
+    F.host = host;
     return all.filter((el) => !all.some((o) => o !== el && o.contains(el)));
   }
-  const over = () => document.documentElement.scrollHeight - G.innerHeight;
+  // how far the page runs past the window: on Practise, measured from what is showing (the question or the card), as
+  // the frame's own minimum height made every phone screen look too tall and shrank its pictures to nothing (Isaac,
+  // 9 November 2026)
+  const over = () => {
+    const h = F.host;
+    if (h && document.documentElement.dataset.screen === 'practise') return Math.ceil(h.getBoundingClientRect().bottom + G.scrollY + 28 - G.innerHeight);
+    return document.documentElement.scrollHeight - G.innerHeight;
+  };
 
   F.run = function () {
     const figs = figures();
