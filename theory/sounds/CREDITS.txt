@@ -1,0 +1,8 @@
+Theory Practice sounds
+
+Piano: from the Versilian Community Sample Library (VSCO 2 Community Edition), http://vis.versilstudios.net/vsco-community.html
+Guitar (nylon string): "classicalguitar-multisampled" by quartertone, https://freesound.org/people/quartertone/packs/11573/
+
+Both as edited by Nicholas Brosowsky in tonejs-instruments (https://github.com/nbrosowsky/tonejs-instruments),
+licensed CC BY 3.0 (https://creativecommons.org/licenses/by/3.0/). Shortened to 3.2 seconds, faded out and made
+mono for this app.
